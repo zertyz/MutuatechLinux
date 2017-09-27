@@ -1,0 +1,355 @@
+<?xml version="1.0"?>
+<JWM>
+    <!-- Autostart applications -->
+    <StartupCommand>feh --bg-scale ~/Backgrounds/flame.png</StartupCommand>
+
+    <!-- The root menu.
+         Build the list with for f in /usr/share/applications/*.desktop; do label=`grep "Name=" "$f" | head -n 1 | sed 's|.*Name=\(.*\)|\1|'`; cmd=`grep "Exec=" "$f" | head -n 1 | sed 's|Exec=\([^ ]*\).*|\1|'`; echo "<Program label=\"${label}\">${cmd}</Program>"; done
+     -->
+    <RootMenu onroot="3">
+
+        <Menu label="Accessories">
+            <Program label="Terminal">lxterminal</Program>
+            <Program label="File Manager">pcmanfm</Program>
+            <Program label="Xarchiver">xarchiver</Program>
+            <Program label="Editor">l3afpad</Program>
+            <Separator/>
+            <Program label="GDMap (root)">sudo /usr/bin/gdmap</Program>
+            <Program label="XDiskUsage (root)">sudo /usr/bin/xdiskusage</Program>
+        </Menu>
+
+        <Separator/>
+
+        <Menu label="Network">
+            <Program label="Chromium">chromium</Program>
+            <Program label="Firefox">firefox</Program>
+            <Program label="Firefox Developer">/opt/firefox-developer/firefox</Program>
+            <Program label="Vivaldi">vivaldi-stable</Program>
+            <Program label="Brave">brave</Program>
+            <Program label="Opera">opera --new-window</Program>
+            <Program label="Midori">midori</Program>
+            <Program label="QupZilla">qupzilla</Program>
+            <Program label="SeaMonkey">seamonkey</Program>
+            <Program label="Surf">surf http://mutuatech.com</Program>
+            <Program label="NetSurf">netsurf</Program>
+            <Separator/>
+            <Program label="Thunderbird">thunderbird</Program>
+            <Separator/>
+            <Program label="FranZ">franz-bin</Program>
+            <Program label="Skype">/usr/bin/apulse32 /usr/bin/skype</Program>
+            <Separator/>
+            <Program label="Wireshark">wireshark-gtk</Program>
+            <Separator/>
+            <!-- this many spaces are to prevent the error message from appearing on the window's title bar, as it shows the full command being executed -->
+            <Program label="wifi-menu (root)">lxterminal -l -e 'sudo wifi-menu                                                                                                                                                                || (echo -en "\n####\n\nError running wifi-menu. Maybe you do not have a wireless adapter?"; sleep 5)'</Program>
+        </Menu>
+
+        <Separator/>
+
+        <Menu label="Media">
+            <Program label="DeaDBeeF">deadbeef</Program>
+            <Program label="VLC media player">/usr/bin/vlc</Program>
+        </Menu>
+
+        <Separator/>
+
+        <Menu label="Development">
+            <Program label="IntelliJ IDEA Ultimate Edition">~/bin/intellij-idea-ultimate-edition || /usr/bin/intellij-idea-ultimate-edition</Program>
+            <Program label="Eclipse">~/bin/eclipse || /usr/bin/eclipse</Program>
+            <Program label="Visual Studio Code">~/bin/code || /usr/bin/code</Program>
+            <Program label="NetBeans">~/bin/netbeans || /usr/bin/netbeans</Program>
+            <Program label="Sublime Text">subl3</Program>
+            <Program label="EditiX XML">editix</Program>
+            <Separator/>
+            <Program label="RStudio">/usr/bin/rstudio-bin</Program>
+            <Program label="Android Studio">~/bin/android-studio || /usr/bin/android-studio</Program>
+            <Program label="Jad X">jadx-gui</Program>
+            <Separator/>
+            <Program label="SmartGit">/usr/bin/smartgit</Program>
+            <Separator/>
+            <Program label="ProGuard">/usr/bin/proguardgui</Program>
+            <Program label="JMeter">/opt/jmeter/bin/jmeter.sh</Program>
+            <Separator/>
+            <Program label="ddd">/usr/bin/ddd</Program>
+        </Menu>
+
+        <Separator/>
+
+        <Menu label="Office">
+            <Program label="LibreOffice">/usr/bin/libreoffice</Program>
+            <Program label="yEd Graph Editor">/usr/bin/yed</Program>
+            <Program label="Gephi">/usr/bin/gephi</Program>
+            <Program label="Ganttproject">/opt/ganttproject/ganttproject</Program>
+            <Program label="Astah* Professional">/usr/bin/astah</Program>
+            <Program label="Modelio">/opt/modelio/modelio</Program>
+            <Separator/>
+            <Program label="FreeMind">/usr/bin/freemind</Program>
+            <Program label="View Your Mind">/usr/bin/vym</Program>
+            <Program label="TreeSheets">/usr/bin/treesheets</Program>
+            <Separator/>
+            <Program label="Acrobat PDF Reader">/usr/bin/acroread</Program>
+            <Program label="dia">/usr/bin/dia</Program>
+        </Menu>
+
+        <Separator/>
+
+        <Menu label="Imaging">
+            <Program label="Geeqie">/usr/bin/geeqie</Program>
+            <Program label="GNU Image Manipulation Program">/usr/bin/gimp-2.8</Program>
+            <Program label="Inkscape">/usr/bin/inkscape</Program>
+            <Program label="Scribus">/usr/bin/scribus</Program>
+        </Menu>
+
+        <Separator/>
+
+        <Menu label="Cross OS">
+            <Program label="Oracle VM VirtualBox">VirtualBox</Program>
+            <Program label="PlayOnLinux">playonlinux</Program>
+            <Separator/>
+            <Program label="Genymotion">/usr/bin/genymotion</Program>
+            <Program label="Heimdall">heimdall-frontend</Program>
+            <Separator/>
+            <Program label="TigerVNC Viewer">~/bin/vncviewer || /usr/bin/vncviewer</Program>
+            <Program label="RDesktop">~/bin/rdesktop || lxterminal -l -e 'rdesktop; echo "## Press CTRL-D to exit. Please create a ~/bin/rdesktop file to invoke this program with the right options"; cat'</Program>
+        </Menu>
+
+        <Separator/>
+
+        <Menu label="Database">
+            <Program label="DBeaver">/usr/bin/dbeaver</Program>
+            <Program label="pgAdmin 4">/usr/bin/pgadmin4</Program>
+            <Program label="Oracle SQL Database Modeling">/usr/bin/oracle-datamodeler</Program>
+            <Program label="Oracle SQL Developer">/usr/bin/oracle-sqldeveloper</Program>
+        </Menu>
+
+        <Separator/>
+
+        <Menu label="B.I.">
+            <Program label="Spoon (Pentaho's Data Integration)">cd /opt/pentaho/data-integration; exec ./spoon.sh</Program>
+            <Program label="Metadata Editor">cd /opt/pentaho/metadata-editor; exec ./metadata-editor.sh</Program>
+            <Program label="Report Designer">cd /opt/pentaho/report-designer; exec ./report-designer.sh</Program>
+            <Program label="Pentaho Server (start)">cd /opt/pentaho/pentaho-server; exec ./start-pentaho.sh</Program>
+            <Program label="Pentaho Server (stop)">cd /opt/pentaho/pentaho-server; exec ./stop-pentaho.sh</Program>
+        </Menu>
+
+        <Separator/>
+
+        <Menu label="System">
+            <Program label="GParted (root)">xhost +; sudo /usr/bin/gparted</Program>
+            <Program label="GSmartControl (root)">xhost +; sudo /usr/bin/gsmartcontrol_polkit</Program>
+            <Program label="i7z (root)">xhost +; sudo i7z-gui</Program>
+        </Menu>
+
+        <Separator/>
+
+        <Menu label="Configuration">
+            <Program label="Preferred Applications">libfm-pref-apps</Program>
+            <Program label="Java">/usr/lib/jvm/java-8-jdk/jre/bin/jcontrol</Program>
+            <Program label="JavaWS">/usr/lib/jvm/java-8-jdk/jre/bin/javaws</Program>
+            <Program label="Java Monitoring and Management Console">/usr/lib/jvm/java-8-jdk/bin/jconsole</Program>
+            <Program label="Java Mission Control">/usr/lib/jvm/java-8-jdk/bin/jmc</Program>
+            <Program label="Java Monitoring and Performance Monitoring Tool">/usr/lib/jvm/java-8-jdk/bin/jvisualvm</Program>
+            <Program label="Java Policy Settings">/usr/lib/jvm/java-8-jdk/jre/bin/policytool</Program>
+        </Menu>
+
+        <Menu label="Remote">
+            <Program label="Preferred Applications">libfm-pref-apps</Program>
+            <Program label="Java">/usr/lib/jvm/java-8-jdk/jre/bin/jcontrol</Program>
+            <Program label="JavaWS">/usr/lib/jvm/java-8-jdk/jre/bin/javaws</Program>
+            <Program label="Java Monitoring and Management Console">/usr/lib/jvm/java-8-jdk/bin/jconsole</Program>
+            <Program label="Java Mission Control">/usr/lib/jvm/java-8-jdk/bin/jmc</Program>
+            <Program label="Java Monitoring and Performance Monitoring Tool">/usr/lib/jvm/java-8-jdk/bin/jvisualvm</Program>
+            <Program label="Java Policy Settings">/usr/lib/jvm/java-8-jdk/jre/bin/policytool</Program>
+        </Menu>
+
+        <Separator/>
+
+    <Menu label="Exit">
+        <Program label="Sleep">sudo sync & sudo systemctl suspend</Program>
+        <Program label="Hibernate">sudo sync & sudo systemctl hibernate</Program>
+        <Separator/>
+        <Program label="Reboot">sudo sync & sudo systemctl reboot</Program>
+        <Program label="Shutdown">sudo sync & sudo systemctl poweroff</Program>
+        <Separator/>
+        <Restart label="Restart JWM"/>
+        <Exit label="Leave JWM" confirm="true"/>
+    </Menu>
+    </RootMenu>
+
+    <!-- Options for program groups. -->
+    <Group>
+        <Option>tiled</Option>
+        <Option>aerosnap</Option>
+    </Group>
+    <!-- programs listed here will forcebly be undecorated. You can still access their window menu with Alt-F2 -->
+    <Group>
+        <Name>lxterminal</Name>
+        <Name>l3afpad</Name>
+        <Name>pcmanfm</Name>
+        <Option>noborder</Option>
+        <Option>notitle</Option>
+    </Group>
+
+    <!-- Tray at the bottom. -->
+    <Tray x="0" y="-1" autohide="bottom">
+	<Spacer width="5"/>
+	<TrayButton label="Menu">root:3</TrayButton>
+	<Spacer width="5"/>
+        <Pager labeled="true"/>
+        <TaskList maxwidth="256"/>
+        <Dock/>
+        <Clock format="%H:%M"></Clock>
+    </Tray>
+
+    <!-- Visual Styles -->
+    <WindowStyle>
+        <Font>Sans-10</Font>
+        <Width>4</Width>
+        <Height>18</Height>
+        <Corner>3</Corner>
+        <Foreground>#FFFFFF</Foreground>
+        <Background>#555555</Background>
+        <Outline>#000000</Outline>
+        <Opacity>0.5</Opacity>
+        <Active>
+            <Foreground>#FFFFFF</Foreground>
+            <Background>#0077CC</Background>
+            <Outline>#000000</Outline>
+            <Opacity>1.0</Opacity>
+        </Active>
+    </WindowStyle>
+    <TrayStyle group="true" list="all">
+        <Font>Sans-10</Font>
+        <Background>#333333</Background>
+        <Foreground>#FFFFFF</Foreground>
+        <Outline>#000000</Outline>
+        <Opacity>0.75</Opacity>
+    </TrayStyle>
+    <PagerStyle>
+        <Outline>#000000</Outline>
+        <Foreground>#555555</Foreground>
+        <Background>#333333</Background>
+        <Text>#FFFFFF</Text>
+        <Active>
+            <Foreground>#0077CC</Foreground>
+            <Background>#004488</Background>
+        </Active>
+    </PagerStyle>
+    <MenuStyle>
+        <Font>Sans-9</Font>
+        <Foreground>#FFFFFF</Foreground>
+        <Background>#333333</Background>
+        <Outline>#000000</Outline>
+        <Active>
+            <Foreground>#FFFFFF</Foreground>
+            <Background>#0077CC</Background>
+        </Active>
+        <Opacity>0.85</Opacity>
+    </MenuStyle>
+    <PopupStyle>
+        <Font>Sans-9</Font>
+        <Foreground>#000000</Foreground>
+        <Background>#999999</Background>
+    </PopupStyle>
+
+    <!-- Path where icons can be found.
+         IconPath can be listed multiple times to allow searching
+         for icons in multiple paths.
+      -->
+    <IconPath>
+        /usr/share/icons/wm-icons/32x32-aquafusion
+    </IconPath>
+    <IconPath>
+        /usr/share/jwm
+    </IconPath>
+
+    <!-- Virtual Desktops -->
+    <!-- Desktop tags can be contained within Desktops for desktop names. -->
+    <Desktops width="5" height="1">
+        <!-- Default background. Note that a Background tag can be
+              contained within a Desktop tag to give a specific background
+              for that desktop.
+         -->
+    <!--    <Background type="solid">#111111</Background> -->
+
+        <!-- desktop 1: only terminals -->
+        <Desktop></Desktop>
+        <!-- desktop 2: only chrome -->
+        <Desktop><Background type="command">pkill -cont chromium; pkill -stop firefox; pkill -stop thunderbird</Background></Desktop>
+        <!-- desktop 3: free -->
+        <Desktop><Background type="command">pkill -cont chromium; pkill -stop firefox; pkill -stop thunderbird</Background></Desktop>
+        <!-- desktop 4: free -->
+        <Desktop><Background type="command">pkill -cont chromium; pkill -stop firefox; pkill -stop thunderbird</Background></Desktop>
+        <!-- desktop 5: only firefox -->
+        <Desktop><Background type="command">pkill -stop chromium; pkill -cont firefox; pkill -cont thunderbird</Background></Desktop>
+
+    </Desktops>
+
+    <!-- Double click speed (in milliseconds) -->
+    <DoubleClickSpeed>400</DoubleClickSpeed>
+
+    <!-- Double click delta (in pixels) -->
+    <DoubleClickDelta>2</DoubleClickDelta>
+
+    <!-- The focus model (sloppy or click) -->
+    <FocusModel>click</FocusModel>
+
+    <!-- The snap mode (none, screen, or border) -->
+    <SnapMode distance="10">border</SnapMode>
+
+    <!-- The move mode (outline or opaque) -->
+    <MoveMode coordinates="off">opaque</MoveMode>
+
+    <!-- The resize mode (outline or opaque) -->
+    <ResizeMode>opaque</ResizeMode>
+
+    <!-- Key bindings -->
+    <Key key="Up">up</Key>
+    <Key key="Down">down</Key>
+    <Key key="Right">right</Key>
+    <Key key="Left">left</Key>
+    <Key key="h">left</Key>
+    <Key key="j">down</Key>
+    <Key key="k">up</Key>
+    <Key key="l">right</Key>
+    <Key key="Return">select</Key>
+    <Key key="Escape">escape</Key>
+
+    <Key mask="A" key="Tab">nextstacked</Key>
+    <Key mask="A" key="F4">close</Key>
+    <Key mask="A" key="#">desktop#</Key>
+    <Key mask="A" key="F1">root:3</Key>
+    <Key mask="A" key="F2">window</Key>
+    <Key mask="A" key="F10">maximize</Key>
+    <!--<Key mask="A" key="Right">rdesktop</Key>
+    <Key mask="A" key="Left">ldesktop</Key>
+    <Key mask="A" key="Up">udesktop</Key>
+    <Key mask="A" key="Down">ddesktop</Key>-->
+
+    <Key mask="4" key="t">exec:lxterminal</Key>
+    <Key mask="4" key="e">exec:l3afpad</Key>
+    <!--<Key mask="4" key="b">exec:netsurf</Key>-->
+    <Key mask="4" key="f">exec:pcmanfm</Key>
+    <Key mask="A" key="F3">exec:~/.config/dmenu/dmenu-bind.sh</Key>
+
+    <!-- Toggle fullscreen with F11 -->
+    <!--<Key key="F11">exec:wmctrl -i -r `xdotool getwindowfocus` -b toggle,fullscreen</Key>-->
+    <Key key="F11">fullscreen</Key>
+
+    <!-- Toggle STOP/CONT with Shift-Alt-Ctrl-Z and "Swapout stopped processes to get 1G of available run" with Shift-Alt-Ctrl-X, which should be pressed twice if you want 2G and so on. Use with responsability. -->
+    <!--<Key mask="ASC" key="z">exec:~/bin/toggleStopCont `xdotool getwindowfocus getwindowpid`</Key>    # dropped in favour of the next command, who requires a click -->
+    <Key mask="ASC" key="z">exec:~/bin/toggleStopCont `xprop _NET_WM_PID | cut -d' ' -f3`</Key>
+    <Key mask="ASC" key="x">exec:dd if=/dev/zero of=/dev/null bs=$((1024*1024*1024)) count=1</Key>  <!-- test if it really uses 1G of ram with /usr/bin/time -f "real: %es\nuser: %Us\nsys : %Ss\nmaxR: %Mkb\nmaxT: %K\nMpgF: %F\nmpgF: %R\nswO : %W\ncswt: %c\n" dd if=/dev/zero of=/dev/null bs=$((1024*1024*1024)) count=1 -->
+
+    <!-- Connects with your bluetooth device, provided that you are running pulseaudio and paired and trusted it with bluetoothctl commands. Pulseaudio is started in ~/.xinitrc  -->
+    <!-- You also need to run 'pavucontrol', set bluetooth to A2DP and disable all other devices -->
+    <Key mask="4" key="b">exec:echo -en "power on\nconnect FC:A8:9A:1F:4A:34\nexit\n"|bluetoothctl</Key>
+
+    <!-- Printscreen -- defaults to edit a selected window image in gimp. Shift + Print Screen to edit the whole screen -->
+    <Key key="Print">exec:import -window `xwininfo | grep "Window id" | cut -d' ' -f4` /tmp/printscrn$$.png; gimp /tmp/printscrn$$.png; rm /tmp/printscrn$$.png</Key>
+    <Key mask="S" key="Print">exec:import -window root /tmp/printscrn$$.png; gimp /tmp/printscrn$$.png; rm /tmp/printscrn$$.png</Key>
+
+    <!-- Set screen opacity. It only works if you are using a screen compositing daemon. See ~/.xinitrc -->
+    <Key mask="4" key="-">exec:transset-df -v -a --dec 0.1</Key>
+    <Key mask="4" key="=">exec:transset-df -v -a --inc 0.1</Key>
+</JWM>

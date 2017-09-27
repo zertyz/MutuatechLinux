@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# pulseaudio should be used if you have a bluetooth phone. See ~/.jwmrc, on <Super>+b key definition for more details on how to connect, pair, etc.
+pulseaudio &
+
+# screen compositing
+#compton -I 0.002 -O 0.002 -D 1 -f -i 1.0 -e 0.8 --vsync opengl --vsync-aggressive --sw-opti --backend glx &
+
+export DE=openbox
+
+# Dbus fix
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
+    eval "$(dbus-launch --sh-syntax --exit-with-session)"
+fi
+
+/usr/bin/xdg-user-dirs-update
+
+. ~/bin/configureProxy
+. ~/bin/setDualHead
+pkill gvfsd
+
+exec /usr/bin/jwm

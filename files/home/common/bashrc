@@ -1,0 +1,15 @@
+# Add nano as default editor
+export EDITOR=vim
+export TERMINAL=lxterminal
+# Gtk themes 
+export GTK2_RC_FILES="$HOME/.gtkrc-2.0"
+
+alias ls='ls --color=auto'
+
+# Edit mirrorlist
+alias editmirror='sudo l3afpad /etc/pacman.d/mirrorlist'
+
+export PATH=~/bin:$PATH     # and ~/bin/player should be linked to /usr/bin/genymotion-player
+export ANDROID_HOME=/opt/android-sdk
+export BROWSER=chromium
+export CHROME_BIN=/usr/bin/chromium
