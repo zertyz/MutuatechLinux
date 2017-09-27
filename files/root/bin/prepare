@@ -1,0 +1,19 @@
+#! /bin/bash
+
+echo 1 >/proc/sys/kernel/sysrq
+echo 40 >/proc/sys/vm/swappiness
+
+mount UUID=938ca3a8-eb8a-4154-a597-9f3ffaed387f /pen
+#mount /dev/sdb1 /pen
+swapon /pen/swap -p 0
+swapoff /dev/sda3
+swapon /dev/sda3 -p 0
+
+losetup --offset $((15622957*4096)) --sizelimit 4617515008 -f /dev/sda2
+losetup --offset $(( (15622957*4096) + (4404*(1024*1024)) )) --sizelimit $(( (16777216*4096) - (4404*(1024*1024)) )) -f /dev/sda2
+
+fsck.ext4 -f /dev/loop1
+
+mount -o noatime /dev/loop1 /home/luiz
+
+/root/bin/reRoute

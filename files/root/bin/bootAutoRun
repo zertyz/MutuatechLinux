@@ -1,0 +1,16 @@
+#! /bin/bash
+
+# optimize IO throughput even for a conventional HD
+/root/bin/setUSBStick
+
+(
+# h filesystem
+/usr/bin/losetup --offset $((16779264*512)) --sizelimit $((1735419904*512)) -f /dev/sda
+/usr/bin/fsck.ext4 -f /dev/loop0
+/usr/bin/mount -o noatime /dev/loop0 /mnt/h
+
+# network
+sleep 10
+/usr/bin/dhcpcd enp5s0f0
+/root/bin/reRoute
+) &

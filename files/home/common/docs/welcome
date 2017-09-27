@@ -1,0 +1,31 @@
+Welcome to MutuaTech's Linux for full stack Developers
+
+This is a lightweight system designed to address the needs of:
+ - web, mobile and desktop frontend developers and designers
+ - backend developers
+ - managers
+ - data and database administrators
+ - BI professionals
+ - testers
+
+ Frontend designers will find tools like: GIMP, Inkscape and Scribus;
+ Developers can count on IntelliJ Idea, Eclipse, Visual Studio Code, Netbeans, Sublime Text, RStudio, Android Studio, SmartGit, Proguard and JMeter. Also the servers: Tomcat 8, WildFly (JBoss);
+ Managers have LibreOffice, yEd, Gephi, GanttProject, Astah, ModelIO, FreeMind, View Your Mind (vym), ThreeSheets, dia;
+ Database professionals will find: DBeaver, pgAdmin 4, Oracle Developer and Oracle Data Modeler, as well as PostgreSQL and mariaDB servers (mySql);
+ BI professionals may count on the complete Pentaho system;
+ For mobile development we provide all Android tools and the Genymotion simulator;
+ Testers have several browsers: Chromium, Firefox, Firefox Developer, Vivaldi, Brave, Opera, Midori QupZilla, SeaMonkey, Surf and NetSurf;
+
+ We also didn't forget the general user tools, like DeaDBeeF, VLC Player, Emulators (qEmu, VirtualBox) Remote viewers (TigerVNC and RDesktop);
+
+ And, of course, made our system ready for Windows Server's based enterprise with CNTLM proxy.
+
+ On this pré-installation version, you'll see that the desktop is as simple as it can be. Try these shortcuts:
+ - ALT-F1     -- opens the applications menu
+ - ALT-F2     -- opens the window's menu
+ - ALT-F3     -- opens the "run a command" top frame
+ - ALT-1 to 5 -- switch desktops
+ - Win-E      -- opens the Editor
+ - Win-F      -- opens the File Manager
+ - Win-T      -- opens the Terminal
+ - Ctrl-Alt-Shift-Z -- turns the mouse pointer into a cross for you to select a process to stop / continue -- in order to swap it to the disk and open room for other processes to execute

@@ -1,0 +1,13 @@
+BDADDR="FC:A8:9A:1F:4A:34"
+bluetoothctl
+power on
+scan on
+agent on
+default-agent
+pair $BDADDR
+connect $BDADDR
+trust $BDADDR
+scan off
+exit
+
+# you may have to delete files under /var/lib/bluetooth

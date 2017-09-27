@@ -1,0 +1,4 @@
+#! /bin/bash
+
+cd nativescript
+exec tns run android --geny "Custom Phone - 4.3 - API 18 - 768x1280" --watch --timeout 120
