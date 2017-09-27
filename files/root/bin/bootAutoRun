@@ -10,7 +10,11 @@
 /usr/bin/mount -o noatime /dev/loop0 /mnt/h
 
 # network
-sleep 10
-/usr/bin/dhcpcd enp5s0f0
+sleep 100
+systemctl stop dhcpcd
+dhcpcd enp5s0f0
+netctl start wlp0s20u9u3-MPemMapas
 /root/bin/reRoute
+ifconfig -a
+route
 ) &

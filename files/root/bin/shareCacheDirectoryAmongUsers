@@ -1,0 +1,26 @@
+#! /bin/bash
+
+# Shares the contents of a directory on a user's home among all other users, so that only one copy of that information is used on the machine.
+
+# usage:
+# 1) ass root, 'cd' to the user's home
+# 2) /root/bin/shareCacheDirectoryAmongUsers [directory-to-share]
+
+# the following will be performed:
+# 1) the given 'directory-to-share' will be moved to /home/common
+# 2) a link to it will be placed on /home/new_user
+# 3) all other directories in /home will have their 'directory-to-share' removed and replaced by a link to /home/common/directory-to-share
+# 4) /home/common/sbin/fixCommonPermissions will be run to make it writable by everyone
+
+DIRECTORY_TO_SHARE="$1"
+echo mv "${DIRECTORY_TO_SHARE}" "/home/common/${DIRECTORY_TO_SHARE}"
+echo chmod -fR 775 "/home/common/${DIRECTORY_TO_SHARE}"
+echo chown -fR 1000:users "/home/common/${DIRECTORY_TO_SHARE}"
+
+shopt -s extglob
+for h in /home/!(common); do
+    echo rm -fr "$h/${DIRECTORY_TO_SHARE}"
+    echo ln -s "/home/common/${DIRECTORY_TO_SHARE}" "$h/${DIRECTORY_TO_SHARE}"
+done
+
+echo /home/common/sbin/fixCommonPermissions

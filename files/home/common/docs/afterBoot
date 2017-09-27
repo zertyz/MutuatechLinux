@@ -11,4 +11,4 @@ After boot configuration:
 - first, get the list of user names you'd like to create and run the following command: _GROUPS=$(for g in `grep mprj /etc/group | sed 's|:.*||'`; do echo -en "$g,"; done); for u in <space-separated-user-list>; do useradd -G $_GROUPS -k /home/new_user -m -p `openssl passwd -1 mprj` $u; done
 
 4) Copy cached files
-If you have another linux machine on the network, you may which to share all cached files. Execute: cd /home/common; ssh 10.32.4.113 "cd /home/common; tar -c .electron .gradle .Genymobile .m2 .node-gyp .npm" | tar -xv
+If you have another linux machine on the network, you may which to share all cached files. Execute: cd /home/common; ssh 10.32.4.113 "cd /home/common; tar -c .electron .gradle .Genymobile .m2 .node-gyp .npm .cache" | tar -xv; sbin/fixCommonPermissions

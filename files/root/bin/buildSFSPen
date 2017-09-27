@@ -5,7 +5,6 @@
 # PARTUUID=c9080e60-01	/sfs	squashfs	defaults	0 0
 # /sfs/usr                /usr	none		bind
 # /sfs/opt                /opt	none		bind
-# /sfs/etc                /etc	none		bind
 
 # prepare to make changes on the RW partition
 #############################################
@@ -34,20 +33,15 @@ echo "Do it with these, after leaving the GUI and logging as root:"
 
 cat <<END
 cd /
-umount -l opt
-umount -l etc
-umount -l usr
-umount -l sfs
+umount -l opt usr sfs
 date
 sync
 telinit 1
 # after that, you'll be prompted for the root password. Execute these last commands
-dd if=/updatedSFS.sfs of=/dev/disk/by-partuuid/c9080e60-01 bs=$((64*1024*1024)) status=progress &
-sleep 5
-echo rm /updatedSFS.sfs
+dd if=/updatedSFS.sfs of=/dev/disk/by-partuuid/c9080e60-01 bs=$((64*1024*1024)) status=progress
+rm /updatedSFS.sfs
 date
 sync
-wait
 shutdown -r now
 END
 

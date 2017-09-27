@@ -29,6 +29,8 @@ Packages that writes on /opt should have their affected /opt directory linked to
 
 Other packages download their binaries or use huge caches that could be shared among users -- Electron, Gradle, Maven, Node, NPM, Yarn, Genymotion, Eclipse... -- the same rule applies and the link should be placed on '/home/new_user' as well as on every user's home.
 
+Also, please study and use the tool '/root/bin/shareCacheDirectoryAmongUsers'.
+
 # Scripts
 List explicit installed packages on a running ArchLinux system: pacman -Q | while read l; do p=${l/[^A-Za-z0-9_\.+-]*/}; if pacman -Qi $p | grep -i "Explicitly installed" &>/dev/null; then if pacman -Si $p &>/dev/null; then echo "arch: $p"; else echo "AUR: $p"; fi; fi; done
 

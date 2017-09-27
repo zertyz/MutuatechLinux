@@ -80,7 +80,7 @@
             <Program label="yEd Graph Editor">/usr/bin/yed</Program>
             <Program label="Gephi">/usr/bin/gephi</Program>
             <Program label="Ganttproject">/opt/ganttproject/ganttproject</Program>
-            <Program label="Astah* Professional">/usr/bin/astah</Program>
+            <Program label="Astah Comunity">/usr/bin/astah</Program>
             <Program label="Modelio">/opt/modelio/modelio</Program>
             <Separator/>
             <Program label="FreeMind">/usr/bin/freemind</Program>
