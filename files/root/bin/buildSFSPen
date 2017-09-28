@@ -1,3 +1,5 @@
+#! /bin/bash
+
 # This script was designed to be used only on systems that runs on SFS.
 # Use this script to update both the RW partition and the SFS.
 # On such systems, usually you'll have an fstab with the following entries:

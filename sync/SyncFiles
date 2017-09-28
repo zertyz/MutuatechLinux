@@ -1,0 +1,17 @@
+#! /bin/bash
+
+# This script is designed to merge any changes done in scripts, documentations and other contents that reside in '../files'
+# the visual tool 'xxdiff' was elected into assisting this procedure.
+
+# Remember that any changes merged into '/home/common' should be checked and applyed in each user's home
+
+xxdiff ../files/home/common/bin/ /home/common/bin/
+xxdiff ../files/home/common/sbin/ /home/common/sbin/
+xxdiff ../files/home/common/docs/ /home/common/docs/
+xxdiff ../files/home/common/jwmrc /home/common/.jwmrc
+xxdiff ../files/home/common/xinitrc /home/common/.xinitrc
+xxdiff ../files/home/common/bash_logout /home/common/.bash_logout
+xxdiff ../files/home/common/bash_profile /home/common/.bash_profile
+xxdiff ../files/home/common/bashrc /home/common/.bashrc
+xhost +
+sudo QT_X11_NO_MITSHM=1 xxdiff ../files/root/bin/ /root/bin/
