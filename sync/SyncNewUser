@@ -11,3 +11,6 @@
 find /home/new_user/ -maxdepth 2 -type l -ls | sed 's|[^/]*/home/||' | sort >/tmp/new_user.current.file_list
 xxdiff ../new_user.file_list /tmp/new_user.current.file_list
 rm /tmp/new_user.current.file_list
+
+echo "Performing missing links analisys -- `find /home/new_user -xtype l | wc -l` missing link(s) found:"
+find /home/new_user -xtype l
