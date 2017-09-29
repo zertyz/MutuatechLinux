@@ -1,0 +1,271 @@
+#! /bin/bash
+
+# Use this script to check which packages you need to install or may remove in order to mirror the original "Mutuatech Linux" package list.
+
+# Note: AUR packages starts with _
+
+BASE=(
+    aria2
+    atom
+    gsfonts
+    libopenraw
+    libreoffice-fresh
+    noto-fonts
+    otf-overpass
+    pgadmin4
+    recordmydesktop
+    scribus
+    
+    unrar
+    unzip
+    usb_modeswitch
+    vim
+    
+    vym
+    xarchiver
+    xdiskusage
+
+    ## basic software
+
+    hunspell
+    hunspell-en
+    _hunspell-pt-br
+    bzip2
+    dosfstools
+    e2fsprogs
+    fakeroot
+    git
+    hdparm
+    i7z
+    intel-ucode
+    iotop
+    linux-headers
+    mlocate
+    _packer
+    pkgfile
+    powertop
+    screen
+    sdparm
+    squashfs-tools
+    systemd-swap
+    wget
+    x264
+
+    # printing
+    cups
+    foomatic-db-engine
+
+    # UI
+    gdmap
+    gparted
+    gsmartcontrol
+
+
+    ## imaging
+    
+    ghostscript
+
+    # UI
+    gimp
+    gutenprint
+    inkscape
+
+    ## networking
+
+    # servers
+    lighttpd
+
+    # console tools
+    _cntlm              # Conectivity with Microsoft's NTLM Proxy
+    arp-scan
+    netcat
+    lftp
+    smbclient
+
+    # UI
+    chromium
+    firefox
+    midori
+    opera 
+    qupzilla
+    seamonkey
+    surf
+
+    # remote clients
+    tigervnc
+    rdesktop
+
+
+
+    ## android
+    android-tools
+    android-udev 
+    _android-platform-22
+    _android-sdk
+    _android-sdk-build-tools-23.0.2
+    _android-sdk-platform-tools
+    _genymotion
+
+    ## virtualization
+    virtualbox
+    virtualbox-guest-utils
+    virtualbox-guest-dkms
+    _virtualbox-ext-oracle
+
+    ## multimedia
+    
+    _gst-plugin-libde265
+    _libde265
+    gst-libav
+    gst-plugins-bad
+    gst-plugins-base
+    gst-plugins-good
+    gst-plugins-ugly
+    gstreamer-vaapi
+    youtube-dl
+
+    # UI
+    deadbeef
+    flashplugin
+    pepper-flash
+    vlc
+
+    ## fonts
+    _ttf-ms-fonts
+    _ttf-vista-fonts
+    font-bh-ttf
+        ttf-anonymous-pro
+    ttf-arphic-uming
+    ttf-baekmuk
+    ttf-bitstream-vera
+    ttf-cheapskate
+    ttf-arphic-ukai
+    ttf-croscore
+    ttf-dejavu
+    ttf-droid
+    ttf-fira-mono
+    ttf-freefont
+    ttf-gentium
+    ttf-hack
+    ttf-inconsolata
+    ttf-ionicons
+    ttf-junicode
+    ttf-liberation
+    ttf-linux-libertine
+    ttf-linux-libertine-g
+    ttf-tibetan-machine
+    ttf-ubraille
+    ttf-ubuntu-font-family
+    ttf-droid
+
+    ## databases & tools
+    dbeaver
+    _dbeaver
+    _oracle-datamodeler
+    _oracle-sqldeveloper
+
+    ## management
+    _ganttproject
+
+    ## dev
+
+    # javascript
+    bower
+    gulp
+    npm
+    typescript
+    _visual-studio-code
+
+    # diagramming
+    freemind
+    gephi
+    _astah-professional     # uml
+
+    # xml
+    _editix-free
+
+    # java
+    _intellij-idea
+    _jdk
+    jadx
+    _projectlibre
+    _sublime-text-dev
+    _xxdiff
+)
+
+DEV=(
+
+    # databases
+    mysql
+    postgresql
+
+    # diagrams & plotting
+    gnuplot
+    gdb
+    ddd
+    jad
+    dia
+    _modelio-bin
+
+    # android
+    heimdall
+
+    subversion      # yeah!
+
+
+    #java
+    eclipse-jee
+    _eclipse-subclipse
+    _eclipse-pmd
+    _eclipse-umlet
+    netbeans
+    proguard
+    _jmeter
+    tomcat8
+    tomcat-native
+    _wildfly
+
+    # other languages
+    r
+    glpk
+
+    # hacking / forensic
+    _wireshark-gtk
+    foremost
+    testdisk
+)
+
+CONNECTIVITY=(
+
+    # skype
+    _skype
+    _lib32-apulse
+
+
+)
+
+OFFICE=(
+
+    # pdf reader
+    _acroread
+    _acroread-fonts-systemwide
+
+)
+
+HAND_INSTALLED=(
+
+    # pentaho
+    /opt/pentaho/data-integration
+    /opt/pentaho/metadata-editor
+    /opt/pentaho/pentaho-server
+    /opt/pentaho/report-designer
+
+    # android SDK (via android-studio)
+    /opt/android...
+
+)
+
+
+for i in "${DEV[@]}"; do
+    echo "$i"
+done
