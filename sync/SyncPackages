@@ -7,23 +7,20 @@
 BASE=(
     aria2
     atom
-    gsfonts
+
     libopenraw
-    libreoffice-fresh
+
+    gsfonts
     noto-fonts
     otf-overpass
+
     pgadmin4
+
     recordmydesktop
+
+    libreoffice-fresh
     scribus
-    
-    unrar
-    unzip
-    usb_modeswitch
-    vim
-    
     vym
-    xarchiver
-    xdiskusage
 
     ## basic software
 
@@ -48,6 +45,10 @@ BASE=(
     sdparm
     squashfs-tools
     systemd-swap
+    unrar
+    unzip
+    usb_modeswitch
+    vim
     wget
     x264
 
@@ -59,6 +60,8 @@ BASE=(
     gdmap
     gparted
     gsmartcontrol
+    xarchiver
+    xdiskusage
 
 
     ## imaging
