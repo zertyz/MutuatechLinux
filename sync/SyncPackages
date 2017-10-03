@@ -25,7 +25,7 @@ BASE=(
     iotop
     linux-headers
     libopenraw
-    mkbold-mkitalic
+    _mkbold-mkitalic
     mlocate
     _packer
     pkgfile
@@ -40,7 +40,7 @@ BASE=(
     usb_modeswitch
     vim
     wget
-    woff2-git
+    _woff2-git
     x264
 
     # printing
@@ -128,7 +128,7 @@ DEV=(
     _rstudio-desktop-bin
 
     # hacking / forensic
-    _wireshark-gtk
+    wireshark-gtk
     foremost
     testdisk
     heimdall        # android

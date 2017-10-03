@@ -81,6 +81,7 @@
             <Program label="yEd Graph Editor">/usr/bin/yed</Program>
             <Program label="Gephi">/usr/bin/gephi</Program>
             <Program label="Ganttproject">/opt/ganttproject/ganttproject</Program>
+            <Program label="ProjectLibre">_JAVA_OPTIONS='-Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel' /usr/sbin/projectlibre</Program>
             <Program label="Astah Comunity">/usr/bin/astah</Program>
             <Program label="Modelio">/opt/modelio/modelio</Program>
             <Separator/>
