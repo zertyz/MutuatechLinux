@@ -59,6 +59,7 @@
             <Program label="Visual Studio Code">~/bin/code || /usr/bin/code</Program>
             <Program label="NetBeans">~/bin/netbeans || /usr/bin/netbeans</Program>
             <Program label="Sublime Text">subl3</Program>
+            <Program label="Atom">/usr/bin/atom</Program>
             <Program label="EditiX XML">editix</Program>
             <Separator/>
             <Program label="RStudio">/usr/bin/rstudio-bin</Program>
@@ -98,6 +99,11 @@
             <Program label="GNU Image Manipulation Program">/usr/bin/gimp-2.8</Program>
             <Program label="Inkscape">/usr/bin/inkscape</Program>
             <Program label="Scribus">/usr/bin/scribus</Program>
+            <Separator/>
+            <Program label="QCad">/usr/bin/qcad</Program>
+            <Program label="OpenSCad">/usr/bin/openscad</Program>
+            <Program label="FreeCad">/usr/bin/freecad</Program>
+            <Program label="Sweet Home 3D">SWEETHOME3D_JAVA3D=1.5 /usr/bin/sweethome3d</Program>
         </Menu>
 
         <Separator/>
@@ -151,6 +157,8 @@
             <Program label="Java Monitoring and Performance Monitoring Tool">/usr/lib/jvm/java-8-jdk/bin/jvisualvm</Program>
             <Program label="Java Policy Settings">/usr/lib/jvm/java-8-jdk/jre/bin/policytool</Program>
         </Menu>
+
+        <Separator/>
 
         <Menu label="Remote">
             <Program label="Preferred Applications">libfm-pref-apps</Program>

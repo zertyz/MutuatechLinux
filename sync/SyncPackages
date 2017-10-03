@@ -4,23 +4,10 @@
 
 # Note: AUR packages starts with _
 
+# To actually sync the packages, use the following command:
+# . ./SyncPackages | sort -u >/tmp/sorted_unique_script_packages; pacman -Q | while read l; do p=${l/[^A-Za-z0-9_\.+-]*/}; if pacman -Qi $p | grep -i "xplicit" &>/dev/null; then if pacman -Si $p &>/dev/null; then echo "arch: $p"; else echo "AUR: $p"; fi; fi; done | tee /tmp/explicit_installed_packages; sort /tmp/explicit_installed_packages >/tmp/sorted_explicit_installed_packages; xxdiff /tmp/sorted_unique_script_packages /tmp/sorted_explicit_installed_packages
+
 BASE=(
-    aria2
-    atom
-
-    libopenraw
-
-    gsfonts
-    noto-fonts
-    otf-overpass
-
-    pgadmin4
-
-    recordmydesktop
-
-    libreoffice-fresh
-    scribus
-    vym
 
     ## basic software
 
@@ -37,10 +24,13 @@ BASE=(
     intel-ucode
     iotop
     linux-headers
+    libopenraw
+    mkbold-mkitalic
     mlocate
     _packer
     pkgfile
     powertop
+    recordmydesktop
     screen
     sdparm
     squashfs-tools
@@ -50,6 +40,7 @@ BASE=(
     usb_modeswitch
     vim
     wget
+    woff2-git
     x264
 
     # printing
@@ -62,138 +53,12 @@ BASE=(
     gsmartcontrol
     xarchiver
     xdiskusage
-
-
-    ## imaging
-    
-    ghostscript
-
-    # UI
-    gimp
-    gutenprint
-    inkscape
-
-    ## networking
-
-    # servers
-    lighttpd
-
-    # console tools
-    _cntlm              # Conectivity with Microsoft's NTLM Proxy
-    arp-scan
-    netcat
-    lftp
-    smbclient
-
-    # UI
-    chromium
-    firefox
-    midori
-    opera 
-    qupzilla
-    seamonkey
-    surf
-
-    # remote clients
-    tigervnc
-    rdesktop
-
-
+    _xmacro
 
     ## android
     android-tools
     android-udev 
-    _android-platform-22
-    _android-sdk
-    _android-sdk-build-tools-23.0.2
-    _android-sdk-platform-tools
-    _genymotion
 
-    ## virtualization
-    virtualbox
-    virtualbox-guest-utils
-    virtualbox-guest-dkms
-    _virtualbox-ext-oracle
-
-    ## multimedia
-    
-    _gst-plugin-libde265
-    _libde265
-    gst-libav
-    gst-plugins-bad
-    gst-plugins-base
-    gst-plugins-good
-    gst-plugins-ugly
-    gstreamer-vaapi
-    youtube-dl
-
-    # UI
-    deadbeef
-    flashplugin
-    pepper-flash
-    vlc
-
-    ## fonts
-    _ttf-ms-fonts
-    _ttf-vista-fonts
-    font-bh-ttf
-        ttf-anonymous-pro
-    ttf-arphic-uming
-    ttf-baekmuk
-    ttf-bitstream-vera
-    ttf-cheapskate
-    ttf-arphic-ukai
-    ttf-croscore
-    ttf-dejavu
-    ttf-droid
-    ttf-fira-mono
-    ttf-freefont
-    ttf-gentium
-    ttf-hack
-    ttf-inconsolata
-    ttf-ionicons
-    ttf-junicode
-    ttf-liberation
-    ttf-linux-libertine
-    ttf-linux-libertine-g
-    ttf-tibetan-machine
-    ttf-ubraille
-    ttf-ubuntu-font-family
-    ttf-droid
-
-    ## databases & tools
-    dbeaver
-    _dbeaver
-    _oracle-datamodeler
-    _oracle-sqldeveloper
-
-    ## management
-    _ganttproject
-
-    ## dev
-
-    # javascript
-    bower
-    gulp
-    npm
-    typescript
-    _visual-studio-code
-
-    # diagramming
-    freemind
-    gephi
-    _astah-professional     # uml
-
-    # xml
-    _editix-free
-
-    # java
-    _intellij-idea
-    _jdk
-    jadx
-    _projectlibre
-    _sublime-text-dev
-    _xxdiff
 )
 
 DEV=(
@@ -201,6 +66,13 @@ DEV=(
     # databases
     mysql
     postgresql
+
+    # database UI
+    pgadmin4
+    dbeaver
+    _oracle-datamodeler
+    _oracle-sqldeveloper
+
 
     # diagrams & plotting
     gnuplot
@@ -210,48 +82,213 @@ DEV=(
     dia
     _modelio-bin
 
+    # version control
+    subversion
+    _smartgit
+
+    # xml
+    _editix-free
+
     # android
-    heimdall
+    _android-sdk
 
-    subversion      # yeah!
-
-
-    #java
-    eclipse-jee
-    _eclipse-subclipse
-    _eclipse-pmd
-    _eclipse-umlet
-    netbeans
-    proguard
+    # java
+    _jdk
+    jadx
     _jmeter
+    proguard
+    _xxdiff
+
+    # java servers
     tomcat8
     tomcat-native
     _wildfly
+
+    # javascript
+    bower
+    gulp
+    npm
+    typescript
 
     # other languages
     r
     glpk
 
+    # IDEs & editors
+    atom
+    _sublime-text-dev
+    _visual-studio-code
+    eclipse-jee
+    _eclipse-subclipse
+    _eclipse-pmd
+    _eclipse-umlet
+    netbeans
+    _intellij-idea-ultimate-edition
+    _android-studio
+    _rstudio-desktop-bin
+
     # hacking / forensic
     _wireshark-gtk
     foremost
     testdisk
+    heimdall        # android
+
 )
 
-CONNECTIVITY=(
+IMAGING=(
+    
+    ghostscript
+
+    # UI
+    gimp
+    gutenprint
+    inkscape
+    scribus
+
+    ## fonts
+    gsfonts
+    noto-fonts
+    otf-overpass
+    _ttf-ms-fonts      _ttf-vista-fonts     font-bh-ttf     ttf-arphic-uming     ttf-baekmuk     ttf-bitstream-vera     ttf-cheapskate     ttf-arphic-ukai     ttf-croscore
+    ttf-dejavu     ttf-droid     ttf-fira-mono     ttf-freefont     ttf-gentium     ttf-hack     ttf-ionicons     ttf-junicode     ttf-liberation     ttf-linux-libertine
+    ttf-linux-libertine-g     ttf-tibetan-machine     ttf-ubraille     ttf-ubuntu-font-family
+
+    # AUR fonts
+    _cl-zpb-ttf _minecrafter-ttf _neuropol-ttf _otf-zilla-slab _terminus-font-ll2-td1-ttf _tgl-ttf _ttf-14minute _ttf-abibas _ttf-abkai _ttf-alef-ibx _ttf-all-the-icons _ttf-animeace _ttf-anonymice-powerline-git 
+    _ttf-antinoou _ttf-arphic _ttf-arphic-extra _ttf-atom-file-icons _ttf-au _ttf-averia-libre _ttf-averia-serif _ttf-babel-sans _ttf-barcodes _ttf-belligerent-madness _ttf-berylium-fonts _ttf-blackout
+    _ttf-blogger-sans _ttf-borders-divide-fonts _ttf-c64-fonts _ttf-camingocode _ttf-campus_relief _ttf-ceva-c2 _ttf-ceva-cm _ttf-chunk _ttf-cica _ttf-comfortaa _ttf-comme _ttf-conkyweather 
+    _ttf-contemporary _ttf-coolvetica _ttf-cutive-mono _ttf-dasroy _ttf-ddc-uchen _ttf-dejavu-sans-code _ttf-digital-7 _ttf-din1451 _ttf-djb-zora-prints-fonts _ttf-dosega 
+    _ttf-droid-sans-mono-dotted-powerline-git _ttf-dseg _ttf-dugfont _ttf-economica _ttf-enochian _ttf-eurostile-complete _ttf-fanwood _ttf-fate-core _ttf-fixedsys-excelsior-linux _ttf-font-awesome 
+    _ttf-font-linux _ttf-free3of9 _ttf-funfonts _ttf-futhark-adapted _ttf-fuzzy-cootie _ttf-google-fonts-typewolf _ttf-goudy-bookletter-1911 _ttf-gurmukhi-fonts_sikhnet _ttf-gurmukhi_punjabi 
+    _ttf-hack-ibx _ttf-i.bming _ttf-ifao-n-copte _ttf-impallari-cancelleresca-bastarda _ttf-impallari-hermeusone _ttf-impallari-libre-caslon-display _ttf-impallari-milonga 
+    _ttf-impallari-neuton-serif-family _ttf-impallari-new-rocker _ttf-impallari-poetsen-one _ttf-impallari-racing-sans _ttf-impallari-ranchers _ttf-impallari-sniglet _ttf-invader _ttf-iosevka-cc 
+    _ttf-iosevka-cc-slab _ttf-iosevka-ss07 _ttf-iosevka-term-ss07 _ttf-istok _ttf-jenna-sue _ttf-jomolhari _ttf-junction _ttf-keep-calm-medium _ttf-kix _ttf-klingon-piqad-hasta _ttf-klingon-piqad-mandel 
+    _ttf-klingon-piqad-vahbo _ttf-knewave _ttf-labrit _ttf-lacartoonerie _ttf-lastresort _ttf-lastwaerk _ttf-lazenby-computer _ttf-league-gothic _ttf-league-spartan _ttf-liberastika _ttf-lightfoot 
+    _ttf-linden-hill _ttf-linek _ttf-linex-fonts _ttf-london-tube _ttf-lora-cyrillic _ttf-manaspace _ttf-masterforce-solid _ttf-material-wifi-icons-git _ttf-maven-pro _ttf-monda _ttf-monofur-powerline-git 
+    _ttf-montepetrum _ttf-ms-fonts _ttf-muli _ttf-neverworld _ttf-new-athena-unicode _ttf-niceandripe _ttf-noto-fonts-emoji-ib _ttf-nunito _ttf-octicons _ttf-oldenglish5 _ttf-openwebicons 
+    _ttf-optimusprinceps _ttf-orbitron _ttf-ostrich-sans _ttf-oxygen-gf _ttf-pfennig-ibx _ttf-play _ttf-press-start-2p _ttf-prociono _ttf-profont-iix _ttf-roboto-mono-ibx _ttf-saginaw _ttf-sansation-ibx 
+    _ttf-sazanami-hanazono _ttf-sf_groove_machine _ttf-share-gf _ttf-signika-family-ib _ttf-sil-abyssinica _ttf-sinkin-sans-ibx _ttf-sorts-mill-goudy _ttf-sorts-mill-goudy-ibx _ttf-source-code-pro-ibx 
+    _ttf-sparks-ffa _ttf-sparks-scrapbook _ttf-sudo _ttf-symbola-ib _ttf-ti83symbols _ttf-timetable-latest _ttf-traveling-typewriter _ttf-triod-postnaja-ibx _ttf-typicons _ttf-typopro 
+    _ttf-ubuntu-mono-derivative-powerline-git  _ttf-vdrsymbols _ttf-vista-fonts _ttf-vollkorn-ibx _ttf-webhostinghub-glyphs _ttf-whiterabbit _ttf-wireone _ttf-wqy-microhei-ibx _ttf-xo-caliburn 
+    _ttf-xo-courser _ttf-xo-oriel _ttf-xo-symbol _ttf-xo-symbol-mac _ttf-xo-tahion _ttf-xo-thames _ttf-xo-windy _ttf-x-scale _ttf-yanone-kaffeesatz-ibx _ttf-yas _ttf-zekton-rg _ttf-zelda _ttf-zilla-slab
+
+
+)
+
+VIRTUALIZATION=(
+
+    ## PC
+    virtualbox
+    virtualbox-guest-utils
+    virtualbox-guest-dkms
+    _virtualbox-ext-oracle
+
+    # android
+    _genymotion
+)
+
+MULTIMEDIA=(
+
+    # libs    
+    _gst-plugin-libde265
+    _libde265
+    gst-libav
+    gst-plugins-bad
+    gst-plugins-base
+    gst-plugins-good
+    gst-plugins-ugly
+
+    # browser plugins
+    gstreamer-vaapi
+    flashplugin
+    pepper-flash
+
+    # command-line
+    youtube-dl
+
+    # UI
+    deadbeef
+    vlc
+)
+
+NETWORKING=(
+
+    # servers
+    lighttpd
+
+    # console tools
+    _cntlm              # Conectivity with Microsoft's NTLM Proxy
+    arp-scan
+    netcat
+    smbclient
+
+    # command line file transfer clients
+    aria2
+    lftp
+
+    # UI
+    _brave-bin
+    chromium
+    firefox
+    _firefox-developer
+    midori
+    opera
+    _opera-ffmpeg-codecs
+    qupzilla
+    seamonkey
+    surf
+    _vivaldi
+    _vivaldi-ffmpeg-codecs
+
+    # remote clients
+    tigervnc
+    rdesktop
 
     # skype
     _skype
     _lib32-apulse
 
+    # multiprotocol
+    _franz-bin
 
 )
 
 OFFICE=(
 
+    libreoffice-fresh
+
+    # diagramming
+    gephi
+    _astah-community        # uml
+    _yed                    # graph
+
+    # mind mapping
+    vym
+    freemind
+
+    ## management
+    _ganttproject
+    _projectlibre
+    _treesheets-git
+
+
     # pdf reader
     _acroread
     _acroread-fonts-systemwide
+
+)
+
+CAD=(
+
+    qcad
+    
+    # 3D solid CAD modelers
+    openscad
+    freecad
+
+    # interior & forniture disposition planning
+    sweethome3d
+    _sweethome3d-furniture-library
 
 )
 
@@ -268,7 +305,9 @@ HAND_INSTALLED=(
 
 )
 
+PACKAGES=( "${BASE[@]}" "${DEV[@]}" "${IMAGING[@]}" "${VIRTUALIZATION[@]}" "${MULTIMEDIA[@]}" "${NETWORKING[@]}" "${OFFICE[@]}" "${CAD[@]}" )
 
-for i in "${DEV[@]}"; do
-    echo "$i"
+
+for i in "${PACKAGES[@]}"; do
+    echo "${i}" | sed 's|^\([^_]\)|arch: \1|' | sed 's|^_|AUR: |'
 done
