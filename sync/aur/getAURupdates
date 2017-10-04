@@ -1,3 +1,3 @@
 #! /bin/bash
 
-lftp ftp://linux\@mutuatech.com:mutuatech@mutuatech.com//aur/ -e "set ssl:verify-certificate false; set ftp:ssl-allow false; set ftp:list-options; set ftp:proxy ${ftp_proxy}; ls -1; quit" | while read l; do p=${l/-[0-9vrlb][0-9:\.aeu-]*/}; ip=`pacman -Q | grep "$p" | head -n 1 | sed 's| |-|'`; echo "[$ip] --> $l" >/dev/null; if echo "$l" | grep -- "${ip}" >/dev/null; then true; else echo get $l; fi; done
+lftp ftp://linux\@mutuatech.com:mutuatech@mutuatech.com -e "set ssl:verify-certificate false; set ftp:ssl-allow false; set ftp:list-options; set ftp:proxy ${ftp_proxy}; cd aur; ls -1; quit" | while read l; do p=${l/-[0-9vrlb][0-9:\.aeu-]*/}; ip=`pacman -Q | grep "$p" | head -n 1 | sed 's| |-|'`; echo "[$ip] --> $l" >/dev/null; if echo "$l" | grep -- "${ip}" >/dev/null; then true; else echo get $l; fi; done
