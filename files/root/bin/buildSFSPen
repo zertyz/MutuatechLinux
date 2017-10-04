@@ -25,12 +25,15 @@ chroot /tmp/rwroot
 # persist RW changes on an SFS file
 ###################################
 
-nice -n 20 mksquashfs /tmp/rwroot/etc /tmp/rwroot/usr /tmp/rwroot/opt /updatedSFS.sfs -keep-as-directory -no-exports -always-use-fragments -noappend -no-recovery -progress -mem 2G -comp xz -b 1024k -Xbcj ia64 -Xdict-size 1024k
+#nice -n 20 tar -cvJf /updatedRW.tar.xz /bin /boot /dev /etc /lib /lib64 /mnt /proc /root /run /sbin /sfs /srv /sys /tmp /var
+nice -n 20 mksquashfs /tmp/rwroot/usr /tmp/rwroot/opt /updatedSFS.sfs -keep-as-directory -no-exports -always-use-fragments -noappend -no-recovery -progress -mem 2G -comp xz -b 1024k -Xbcj ia64 -Xdict-size 1024k
 
 echo "#############################################################################################################"
 echo "# updated SFS is now at /updatedSFS.sfs. Move it to /dev/sdb1 just before booting to use the updated system #"
 echo "#############################################################################################################"
 ls -l /updatedSFS.sfs
+echo "Now uploading it..."
+lftp ftp://linux\@mutuatech.com:mutuatech@mutuatech.com -e "set ssl:verify-certificate false; set ftp:ssl-allow false; set ftp:list-options; set ftp:proxy ${ftp_proxy}; cd download; put /updatedSFS.sfs; quit"
 echo "Do it with these, after leaving the GUI and logging as root:"
 
 cat <<END

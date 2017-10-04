@@ -1,0 +1,3 @@
+#! /bin/bash
+
+lftp ftp://linux\@mutuatech.com:mutuatech@mutuatech.com//aur/ -e "set ssl:verify-certificate false; set ftp:ssl-allow false; set ftp:list-options; set ftp:proxy ${ftp_proxy}; lcd .; mirror --continue --reverse --use-cache --verbose --allow-chown  --allow-suid --no-umask --parallel=1 --exclude-glob .svn; quit"

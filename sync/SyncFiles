@@ -14,5 +14,7 @@ xxdiff ../files/home/common/bash_logout /home/common/.bash_logout
 xxdiff ../files/home/common/bash_profile /home/common/.bash_profile
 xxdiff ../files/home/common/bashrc /home/common/.bashrc
 xhost +
+sudo QT_X11_NO_MITSHM=1 xxdiff ../files/root/bash_profile /root/.bash_profile
+sudo QT_X11_NO_MITSHM=1 xxdiff ../files/root/mvuser /root/mvuser
 sudo QT_X11_NO_MITSHM=1 xxdiff ../files/root/bin/ /root/bin/
 sudo QT_X11_NO_MITSHM=1 xxdiff ../files/etc/systemd/system/getty@tty1.service.d/autologin.conf /etc/systemd/system/getty@tty1.service.d/autologin.conf

@@ -1,0 +1,5 @@
+for p in jdk ganttproject freemind; do cd ~/tmp/n; packer -G $p; cd $p; makepkg -s; mv *.pkg.tar* ..; done
+
+and
+
+. ./publish
