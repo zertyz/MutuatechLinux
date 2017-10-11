@@ -3,6 +3,9 @@
 # p/ pai, 5.72W de consumo com a tela ligada e 3.31W com ela desligada: (sem tlp)
 # acer: 5.18w com wifi e pen, com HD desligado com hdparm -Y; 3,71 sem wifi e 3.34 sem wifi e sem tela; 3.85 com tela, sem wifi, sem hd e com sdcard
 
+# remount root (and any other ext4 FS) to allow for up to 10 min write timeouts
+mount -o remount,data=writeback,nobh,commit=600,noatime /
+
 echo Y > /sys/module/snd_hda_intel/parameters/power_save_controller
 echo 1 > /sys/module/snd_hda_intel/parameters/power_save
 for i in wlp2s0 wlp3s0; do
@@ -16,7 +19,7 @@ for i in enp2s0 enp3s0; do
 	ifconfig $i down
 done
 #hciconfig hci0 down ; rmmod hci_usb
-echo 60 > /proc/sys/vm/laptop_mode
+echo 5 > /proc/sys/vm/laptop_mode
 echo 0 > /proc/sys/kernel/nmi_watchdog
 # usb
 for i in /sys/bus/usb/devices/*/power/autosuspend; do echo 1 > $i; done
@@ -35,7 +38,7 @@ cpupower frequency-set -g powersave
 # handle HD power settings
 if df | grep /dev/sda; then
 	echo "hd is under usage. Setting to a good power saving mode:"
-	hdparm -B 128 /dev/sda
+	hdparm -B 132 /dev/sda
 	hdparm -C /dev/sda
 else
 	echo "hd is not under usage. Setting it to idle"
