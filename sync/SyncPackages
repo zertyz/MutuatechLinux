@@ -15,8 +15,10 @@ BASE=(
     hunspell-en
     _hunspell-pt-br
     bzip2
+    cpupower
     dosfstools
     e2fsprogs
+    ethtool
     fakeroot
     git
     hdparm
@@ -38,8 +40,8 @@ BASE=(
     unrar
     unzip
     usb_modeswitch
-    vim
     wget
+    wireless_tools
     _woff2-git
     x264
 
@@ -51,6 +53,7 @@ BASE=(
     gdmap
     gparted
     gsmartcontrol
+    gvim
     xarchiver
     xdiskusage
     _xmacro
