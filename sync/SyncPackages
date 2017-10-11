@@ -221,6 +221,7 @@ NETWORKING=(
     arp-scan
     netcat
     smbclient
+    iw
 
     # command line file transfer clients
     aria2
