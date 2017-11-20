@@ -208,6 +208,7 @@ MULTIMEDIA=(
 
     # command-line
     youtube-dl
+    mplayer
 
     # UI
     deadbeef
