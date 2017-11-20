@@ -7,6 +7,10 @@
 # To actually sync the packages, use the following command:
 # . ./SyncPackages | sort -u >/tmp/sorted_unique_script_packages; pacman -Q | while read l; do p=${l/[^A-Za-z0-9_\.+-]*/}; if pacman -Qi $p | grep -i "xplicit" &>/dev/null; then if pacman -Si $p &>/dev/null; then echo "arch: $p"; else echo "AUR: $p"; fi; fi; done | tee /tmp/explicit_installed_packages; sort /tmp/explicit_installed_packages >/tmp/sorted_explicit_installed_packages; xxdiff /tmp/sorted_unique_script_packages /tmp/sorted_explicit_installed_packages
 
+# Useful commands:
+# 1) List missing packages:
+#   for p in `. ./SyncPackages | grep 'arch: ' | sed 's|arch: ||'`; do if pacman -Q $p &>/dev/null; then true; else echo "$p NOT INSTALLED"; fi; done
+
 BASE=(
 
     ## basic software
@@ -297,6 +301,10 @@ CAD=(
 
 )
 
+AMUSEMENT=(
+    celestia
+)
+
 HAND_INSTALLED=(
 
     # pentaho
@@ -310,7 +318,7 @@ HAND_INSTALLED=(
 
 )
 
-PACKAGES=( "${BASE[@]}" "${DEV[@]}" "${IMAGING[@]}" "${VIRTUALIZATION[@]}" "${MULTIMEDIA[@]}" "${NETWORKING[@]}" "${OFFICE[@]}" "${CAD[@]}" )
+PACKAGES=( "${BASE[@]}" "${DEV[@]}" "${IMAGING[@]}" "${VIRTUALIZATION[@]}" "${MULTIMEDIA[@]}" "${NETWORKING[@]}" "${OFFICE[@]}" "${CAD[@]}" "${AMUSEMENT[@]}" )
 
 
 for i in "${PACKAGES[@]}"; do
