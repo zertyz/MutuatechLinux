@@ -12,6 +12,7 @@ for i in wlp2s0 wlp3s0; do
 	iwconfig $i txpower 10
 	sleep 2
 	iwconfig $i txpower 5
+	iw dev $i set power_save on
 done
 for i in enp2s0 enp3s0; do
 	ethtool -s $i wol d

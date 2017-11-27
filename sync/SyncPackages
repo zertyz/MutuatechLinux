@@ -18,6 +18,7 @@ BASE=(
     hunspell
     hunspell-en
     _hunspell-pt-br
+    bluez-utils
     bzip2
     cpupower
     dosfstools
@@ -58,6 +59,7 @@ BASE=(
     gparted
     gsmartcontrol
     gvim
+    pavucontrol
     xarchiver
     xdiskusage
     _xmacro
@@ -85,7 +87,7 @@ DEV=(
     # diagrams & plotting
     gnuplot
     gdb
-    ddd
+    _ddd
     jad
     dia
     _modelio-bin
