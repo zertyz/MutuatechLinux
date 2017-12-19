@@ -34,6 +34,7 @@ BASE=(
     libopenraw
     _mkbold-mkitalic
     mlocate
+    net-tools
     _packer
     pkgfile
     powertop
@@ -68,6 +69,17 @@ BASE=(
     ## android
     android-tools
     android-udev 
+
+    # joe's window manager
+    jwm
+    jwm-artwork
+    jwm-documentation
+    jwm-wallpapers
+    jwmconf
+    jwmtools
+    # manjaro-jwm-settings  # conflicts with manjaro-deepin-settings
+    pacli-jwm
+    xdgmenumaker
 
 )
 
@@ -255,12 +267,13 @@ NETWORKING=(
     # remote clients
     tigervnc
     rdesktop
+    _icaclient  # citrix
 
     # skype
     _skype
     _lib32-apulse
 
-    # multiprotocol
+    # multiprotocol messaging
     _franz-bin
 
 )
