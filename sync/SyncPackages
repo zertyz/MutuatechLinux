@@ -55,6 +55,9 @@ BASE=(
     cups
     foomatic-db-engine
 
+    # drivers
+    vulkan-intel
+
     # UI
     gdmap
     gparted
@@ -64,6 +67,7 @@ BASE=(
     xarchiver
     xdiskusage
     _xmacro
+    _xxdiff
     tlpui
 
     ## android
@@ -114,12 +118,19 @@ DEV=(
     # android
     _android-sdk
 
+    # c
+    automake
+
+    # dotnet core
+    _dotnet-sdk-2.0
+
     # java
     _jdk
     jadx
     _jmeter
     proguard
-    _xxdiff
+    maven
+    _soapui
 
     # java servers
     tomcat8
@@ -130,6 +141,7 @@ DEV=(
     bower
     gulp
     npm
+    yarn
     typescript
 
     # other languages
@@ -166,6 +178,7 @@ IMAGING=(
     gutenprint
     inkscape
     scribus
+    blender
 
     ## fonts
     gsfonts
@@ -183,7 +196,7 @@ IMAGING=(
     _ttf-droid-sans-mono-dotted-powerline-git _ttf-dseg _ttf-dugfont _ttf-economica _ttf-enochian _ttf-eurostile-complete _ttf-fanwood _ttf-fate-core _ttf-fixedsys-excelsior-linux _ttf-font-awesome 
     _ttf-font-linux _ttf-free3of9 _ttf-funfonts _ttf-futhark-adapted _ttf-fuzzy-cootie _ttf-google-fonts-typewolf _ttf-goudy-bookletter-1911 _ttf-gurmukhi-fonts_sikhnet _ttf-gurmukhi_punjabi 
     _ttf-hack-ibx _ttf-i.bming _ttf-ifao-n-copte _ttf-impallari-cancelleresca-bastarda _ttf-impallari-hermeusone _ttf-impallari-libre-caslon-display _ttf-impallari-milonga 
-    _ttf-impallari-neuton-serif-family _ttf-impallari-new-rocker _ttf-impallari-poetsen-one _ttf-impallari-racing-sans _ttf-impallari-ranchers _ttf-impallari-sniglet _ttf-invader _ttf-iosevka-cc 
+    _ttf-impallari-neuton-serif-family _ttf-impallari-new-rocker _ttf-impallari-poetsen-one _ttf-impallari-racing-sans _ttf-impallari-ranchers _ttf-impallari-sniglet _ttf-invader _ttf-indic-otf _ttf-iosevka-cc 
     _ttf-iosevka-cc-slab _ttf-iosevka-ss07 _ttf-iosevka-term-ss07 _ttf-istok _ttf-jenna-sue _ttf-jomolhari _ttf-junction _ttf-keep-calm-medium _ttf-kix _ttf-klingon-piqad-hasta _ttf-klingon-piqad-mandel 
     _ttf-klingon-piqad-vahbo _ttf-knewave _ttf-labrit _ttf-lacartoonerie _ttf-lastresort _ttf-lastwaerk _ttf-lazenby-computer _ttf-league-gothic _ttf-league-spartan _ttf-liberastika _ttf-lightfoot 
     _ttf-linden-hill _ttf-linek _ttf-linex-fonts _ttf-london-tube _ttf-lora-cyrillic _ttf-manaspace _ttf-masterforce-solid _ttf-material-wifi-icons-git _ttf-maven-pro _ttf-monda _ttf-monofur-powerline-git 
@@ -207,6 +220,7 @@ VIRTUALIZATION=(
 
     # android
     _genymotion
+    _anbox-git
 )
 
 MULTIMEDIA=(
@@ -232,6 +246,12 @@ MULTIMEDIA=(
     # UI
     deadbeef
     vlc
+    handbrake
+    ardour      # multitrack audio editor
+    audacity    # waveform audio editor
+    guitarix2
+    _tuxguitar
+    hydrogen    # drums
 )
 
 NETWORKING=(
@@ -254,7 +274,7 @@ NETWORKING=(
     _brave-bin
     chromium
     firefox
-    _firefox-developer
+    firefox-developer-edition
     midori
     opera
     _opera-ffmpeg-codecs
@@ -269,9 +289,10 @@ NETWORKING=(
     rdesktop
     _icaclient  # citrix
 
-    # skype
+    # conferencing
     _skype
     _lib32-apulse
+    _zoom
 
     # multiprotocol messaging
     _franz-bin
@@ -318,7 +339,26 @@ CAD=(
 )
 
 AMUSEMENT=(
+    
+    # the universe
     celestia
+    stellarium
+
+    # 3D games
+    armagetronad
+    astromenace
+    supertuxkart
+    _darkmod
+    _openarena
+    _voxelands
+
+    # 2D games
+    blobwars
+    hedgewars
+    wesnoth
+    wesnoth-data
+    widelands
+
 )
 
 HAND_INSTALLED=(

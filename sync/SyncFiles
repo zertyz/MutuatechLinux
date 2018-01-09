@@ -17,5 +17,10 @@ xhost +
 sudo QT_X11_NO_MITSHM=1 xxdiff ../files/root/bash_profile                                      /root/.bash_profile
 sudo QT_X11_NO_MITSHM=1 xxdiff ../files/root/mvuser                                            /root/mvuser
 sudo QT_X11_NO_MITSHM=1 xxdiff ../files/root/bin/                                              /root/bin/
+sudo QT_X11_NO_MITSHM=1 xxdiff ../files/etc/modules-load.d/anbox.conf                          /etc/modules-load.d/anbox.conf
+sudo QT_X11_NO_MITSHM=1 xxdiff ../files/etc/modprobe.d/mutuatechlinux.conf                     /etc/modprobe.d/mutuatechlinux.conf
+sudo QT_X11_NO_MITSHM=1 xxdiff ../files/etc/default/tlp                                        /etc/default/tlp
+sudo QT_X11_NO_MITSHM=1 xxdiff ../files/etc/sudoers                                            /etc/sudoers
+sudo QT_X11_NO_MITSHM=1 xxdiff ../files/etc/systemd/swap.conf                                  /etc/systemd/swap.conf
 sudo QT_X11_NO_MITSHM=1 xxdiff ../files/etc/systemd/system/getty@tty1.service.d/autologin.conf /etc/systemd/system/getty@tty1.service.d/autologin.conf
 sudo QT_X11_NO_MITSHM=1 xxdiff ../files/etc/sysctl.d/99-sysctl.conf                            /etc/sysctl.d/99-sysctl.conf

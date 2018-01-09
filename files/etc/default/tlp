@@ -18,7 +18,7 @@ TLP_PERSISTENT_DEFAULT=0
 
 # Seconds laptop mode has to wait after the disk goes idle before doing a sync.
 # Non-zero value enables, zero disables laptop mode.
-DISK_IDLE_SECS_ON_AC=0
+DISK_IDLE_SECS_ON_AC=60
 DISK_IDLE_SECS_ON_BAT=120
 
 # Dirty page values (timeouts in secs).
@@ -48,7 +48,7 @@ CPU_SCALING_GOVERNOR_ON_BAT=conservative
 #CPU_SCALING_MIN_FREQ_ON_AC=0
 #CPU_SCALING_MAX_FREQ_ON_AC=0
 #CPU_SCALING_MIN_FREQ_ON_BAT=0
-CPU_SCALING_MAX_FREQ_ON_BAT=1350000
+#CPU_SCALING_MAX_FREQ_ON_BAT=1350000
 
 # Set energy performance hints (HWP) for Intel P-state governor:
 #   default, performance, balance_performance, balance_power, power
@@ -63,8 +63,8 @@ CPU_HWP_ON_BAT=balance_power
 # Requires an Intel Core i processor with intel_pstate driver.
 #CPU_MIN_PERF_ON_AC=0
 #CPU_MAX_PERF_ON_AC=100
-#CPU_MIN_PERF_ON_BAT=0
-#CPU_MAX_PERF_ON_BAT=30
+CPU_MIN_PERF_ON_BAT=0
+CPU_MAX_PERF_ON_BAT=30
 
 # Set the CPU "turbo boost" feature: 0=disable, 1=allow
 # Requires an Intel Core i processor.
@@ -132,8 +132,8 @@ SATA_LINKPWR_ON_BAT=min_power
 # Runtime Power Management for AHCI controllers and disks:
 #   on=disable, auto=enable
 # EXPERIMENTAL ** WARNING: auto will most likely cause system lockups/data loss
-AHCI_RUNTIME_PM_ON_AC=auto
-AHCI_RUNTIME_PM_ON_BAT=auto
+AHCI_RUNTIME_PM_ON_AC=on
+AHCI_RUNTIME_PM_ON_BAT=on
 
 # Seconds of inactivity before disk is suspended
 AHCI_RUNTIME_PM_TIMEOUT=15
@@ -178,7 +178,7 @@ SOUND_POWER_SAVE_CONTROLLER=Y
 # or by pressing the disc eject button on newer models.
 # Note: an UltraBay/MediaBay hard disk is never powered off.
 BAY_POWEROFF_ON_AC=0
-BAY_POWEROFF_ON_BAT=0
+BAY_POWEROFF_ON_BAT=1
 # Optical drive device to power off (default sr0).
 BAY_DEVICE="sr0"
 
