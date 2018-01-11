@@ -118,7 +118,7 @@ DISK_APM_LEVEL_ON_BAT="128 128"
 # Select IO scheduler for the disk devices: cfq, deadline, noop (Default: cfq);
 # Separate values for multiple disks with spaces. Use the special value 'keep'
 # to keep the kernel default scheduler for the particular disk.
-DISK_IOSCHED="cfq cfq"
+DISK_IOSCHED="bfq-sq bfq-sq"
 
 # SATA aggressive link power management (ALPM):
 #   min_power, medium_power, max_performance
