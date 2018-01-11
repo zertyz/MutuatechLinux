@@ -317,6 +317,7 @@ OFFICE=(
     # mind mapping
     vym
     freemind
+    _freeplane
 
     ## management
     _ganttproject
