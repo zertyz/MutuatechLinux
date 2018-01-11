@@ -9,7 +9,7 @@
 
 # Useful commands:
 # 1) List missing packages:
-#   for p in `. ./SyncPackages | grep 'arch: ' | sed 's|arch: ||'`; do if pacman -Q $p &>/dev/null; then true; else echo "$p NOT INSTALLED"; fi; done
+#   echo "## From Main Repositories:"; for p in `. ./SyncPackages | grep 'arch: ' | sed 's|arch: ||'`; do if pacman -Q $p &>/dev/null; then true; else echo "$p NOT INSTALLED"; fi; done; echo "## From AUR:"; for p in `. ./SyncPackages | grep 'AUR: ' | sed 's|AUR: ||'`; do if pacman -Q $p &>/dev/null; then true; else echo "$p NOT INSTALLED"; fi; done
 
 BASE=(
 
@@ -200,7 +200,7 @@ IMAGING=(
     _ttf-hack-ibx _ttf-i.bming _ttf-ifao-n-copte _ttf-impallari-cancelleresca-bastarda _ttf-impallari-hermeusone _ttf-impallari-libre-caslon-display _ttf-impallari-milonga 
     _ttf-impallari-neuton-serif-family _ttf-impallari-new-rocker _ttf-impallari-poetsen-one _ttf-impallari-racing-sans _ttf-impallari-ranchers _ttf-impallari-sniglet _ttf-invader _ttf-indic-otf _ttf-iosevka-cc 
     _ttf-iosevka-cc-slab _ttf-iosevka-ss07 _ttf-iosevka-term-ss07 _ttf-istok _ttf-jenna-sue _ttf-jomolhari _ttf-junction _ttf-keep-calm-medium _ttf-kix _ttf-klingon-piqad-hasta _ttf-klingon-piqad-mandel 
-    _ttf-klingon-piqad-vahbo _ttf-knewave _ttf-labrit _ttf-lacartoonerie _ttf-lastresort _ttf-lastwaerk _ttf-lazenby-computer _ttf-league-gothic _ttf-league-spartan _ttf-liberastika _ttf-lightfoot 
+    _ttf-klingon-piqad-vahbo _ttf-knewave _ttf-lacartoonerie _ttf-lastresort _ttf-lastwaerk _ttf-lazenby-computer _ttf-league-gothic _ttf-league-spartan _ttf-liberastika _ttf-lightfoot 
     _ttf-linden-hill _ttf-linek _ttf-linex-fonts _ttf-london-tube _ttf-lora-cyrillic _ttf-manaspace _ttf-masterforce-solid _ttf-material-wifi-icons-git _ttf-maven-pro _ttf-monda _ttf-monofur-powerline-git 
     _ttf-montepetrum _ttf-ms-fonts _ttf-muli _ttf-neverworld _ttf-new-athena-unicode _ttf-niceandripe _ttf-noto-fonts-emoji-ib _ttf-nunito _ttf-octicons _ttf-oldenglish5 _ttf-openwebicons 
     _ttf-optimusprinceps _ttf-orbitron _ttf-ostrich-sans _ttf-oxygen-gf _ttf-pfennig-ibx _ttf-play _ttf-press-start-2p _ttf-prociono _ttf-profont-iix _ttf-roboto-mono-ibx _ttf-saginaw _ttf-sansation-ibx 
