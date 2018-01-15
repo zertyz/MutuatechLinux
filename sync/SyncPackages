@@ -151,7 +151,7 @@ DEV=(
     # IDEs & editors
     atom
     _sublime-text-dev
-    _visual-studio-code
+    _visual-studio-code-bin
     eclipse-jee
     _eclipse-subclipse
     _eclipse-pmd
