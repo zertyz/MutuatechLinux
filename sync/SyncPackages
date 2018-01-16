@@ -58,6 +58,11 @@ BASE=(
     # drivers
     vulkan-intel
 
+    # UI control
+    wmctrl
+    xdotool
+    _xmacro
+
     # UI
     gdmap
     gparted
@@ -66,7 +71,6 @@ BASE=(
     pavucontrol
     xarchiver
     xdiskusage
-    _xmacro
     _xxdiff
     tlpui
 
@@ -188,7 +192,7 @@ IMAGING=(
     _ttf-ms-fonts      _ttf-vista-fonts     font-bh-ttf     ttf-arphic-uming     ttf-baekmuk     ttf-bitstream-vera     ttf-cheapskate     ttf-arphic-ukai     ttf-croscore
     ttf-dejavu     ttf-droid     ttf-fira-mono     ttf-freefont     ttf-gentium     ttf-hack     ttf-ionicons     ttf-junicode     ttf-liberation     ttf-linux-libertine
     ttf-linux-libertine-g     ttf-tibetan-machine     ttf-ubraille     ttf-ubuntu-font-family
-    _ttf-thelinuxbox-fonts
+    _ttf-thelinuxbox-fonts  _ephifonts
 
     # AUR fonts
     _cl-zpb-ttf _minecrafter-ttf _neuropol-ttf _otf-zilla-slab _terminus-font-ll2-td1-ttf _tgl-ttf _ttf-14minute _ttf-abibas _ttf-abkai _ttf-alef-ibx _ttf-all-the-icons _ttf-animeace _ttf-anonymice-powerline-git 
