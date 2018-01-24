@@ -103,6 +103,8 @@ DEV=(
     _oracle-datamodeler
     _oracle-sqldeveloper
 
+    # web / frontend
+    hugo
 
     # diagrams & plotting
     gnuplot
@@ -184,6 +186,7 @@ IMAGING=(
     scribus
     blender
     _font-manager
+    _fontforge
 
     ## fonts
     gsfonts
