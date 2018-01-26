@@ -1,0 +1,45 @@
+export DISPLAY=:0
+export DE=openbox
+
+# nice look & feel and fonts for java apps
+export _JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=lcd -Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel'
+
+sudo X :0 -dpi 80x80 &
+
+# bluetooth
+#(echo -en "power on\nconnect FC:A8:9A:1F:4A:34\nexit\n"; cat) | bluetoothctl
+(echo "power on"; sleep 5; echo "connect FC:A8:9A:1F:4A:34"; sleep 5; echo "exit"; sleep 1) | bluetoothctl &
+
+( sleep 20;
+
+# synaptics
+DEVICE_NAME='SynPS/2 Synaptics TouchPad'
+TAPPING=`xinput list-props "${DEVICE_NAME}" | grep 'libinput Tapping Enabled (' | sed 's|.*(\([^)]*\).*|\1|'`
+NATURAL_SCROLLING=`xinput list-props "${DEVICE_NAME}" | grep 'libinput Natural Scrolling Enabled (' | sed 's|.*(\([^)]*\).*|\1|'`
+ACCEL=`xinput list-props "${DEVICE_NAME}" | grep 'libinput Accel Speed (' | sed 's|.*(\([^)]*\).*|\1|'`
+HORIZONTAL_SCROLL=`xinput list-props "${DEVICE_NAME}" | grep 'libinput Horizontal Scroll Enabled (' | sed 's|.*(\([^)]*\).*|\1|'`
+xinput set-prop "${DEVICE_NAME}" ${TAPPING} 1
+xinput set-prop "${DEVICE_NAME}" ${NATURAL_SCROLLING} 1
+xinput set-prop "${DEVICE_NAME}" ${ACCEL} 1
+xinput set-prop "${DEVICE_NAME}" ${HORIZONTAL_SCROLL} 1
+
+# keyboard & track point & monitor
+xset +dpms
+xset m 10/9 0
+xset r rate 260 60
+
+deepin-terminal &
+
+# bluetooth mouse
+sleep 30
+DEVICE_NAME='ThinkPad Bluetooth Laser Mouse'
+BT_ACCEL=`xinput list-props "${DEVICE_NAME}" | grep 'libinput Accel Speed (' | sed 's|.*(\([^)]*\).*|\1|'`
+xinput set-prop "${DEVICE_NAME}" ${BT_ACCEL} 1
+
+) &
+
+sleep 8
+
+compiz
+
+sudo pkill X
