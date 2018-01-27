@@ -61,9 +61,11 @@ BASE=(
     # UI control
     wmctrl
     xdotool
+    xorg-xinput
     _xmacro
 
     # UI
+    compiz-manjaro
     gdmap
     gparted
     gsmartcontrol
