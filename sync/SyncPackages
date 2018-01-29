@@ -60,21 +60,21 @@ BASE=(
 
     # UI control
     wmctrl
+    xbacklight
     xdotool
-    xorg-xinput
     _xmacro
 
     # UI
-    compiz-manjaro
     gdmap
     gparted
     gsmartcontrol
     gvim
     pavucontrol
+    tlpui
     xarchiver
     xdiskusage
     _xxdiff
-    tlpui
+    _xlunch-git
 
     ## android
     android-tools
