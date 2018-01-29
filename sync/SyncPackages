@@ -60,7 +60,7 @@ BASE=(
 
     # UI control
     wmctrl
-    xbacklight
+    xorg-xbacklight
     xdotool
     _xmacro
 
