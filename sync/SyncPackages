@@ -237,6 +237,9 @@ VIRTUALIZATION=(
     # android
     _genymotion
     _anbox-git
+
+    # wine
+    playonlinux
 )
 
 MULTIMEDIA=(
