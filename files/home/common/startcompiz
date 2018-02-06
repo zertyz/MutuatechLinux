@@ -13,15 +13,16 @@ sudo X :0 -dpi 80x80 &
 ( sleep 20;
 
 # synaptics
-DEVICE_NAME='SynPS/2 Synaptics TouchPad'
-TAPPING=`xinput list-props "${DEVICE_NAME}" | grep 'libinput Tapping Enabled (' | sed 's|.*(\([^)]*\).*|\1|'`
-NATURAL_SCROLLING=`xinput list-props "${DEVICE_NAME}" | grep 'libinput Natural Scrolling Enabled (' | sed 's|.*(\([^)]*\).*|\1|'`
-ACCEL=`xinput list-props "${DEVICE_NAME}" | grep 'libinput Accel Speed (' | sed 's|.*(\([^)]*\).*|\1|'`
-HORIZONTAL_SCROLL=`xinput list-props "${DEVICE_NAME}" | grep 'libinput Horizontal Scroll Enabled (' | sed 's|.*(\([^)]*\).*|\1|'`
-xinput set-prop "${DEVICE_NAME}" ${TAPPING} 1
-xinput set-prop "${DEVICE_NAME}" ${NATURAL_SCROLLING} 1
-xinput set-prop "${DEVICE_NAME}" ${ACCEL} 1
-xinput set-prop "${DEVICE_NAME}" ${HORIZONTAL_SCROLL} 1
+for DEVICE_NAME in 'ELAN0501:00 04F3:300B Touchpad' 'SynPS/2 Synaptics TouchPad'; do
+	TAPPING=`xinput list-props "${DEVICE_NAME}" | grep 'libinput Tapping Enabled (' | sed 's|.*(\([^)]*\).*|\1|'`
+	NATURAL_SCROLLING=`xinput list-props "${DEVICE_NAME}" | grep 'libinput Natural Scrolling Enabled (' | sed 's|.*(\([^)]*\).*|\1|'`
+	ACCEL=`xinput list-props "${DEVICE_NAME}" | grep 'libinput Accel Speed (' | sed 's|.*(\([^)]*\).*|\1|'`
+	HORIZONTAL_SCROLL=`xinput list-props "${DEVICE_NAME}" | grep 'libinput Horizontal Scroll Enabled (' | sed 's|.*(\([^)]*\).*|\1|'`
+	xinput set-prop "${DEVICE_NAME}" ${TAPPING} 1
+	xinput set-prop "${DEVICE_NAME}" ${NATURAL_SCROLLING} 1
+	xinput set-prop "${DEVICE_NAME}" ${ACCEL} 1
+	xinput set-prop "${DEVICE_NAME}" ${HORIZONTAL_SCROLL} 1
+done
 
 # keyboard & track point & monitor
 xset +dpms
