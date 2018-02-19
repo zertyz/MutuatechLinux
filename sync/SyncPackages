@@ -27,7 +27,7 @@ BASE=(
     fakeroot
     git
     hdparm
-    i7z
+    i7ze
     intel-ucode
     iotop
     linux-headers
@@ -75,6 +75,7 @@ BASE=(
     xarchiver
     xdiskusage
     xorg-xinput
+    xorg-xwininfo
     _xxdiff
     _xlunch-git
 
@@ -303,6 +304,9 @@ NETWORKING=(
     surf
     _vivaldi
     _vivaldi-ffmpeg-codecs
+
+    # email
+    thunderbird
 
     # remote clients
     tigervnc
