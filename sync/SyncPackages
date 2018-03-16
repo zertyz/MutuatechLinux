@@ -285,6 +285,7 @@ NETWORKING=(
     arp-scan
     netcat
     smbclient
+    nmap                # network discovery
     iw
 
     # command line file transfer clients
