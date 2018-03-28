@@ -406,3 +406,80 @@ PACKAGES=( "${BASE[@]}" "${DEV[@]}" "${IMAGING[@]}" "${VIRTUALIZATION[@]}" "${MU
 for i in "${PACKAGES[@]}"; do
     echo "${i}" | sed 's|^\([^_]\)|arch: \1|' | sed 's|^_|AUR: |'
 done
+
+# Windows users should install Chocolatey and use the following packages:
+# 7zip adb adobereader advanced-codecs dbeaver eclipse ffmpeg freeplane gimp git GoogleChrome
+# googleearthpro InkScape jdk8 jmeter libreoffice-fresh musicbee nodejs putty scribus sublimetext3
+# sysinternals thunderbird tightvnc treesizefree virtualbox visualstudiocode vlc wireshark yarn
+# yed youtube-dl
+
+# win 10 save
+7zip v18.1 is the latest version available based on your source(s).
+7zip.install v18.1 is the latest version available based on your source(s).
+adb v1.0.39.20171026 is the latest version available based on your source(s).
+adobereader v2015.007.20033.02 is the latest version available based on your source(s).
+advanced-codecs v8.9.0 is the latest version available based on your source(s).
+autohotkey v1.1.28.00 is the latest version available based on your source(s).
+autohotkey.install v1.1.28.00 is the latest version available based on your source(s).
+autohotkey.portable v1.1.28.00 is the latest version available based on your source(s).
+chocolatey v0.10.9 is the latest version available based on your source(s).
+chocolatey-core.extension v1.3.3 is the latest version available based on your source(s).
+chocolatey-visualstudio.extension v1.6.0 is the latest version available based on your source(s).
+chocolatey-windowsupdate.extension v1.0.2 is the latest version available based on your source(s).
+chocolatey v0.10.9 is the latest version available based on your source(s).
+chocolateygui v0.16.0 is the latest version available based on your source(s).
+dbeaver v5.0.1 is the latest version available based on your source(s).
+DotNet3.5 v3.5.20160716 is the latest version available based on your source(s).
+DotNet4.5.2 v4.5.2.20140902 is the latest version available based on your source(s).
+DotNet4.6.1 v4.6.01055.20170308 is the latest version available based on your source(s).
+dotnetcore-sdk v2.1.102 is the latest version available based on your source(s).
+eclipse v4.7.3 is the latest version available based on your source(s).
+ffmpeg v3.4.2 is the latest version available based on your source(s).
+freeplane v1.6.14 is the latest version available based on your source(s).
+Ghostscript v9.23 is the latest version available based on your source(s).
+Ghostscript.app v9.23 is the latest version available based on your source(s).
+gimp v2.8.22.20171021 is the latest version available based on your source(s).
+git v2.16.3 is the latest version available based on your source(s).
+git.install v2.16.3 is the latest version available based on your source(s).
+GoogleChrome v65.0.3325.18100 is the latest version available based on your source(s).
+googleearthpro v7.3.1.4507 is the latest version available based on your source(s).
+javaruntime v8.0.151 is the latest version available based on your source(s).
+jdk8 v8.0.162 is the latest version available based on your source(s).
+jmeter v4.0 is the latest version available based on your source(s).
+jre8 v8.0.161 is the latest version available based on your source(s).
+KB2533623 v1.0.2 is the latest version available based on your source(s).
+KB2919355 v1.0.20160915 is the latest version available based on your source(s).
+KB2919442 v1.0.20160915 is the latest version available based on your source(s).
+KB2999226 v1.0.20170509 is the latest version available based on your source(s).
+KB3033929 v1.0.3 is the latest version available based on your source(s).
+KB3035131 v1.0.1 is the latest version available based on your source(s).
+libreoffice-fresh v6.0.2 is the latest version available based on your source(s).
+MsSqlServer2014Express v12.2.5000.20170905 is the latest version available based on your source(s).
+MsSqlServerManagementStudio2014Express v12.2.5000.20170905 is the latest version available based on your source(s).
+musicbee v3.1.6590 is the latest version available based on your source(s).
+nodejs v9.9.0 is the latest version available based on your source(s).
+nodejs.install v9.9.0 is the latest version available based on your source(s).
+projectlibre.portable v1.7 is the latest version available based on your source(s).
+putty v0.70.0.20171219 is the latest version available based on your source(s).
+putty.portable v0.70.0.20171219 is the latest version available based on your source(s).
+scribus v1.4.6.20170429 is the latest version available based on your source(s).
+sketchup v2016.1.1449.20170912 is the latest version available based on your source(s).
+sublimetext3 v3.0.0.3143 is the latest version available based on your source(s).
+sysinternals v2018.2.13 is the latest version available based on your source(s).
+thunderbird v52.7.0 is the latest version available based on your source(s).
+tightvnc v2.8.8 is the latest version available based on your source(s).
+treesizefree v4.1.2.3 is the latest version available based on your source(s).
+vcredist140 v14.12.25810 is the latest version available based on your source(s).
+vcredist2008 v9.0.30729.6161 is the latest version available based on your source(s).
+vcredist2010 v10.0.40219.2 is the latest version available based on your source(s).
+vcredist2012 v11.0.61031 is the latest version available based on your source(s).
+vcredist2015 v14.0.24215.20170201 is the latest version available based on your source(s).
+virtualbox v5.2.8 is the latest version available based on your source(s).
+visualstudio2017-installer v1.0.1 is the latest version available based on your source(s).
+visualstudio2017community v15.2.26430.20170605 is the latest version available based on your source(s).
+visualstudiocode v1.21.1 is the latest version available based on your source(s).
+winrar v5.50 is the latest version available based on your source(s).
+wireshark v2.4.5 is the latest version available based on your source(s).
+yarn v1.5.1 is the latest version available based on your source(s).
+yed v3.17.2 is the latest version available based on your source(s).
+youtube-dl v2018.03.20 is the latest version available based on your source(s).
