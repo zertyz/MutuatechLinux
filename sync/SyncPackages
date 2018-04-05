@@ -406,3 +406,37 @@ PACKAGES=( "${BASE[@]}" "${DEV[@]}" "${IMAGING[@]}" "${VIRTUALIZATION[@]}" "${MU
 for i in "${PACKAGES[@]}"; do
     echo "${i}" | sed 's|^\([^_]\)|arch: \1|' | sed 's|^_|AUR: |'
 done
+
+# Windows users should install Chocolatey and then "choco install " the following packages:
+#   7zip adb adobereader advanced-codecs chocolatey-core.extension chocolateygui
+#   darktable drawpile
+#   dbeaver dotnetcore-sdk eclipse em-client ffmpeg freeplane gimp git GoogleChrome googleearthpro graphviz
+#   jdk8 jmeter libreoffice-fresh MsSqlServer2014Express MsSqlServerManagementStudio2014Express musicbee nodejs
+#   projectlibre.portable putty scribus sketchup soapui sublimetext3 sysinternals thunderbird tightvnc treesizefree
+#   virtualbox visualstudio2017community visualstudiocode winrar wireshark yarn yed youtube-dl
+#
+# And should get, from the Windows App Store:
+#   Mailing eMail     --> manage subscription lists for your users
+#   Kali Linux        --> also enable WLS (Windows->Linux Subsystem) on "additional windows components"
+#   Netflix
+#   Slack
+#   Trello
+#   Whatsapp Desktop
+#   Telegram Desktop
+#   Quora Insights
+#   Skype
+# 
+# And, also, should download and install
+#   MSys2     --> the new incarnation of Cygwin
+#
+# additional settings:
+#   1) Disable the antivirus realtime protection -- you will only want antivirus to scan when you ask for it
+#   2) Disable Windows Defender and Windows Indexer tasks whenever we're on battery: open "Task Scheduler"
+#   3) Open "Task Manager" and disable unwanted "Startup" applications
+#   4) Consider compressing the whole "C:\"
+#   5) Configure Win+LCkick to hide windows' title bars and Win+RClick to show it. Possibly set the script "TitleBarHotKeys.ahk" to run on boot
+#   6) For laptops, enable write cache: right click on C:\->Properties->Hardware->Change Settings->Politics and mark "enable cache writes" and "disable buffer flishes"
+#   7) The same for your pendrives: right click on the drive -> Properties -> Hardware -> Change Settings -> Politics -> 
+#      Best Performance (enable cache writes) and all the other related options, if your device supports them
+#   8) Get yourself a fast USB stick, format it as ExFAT, click on properties for the drive and enable "ReadyBoost"
+#   9) In Services, set to manual "TightVNC Server"
