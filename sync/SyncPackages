@@ -27,7 +27,7 @@ BASE=(
     fakeroot
     git
     hdparm
-    i7ze
+    i7z
     intel-ucode
     iotop
     linux-headers
@@ -176,7 +176,7 @@ DEV=(
     wireshark-gtk
     foremost
     testdisk
-    heimdall        # android
+    _heimdall        # android
 
 )
 
