@@ -1,0 +1,110 @@
+# prepare filesystems:
+mdadm --create md0 --level=linear --raid-devices=4 /dev/sda2 /dev/sdd2 /dev/sdc2 /dev/sdb2
+mkfs.ext4 -b 4096 -E resize=$((96*(1024*1024*1024)/4096)),stride=32,stripe-width=32,packed_meta_blocks=1 -m 0 -O flex_bg /dev/md0
+tune2fs -L "BigPiArray" -c 3 -e remount-ro -o journal_data_writeback,nobarrier,discard /dev/md0
+mkfs.vfat -s 8 -n "BigPiBoot" /dev/mmcblk0p1
+
+# packages
+kodi-eventclients-rbp-git kodi-rbp-git kodi-tools-texturepacker-rbp-git
+xorg xf86-video-fbturbo-git lxqt
+base-devel
+jre10-openjdk-headless
+gst-omx-rpi libbcm2835 omxplayer-git
+p7zip
+rsync
+mlocate
+netcat lftp
+ntp
+screen
+unrar
+unzip
+upower
+vim
+wget
+wpa_supplicant
+xterm
+zip
+
+hostnamectl set-hostname BigPi
+
+echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+locale-gen
+localectl set-locale LANG="en_US.UTF-8"
+
+timedatectl set-timezone America/Sao_Paulo
+ntpdate br.pool.ntp.org
+hwclock -w
+
+# hacks on /boot/config.txt
+gpu_mem=16
+cma_lwm=16
+cma_hwm=32
+cma_offline_start=16
+
+# rPi2
+arm_freq=1100
+gpu_freq=500
+sdram_freq=500
+over_voltage=6
+initial_turbo=60
+
+# maximum turbo for rPi1
+arm_freq=1000
+gpu_freq=500
+sdram_freq=600
+over_voltage=6
+over_voltage_sdram=6
+initial_turbo=60
+
+# services
+systemctl disable haveged
+systemctl mask serial-getty@ttyAMA0.service
+systemctl mask tmp.mount
+systemctl mask systemd-timesyncd.service
+systemctl mask systemd-logind.service
+systemctl mask systemd-journald.service
+systemctl mask getty@tty1.service
+systemctl mask lvm2-lvmetad
+systemctl mask lvm2-lvmetad.socket
+--> cd to /etc/systemd/system, copy the sources and remove restart and watchdog from: systemd-resolved.service, systemd-networkd.service, systemd-udevd.service
+
+# /etc/sysctl.d/99-mutuatechTweaks.conf
+vm.swappiness = 10
+vm.vfs_cache_pressure = 10
+vm.dirty_ratio = 80
+vm.dirty_background_ratio = 80
+vm.dirty_writeback_centisecs = 60000
+vm.dirty_expire_centisecs    = 60000
+
+kernel.sysrq=1
+
+# Set maximum and minimum speed of raid resyncing operations
+dev.raid.speed_limit_max = 5000
+dev.raid.speed_limit_min = 1000
+
+
+
+# fstab
+
+/dev/mmcblk0p2                                  /               ext4    defaults,noatime,discard,barrier=0,commit=600   0       1
+
+UUID=def560f7-3932-41e7-ba6c-42094c903141       /data           ext4    defaults,noatime,barrier=0,commit=600   0       2
+
+/dev/mmcblk0p1                                  /boot           vfat    defaults        0       2
+
+UUID=380a6823-037e-4e18-9401-a9a872d50836       none            swap    pri=5        0       0
+UUID=b6774335-8ee3-48aa-b196-4fb78ef81b3d       none            swap    pri=4        0       0
+UUID=aac598cf-d4da-41b8-93a0-bc693640046b       none            swap    pri=3        0       0
+UUID=4981ad72-1325-486c-a921-e170978f15b6       none            swap    pri=2        0       0
+UUID=4e3813bc-0d5c-4654-9418-e0296dd142f0       none            swap    pri=1        0       0
+
+# systemd tweaks (/etc/systemd)
+coredump.conf: Storage=none
+journald.conf: Storage=none
+swap.conf:
+
+# startup script
+pkill -f systemd-udevd; pkill -f systemd-resolved; pkill -f systemd-networkd; sleep 3; dhcpcd -p eth0; sleep 5; pkill dhcpcd; date; pkill -f systemd-networkd; sleep 1; pkill -f systemd-udevd; swapoff -a; modprobe zram num_devices=5; ((z=0)); for d in /dev/mmcblk0p3 /dev/sda1 /dev/sdb1 /dev/sdc1 /dev/sdd1; do echo $d >/sys/block/zram${z}/backing_dev; echo lz4 >/sys/devices/virtual/block/zram${z}/comp_algorithm; echo 96m >/sys/devices/virtual/block/zram${z}/mem_limit; echo 512m >/sys/devices/virtual/block/zram${z}/disksize; mkswap /dev/zram${z}; swapon -p 15 /dev/zram${z}; ((z++)); done; swapon -s; systemctl stop lvm2-lvmetad; pkill -f dbus-daemon
+
+# root over ssh (only with keys):
+/etc/ssh/sshd_config: PermitRootLogin prohibit-password

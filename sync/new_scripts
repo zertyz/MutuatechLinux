@@ -1,0 +1,5 @@
+
+find /tmp/oldroot/var/lib/pacman/local/ -name desc -exec pcregrep -L -M '%REASON%\n1' "{}"  \; | sed 's|.*/\(.*\)/desc|\1|' | sed 's|\-[0-9].*||' >/tmp/installed
+
+echo "## From Main Repositories:"; for p in `. ./SyncPackages | grep 'arch: ' | sed 's|arch: ||'`; do if grep $p /tmp/installed &>/dev/null; then true; else echo "$p NOT INSTALLED"; fi; done; echo "## From AUR:"; for p in `. ./SyncPackages | grep 'AUR: ' | sed 's|AUR: ||'`; do if grep $p /tmp/installed &>/dev/null; then true; else echo "$p NOT INSTALLED"; fi; done; echo "## Not listed in SyncPackages:"; for p in `cat /tmp/installed`; do if . ./SyncPackages | grep $p &>/dev/null; then true; else echo "$p NOT LISTED"; fi; done
+

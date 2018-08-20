@@ -18,6 +18,7 @@ BASE=(
     hunspell
     hunspell-en
     _hunspell-pt-br
+    bcache-tools
     bluez-utils
     bzip2
     cpupower
@@ -35,7 +36,7 @@ BASE=(
     _mkbold-mkitalic
     mlocate
     net-tools
-    _packer
+    _yaourt
     pkgfile
     powertop
     recordmydesktop
@@ -72,6 +73,7 @@ BASE=(
     gvim
     pavucontrol
     tlpui
+    transmission-remote-gtk
     xarchiver
     xdiskusage
     xorg-xinput
@@ -177,6 +179,7 @@ DEV=(
     foremost
     testdisk
     _heimdall        # android
+    _heimdall_cleanui
 
 )
 
@@ -197,7 +200,7 @@ IMAGING=(
     gsfonts
     noto-fonts
     otf-overpass
-    _ttf-ms-fonts      _ttf-vista-fonts     font-bh-ttf     ttf-arphic-uming     ttf-baekmuk     ttf-bitstream-vera     ttf-cheapskate     ttf-arphic-ukai     ttf-croscore
+    _ttf-ms-win10     font-bh-ttf     ttf-arphic-uming     ttf-baekmuk     ttf-bitstream-vera     ttf-cheapskate     ttf-arphic-ukai     ttf-croscore
     ttf-dejavu     ttf-droid     ttf-fira-mono     ttf-freefont     ttf-gentium     ttf-hack     ttf-ionicons     ttf-junicode     ttf-liberation     ttf-linux-libertine
     ttf-linux-libertine-g     ttf-tibetan-machine     ttf-ubraille     ttf-ubuntu-font-family
     _ttf-thelinuxbox-fonts  _ephifonts
@@ -214,7 +217,7 @@ IMAGING=(
     _ttf-iosevka-cc-slab _ttf-iosevka-ss07 _ttf-iosevka-term-ss07 _ttf-istok _ttf-jenna-sue _ttf-jomolhari _ttf-junction _ttf-keep-calm-medium _ttf-kix _ttf-klingon-piqad-hasta _ttf-klingon-piqad-mandel 
     _ttf-klingon-piqad-vahbo _ttf-knewave _ttf-lacartoonerie _ttf-lastresort _ttf-lastwaerk _ttf-lazenby-computer _ttf-league-gothic _ttf-league-spartan _ttf-liberastika _ttf-lightfoot 
     _ttf-linden-hill _ttf-linek _ttf-linex-fonts _ttf-london-tube _ttf-lora-cyrillic _ttf-manaspace _ttf-masterforce-solid _ttf-material-wifi-icons-git _ttf-maven-pro _ttf-monda _ttf-monofur-powerline-git 
-    _ttf-montepetrum _ttf-ms-fonts _ttf-muli _ttf-neverworld _ttf-new-athena-unicode _ttf-niceandripe _ttf-noto-fonts-emoji-ib _ttf-nunito _ttf-octicons _ttf-oldenglish5 _ttf-openwebicons 
+    _ttf-montepetrum _ttf-muli _ttf-neverworld _ttf-new-athena-unicode _ttf-niceandripe _ttf-noto-fonts-emoji-ib _ttf-nunito _ttf-octicons _ttf-oldenglish5 _ttf-openwebicons 
     _ttf-optimusprinceps _ttf-orbitron _ttf-ostrich-sans _ttf-oxygen-gf _ttf-pfennig-ibx _ttf-play _ttf-press-start-2p _ttf-prociono _ttf-profont-iix _ttf-roboto-mono-ibx _ttf-saginaw _ttf-sansation-ibx 
     _ttf-sazanami-hanazono _ttf-sf_groove_machine _ttf-share-gf _ttf-signika-family-ib _ttf-sil-abyssinica _ttf-sinkin-sans-ibx _ttf-sorts-mill-goudy _ttf-sorts-mill-goudy-ibx _ttf-source-code-pro-ibx 
     _ttf-sparks-ffa _ttf-sparks-scrapbook _ttf-sudo _ttf-symbola-ib _ttf-ti83symbols _ttf-timetable-latest _ttf-traveling-typewriter _ttf-triod-postnaja-ibx _ttf-typicons _ttf-typopro 
@@ -294,6 +297,7 @@ NETWORKING=(
 
     # UI
     _brave-bin
+    _google-chrome
     chromium
     firefox
     firefox-developer-edition
@@ -324,6 +328,26 @@ NETWORKING=(
 
 )
 
+DESKTOP=(
+
+    # X
+    xorg-server
+    xorg-apps
+    xf86-video-intel
+
+    # jwm
+    jwm
+
+    # compiz standalone
+    compiz
+    ccsm
+
+    # kde
+    plasma-meta
+    kde-applications-meta
+
+)
+
 OFFICE=(
 
     libreoffice-fresh
@@ -332,6 +356,7 @@ OFFICE=(
     gephi
     _astah-community        # uml
     _yed                    # graph
+    graphviz
 
     # mind mapping
     vym
@@ -400,7 +425,7 @@ HAND_INSTALLED=(
 
 )
 
-PACKAGES=( "${BASE[@]}" "${DEV[@]}" "${IMAGING[@]}" "${VIRTUALIZATION[@]}" "${MULTIMEDIA[@]}" "${NETWORKING[@]}" "${OFFICE[@]}" "${CAD[@]}" "${AMUSEMENT[@]}" )
+PACKAGES=( "${BASE[@]}" "${DEV[@]}" "${IMAGING[@]}" "${VIRTUALIZATION[@]}" "${MULTIMEDIA[@]}" "${NETWORKING[@]}" "${DESKTOP[@]}" "${OFFICE[@]}" "${CAD[@]}" "${AMUSEMENT[@]}" )
 
 
 for i in "${PACKAGES[@]}"; do
@@ -410,10 +435,10 @@ done
 # Windows users should install Chocolatey and then "choco install " the following packages:
 #   7zip adb adobereader advanced-codecs chocolatey-core.extension chocolateygui
 #   darktable drawpile
-#   dbeaver dotnetcore-sdk eclipse em-client ffmpeg freeplane gimp git GoogleChrome googleearthpro graphviz
-#   jdk8 jmeter libreoffice-fresh MsSqlServer2014Express MsSqlServerManagementStudio2014Express musicbee nodejs
+#   dbeaver dotnetcore-sdk eclipse em-client ffmpeg freeplane gimp git GoogleChrome googleearthpro graphviz gsmartcontrol
+#   jdk10 jmeter libreoffice-fresh MsSqlServer2014Express MsSqlServerManagementStudio2014Express musicbee nodejs
 #   projectlibre.portable putty scribus sketchup soapui sublimetext3 sysinternals thunderbird tightvnc treesizefree
-#   virtualbox visualstudio2017community visualstudiocode winrar wireshark yarn yed youtube-dl
+#   transmission-remote virtualbox visualstudio2017community visualstudiocode winrar wireshark yarn yed youtube-dl
 #
 # And should get, from the Windows App Store:
 #   Mailing eMail     --> manage subscription lists for your users
