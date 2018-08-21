@@ -72,7 +72,7 @@ BASE=(
     gsmartcontrol
     gvim
     pavucontrol
-    tlpui
+    _tlpui-git
     transmission-remote-gtk
     xarchiver
     xdiskusage
@@ -304,7 +304,7 @@ NETWORKING=(
     midori
     opera
     _opera-ffmpeg-codecs
-    qupzilla
+    _qupzilla
     seamonkey
     surf
     _vivaldi
@@ -381,7 +381,7 @@ CAD=(
     
     # 3D solid CAD modelers
     openscad
-    freecad
+    _freecad
 
     # interior & forniture disposition planning
     sweethome3d
@@ -407,7 +407,6 @@ AMUSEMENT=(
     blobwars
     hedgewars
     wesnoth
-    wesnoth-data
     widelands
 
 )
