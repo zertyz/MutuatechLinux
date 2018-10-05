@@ -13,7 +13,7 @@
 
 BASE=(
 
-    ## basic softwarex
+    ## basic software
 
     hunspell
     hunspell-en
@@ -36,9 +36,9 @@ BASE=(
     _mkbold-mkitalic
     mlocate
     net-tools
-    _yaourt
     pkgfile
     powertop
+    _pulseaudio-ctl
     recordmydesktop
     screen
     sdparm
@@ -52,12 +52,14 @@ BASE=(
     _woff2-git
     x264
 
+    # package management
+    _yaourt
+    _octopi-git
+
     # printing
     cups
     foomatic-db-engine
-
-    # drivers
-    vulkan-intel
+    hplip       # drivers for HP printers
 
     # UI control
     wmctrl
@@ -85,17 +87,6 @@ BASE=(
     android-tools
     android-udev 
 
-    # joe's window manager
-    jwm
-    jwm-artwork
-    jwm-documentation
-    jwm-wallpapers
-    jwmconf
-    jwmtools
-    # manjaro-jwm-settings  # conflicts with manjaro-deepin-settings
-    pacli-jwm
-    xdgmenumaker
-
 )
 
 DEV=(
@@ -103,6 +94,8 @@ DEV=(
     # databases
     mysql
     postgresql
+    redis
+    _medis
 
     # database UI
     pgadmin4
@@ -135,7 +128,7 @@ DEV=(
     automake
 
     # dotnet core
-    _dotnet-sdk-2.0
+    dotnet-sdk
 
     # java
     _jdk
@@ -178,6 +171,7 @@ DEV=(
     wireshark-gtk
     foremost
     testdisk
+    ddrescue
     _heimdall        # android
     _heimdall_cleanui
 
@@ -333,6 +327,9 @@ DESKTOP=(
     # X
     xorg-server
     xorg-apps
+
+    # drivers
+    vulkan-intel
     xf86-video-intel
 
     # jwm
