@@ -106,13 +106,14 @@ DEV=(
     # web / frontend
     hugo
 
-    # diagrams & plotting
+    # diagrams & plotting & graphs
     gnuplot
     gdb
     _ddd
     jad
     dia
     _modelio-bin
+    graphviz
 
     # version control
     subversion
@@ -174,7 +175,6 @@ DEV=(
     foremost
     testdisk
     ddrescue
-    _heimdall        # android
     _heimdall_cleanui
 
 )
@@ -300,7 +300,7 @@ NETWORKING=(
     midori
     opera
     _opera-ffmpeg-codecs
-    _qupzilla
+    _qupzilla-git
     seamonkey
     surf
     _vivaldi
