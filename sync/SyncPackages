@@ -124,8 +124,10 @@ DEV=(
     # android
     _android-sdk
 
-    # c
+    # c/c++
     automake
+    cmake
+    ninja
 
     # dotnet core
     dotnet-sdk
@@ -334,6 +336,9 @@ DESKTOP=(
 
     # jwm
     jwm
+    lxterminal
+    pcmanfm
+    geeqie
 
     # compiz standalone
     compiz
