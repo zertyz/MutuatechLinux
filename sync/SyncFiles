@@ -25,18 +25,23 @@ ROOT_FILES=(
     etc/modprobe.d/mutuatechlinux.conf
     etc/default/tlp
     etc/sudoers
-    etc/systemd/swap.conf
     etc/systemd/system/getty@tty1.service.d/autologin.conf
-    etc/sysctl.d/99-sysctl.conf
+    etc/sysctl.d/99-mutuatechTweaks.conf
 )
 
 # diff common files
 for f in "${COMMON_FILES[@]}"; do
-    xxdiff "../files/home/common/$f" "/home/common/$f"
+    devf="../files/home/common/$f"
+    prodf="/home/common/$f"
+    echo "--> Comparing '${devf}' and '${prodf}' ..."
+    xxdiff "${devf}" "${prodf}"
 done
 
 # diff root files
 xhost +
 for f in "${ROOT_FILES[@]}"; do
+    devf="../files/$f"
+    prodf="/$f"
+    echo "--> Comparing '${devf}' and '${prodf}' ..."
     sudo QT_X11_NO_MITSHM=1 xxdiff "../files/$f" "/$f"
 done
