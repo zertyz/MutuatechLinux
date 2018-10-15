@@ -129,6 +129,10 @@ DEV=(
     automake
     cmake
     ninja
+    _clion
+    #_clion-cmake
+    #_clion-gdb
+    #_clion-lldb
 
     # dotnet core
     dotnet-sdk
@@ -137,7 +141,7 @@ DEV=(
     _jdk
     jadx
     _jmeter
-    proguard
+    _proguard
     maven
     _soapui
 
@@ -319,9 +323,6 @@ NETWORKING=(
     _lib32-apulse
     _zoom
 
-    # multiprotocol messaging
-    _franz-bin
-
 )
 
 DESKTOP=(
@@ -341,8 +342,7 @@ DESKTOP=(
     geeqie
 
     # compiz standalone
-    compiz
-    ccsm
+    _compiz
 
     # kde
     plasma-meta
@@ -421,6 +421,9 @@ HAND_INSTALLED=(
     /opt/pentaho/pentaho-server
     /opt/pentaho/report-designer
 
+    # eclipse for c/c++
+    /opt/eclipse
+
     # android SDK (via android-studio)
     /opt/android...
 
@@ -437,7 +440,7 @@ done
 #   7zip adb adobereader advanced-codecs chocolatey-core.extension chocolateygui
 #   darktable drawpile
 #   dbeaver dotnetcore-sdk eclipse em-client ffmpeg freeplane gimp git GoogleChrome googleearthpro graphviz gsmartcontrol
-#   jdk10 jmeter libreoffice-fresh MsSqlServer2014Express MsSqlServerManagementStudio2014Express musicbee nodejs
+#   jdk11 jmeter libreoffice-fresh  musicbee nodejs
 #   projectlibre.portable putty scribus sketchup soapui sublimetext3 sysinternals thunderbird tightvnc treesizefree
 #   transmission-remote virtualbox visualstudio2017community visualstudiocode winrar wireshark yarn yed youtube-dl
 #
