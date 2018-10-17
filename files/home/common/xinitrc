@@ -17,6 +17,7 @@ fi
 
 . ~/bin/configureProxy
 . ~/bin/setDualHead
+. ~/bin/setInput &
 pkill gvfsd
 
 exec /usr/bin/jwm

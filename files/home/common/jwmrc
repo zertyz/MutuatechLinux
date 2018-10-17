@@ -2,6 +2,7 @@
 <JWM>
     <!-- Autostart applications -->
     <StartupCommand>feh --bg-scale ~/Backgrounds/flame.png</StartupCommand>
+    <StartupCommand>gkrellm</StartupCommand>
 
     <!-- The root menu.
          Build the list with for f in /usr/share/applications/*.desktop; do label=`grep "Name=" "$f" | head -n 1 | sed 's|.*Name=\(.*\)|\1|'`; cmd=`grep "Exec=" "$f" | head -n 1 | sed 's|Exec=\([^ ]*\).*|\1|'`; echo "<Program label=\"${label}\">${cmd}</Program>"; done
@@ -12,7 +13,7 @@
             <Program label="Terminal">lxterminal</Program>
             <Program label="File Manager">pcmanfm</Program>
             <Program label="Xarchiver">xarchiver</Program>
-            <Program label="Editor">l3afpad</Program>
+            <Program label="Editor">subl3</Program>
             <Separator/>
             <Program label="GDMap (root)">sudo /usr/bin/gdmap</Program>
             <Program label="XDiskUsage (root)">sudo /usr/bin/xdiskusage</Program>
@@ -21,6 +22,7 @@
         <Separator/>
 
         <Menu label="Network">
+            <Program label="Chrome">google-chrome-stable</Program>
             <Program label="Chromium">chromium</Program>
             <Program label="Firefox">firefox</Program>
             <Program label="Firefox Developer">/opt/firefox-developer/firefox</Program>
@@ -145,6 +147,8 @@
             <Program label="GParted (root)">xhost +; sudo /usr/bin/gparted</Program>
             <Program label="GSmartControl (root)">xhost +; sudo /usr/bin/gsmartcontrol_polkit</Program>
             <Program label="i7z (root)">xhost +; sudo i7z-gui</Program>
+            <Separator/>
+            <Program label="TLPui (root)">xhost +; sudo /usr/bin/tlpui</Program>
         </Menu>
 
         <Separator/>
@@ -192,11 +196,21 @@
     </Group>
     <!-- programs listed here will forcebly be undecorated. You can still access their window menu with Alt-F2 -->
     <Group>
-        <Name>lxterminal</Name>
-        <Name>l3afpad</Name>
+        <Name>konsole</Name>
+        <Name>subl3</Name>
         <Name>pcmanfm</Name>
         <Option>noborder</Option>
         <Option>notitle</Option>
+        <Option>aerosnap</Option>
+    </Group>
+    <!-- programs that can't receive focus -->
+    <Group>
+        <Name>gkrellm</Name>
+        <Option>noborder</Option>
+        <Option>notitle</Option>
+	<Option>nofocus</Option>
+	<Option>sticky</Option>
+	<Option>opacity:0.5</Option>
     </Group>
 
     <!-- Tray at the bottom. -->
@@ -326,7 +340,7 @@
 
     <Key mask="A" key="Tab">nextstacked</Key>
     <Key mask="A" key="F4">close</Key>
-    <Key mask="A" key="#">desktop#</Key>
+    <Key mask="4" key="#">desktop#</Key>
     <Key mask="A" key="F1">root:3</Key>
     <Key mask="A" key="F2">window</Key>
     <Key mask="A" key="F10">maximize</Key>
@@ -335,15 +349,15 @@
     <Key mask="A" key="Up">udesktop</Key>
     <Key mask="A" key="Down">ddesktop</Key>-->
 
-    <Key mask="4" key="t">exec:lxterminal</Key>
-    <Key mask="4" key="e">exec:l3afpad</Key>
+    <Key mask="4" key="t">exec:konsole</Key>
+    <Key mask="4" key="e">exec:subl3</Key>
     <!--<Key mask="4" key="b">exec:netsurf</Key>-->
     <Key mask="4" key="f">exec:pcmanfm</Key>
     <Key mask="A" key="F3">exec:~/.config/dmenu/dmenu-bind.sh</Key>
 
     <!-- Toggle fullscreen with F11 -->
     <!--<Key key="F11">exec:wmctrl -i -r `xdotool getwindowfocus` -b toggle,fullscreen</Key>-->
-    <Key key="F11">fullscreen</Key>
+    <Key mask="4" key="F11">fullscreen</Key>
 
     <!-- Toggle STOP/CONT with Shift-Alt-Ctrl-Z and "Swapout stopped processes to get 1G of available run" with Shift-Alt-Ctrl-X, which should be pressed twice if you want 2G and so on. Use with responsability. -->
     <!--<Key mask="ASC" key="z">exec:~/bin/toggleStopCont `xdotool getwindowfocus getwindowpid`</Key>    # dropped in favour of the next command, who requires a click -->

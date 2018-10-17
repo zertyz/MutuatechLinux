@@ -18,11 +18,11 @@ TLP_PERSISTENT_DEFAULT=0
 
 # Seconds laptop mode has to wait after the disk goes idle before doing a sync.
 # Non-zero value enables, zero disables laptop mode.
-DISK_IDLE_SECS_ON_AC=60
-DISK_IDLE_SECS_ON_BAT=120
+DISK_IDLE_SECS_ON_AC=15
+DISK_IDLE_SECS_ON_BAT=600
 
 # Dirty page values (timeouts in secs).
-MAX_LOST_WORK_SECS_ON_AC=300
+MAX_LOST_WORK_SECS_ON_AC=15
 MAX_LOST_WORK_SECS_ON_BAT=600
 
 # Hint: CPU parameters below are disabled by default, remove the leading #
@@ -36,11 +36,13 @@ MAX_LOST_WORK_SECS_ON_BAT=600
 # (*) is recommended.
 # Hint: use tlp-stat -p to show the active driver and available governors.
 # Important:
-#   You *must* disable your distribution's governor settings or conflicts will
-#   occur. ondemand is sufficient for *almost all* workloads, you should know
-#   what you're doing!
-CPU_SCALING_GOVERNOR_ON_AC=performance
-CPU_SCALING_GOVERNOR_ON_BAT=conservative
+#   powersave for intel_pstate and ondemand for acpi-cpufreq are power
+#   efficient for *almost all* workloads and therefore kernel and most
+#   distributions have chosen them as defaults. If you still want to change,
+#   you should know what you're doing! You *must* disable your distribution's
+#   governor settings or conflicts will occur.
+CPU_SCALING_GOVERNOR_ON_AC=schedutil
+CPU_SCALING_GOVERNOR_ON_BAT=powersave
 
 # Set the min/max frequency available for the scaling governor.
 # Possible values strongly depend on your CPU. For available frequencies see
@@ -71,7 +73,7 @@ CPU_MAX_PERF_ON_BAT=30
 # Important:
 # - This may conflict with your distribution's governor settings
 # - A value of 1 does *not* activate boosting, it just allows it
-CPU_BOOST_ON_AC=1
+CPU_BOOST_ON_AC=0
 CPU_BOOST_ON_BAT=0
 
 # Minimize number of used CPU cores/hyper-threads under light load conditions:
@@ -94,18 +96,18 @@ NMI_WATCHDOG=0
 # Values are given in order of increasing power saving.
 # Requires kernel module msr and x86_energy_perf_policy from linux-tools.
 ENERGY_PERF_POLICY_ON_AC=performance
-ENERGY_PERF_POLICY_ON_BAT=powersave
+ENERGY_PERF_POLICY_ON_BAT=power
 
 # Disk devices; separate multiple devices with spaces (default: sda).
 # Devices can be specified by disk ID also (lookup with: tlp diskid).
-DISK_DEVICES="sda sdb"
+DISK_DEVICES="sda"
 
 # Disk advanced power management level: 1..254, 255 (max saving, min, off).
 # Levels 1..127 may spin down the disk; 255 allowable on most drives.
 # Separate values for multiple disks with spaces. Use the special value 'keep'
 # to keep the hardware default for the particular disk.
-DISK_APM_LEVEL_ON_AC="254 254"
-DISK_APM_LEVEL_ON_BAT="128 128"
+DISK_APM_LEVEL_ON_AC="250"
+DISK_APM_LEVEL_ON_BAT="128"
 
 # Hard disk spin down timeout:
 #   0:        spin down disabled
@@ -114,33 +116,33 @@ DISK_APM_LEVEL_ON_BAT="128 128"
 # See 'man hdparm' for details.
 # Separate values for multiple disks with spaces. Use the special value 'keep'
 # to keep the hardware default for the particular disk.
-#DISK_SPINDOWN_TIMEOUT_ON_AC="0 0"
-#DISK_SPINDOWN_TIMEOUT_ON_BAT="0 0"
+#DISK_SPINDOWN_TIMEOUT_ON_AC="0"
+#DISK_SPINDOWN_TIMEOUT_ON_BAT="0"
 
 # Select IO scheduler for the disk devices: cfq, deadline, noop (Default: cfq).
 # Separate values for multiple disks with spaces. Use the special value 'keep'
 # to keep the kernel default scheduler for the particular disk.
-DISK_IOSCHED="bfq-sq bfq-sq"
+#DISK_IOSCHED="cfq"
 
 # AHCI link power management (ALPM) for disk devices:
 #   min_power, med_power_with_dipm(*), medium_power, max_performance.
 # (*) Kernel >= 4.15 required, then recommended.
 # Multiple values separated with spaces are tried sequentially until success.
 SATA_LINKPWR_ON_AC="med_power_with_dipm max_performance"
-SATA_LINKPWR_ON_BAT="med_power_with_dipm min_power"
+SATA_LINKPWR_ON_BAT="min_power med_power_with_dipm"
 
 # Exclude host devices from AHCI link power management.
 # Separate multiple hosts with spaces.
 #SATA_LINKPWR_BLACKLIST="host1"
 
-# Runtime Power Management for AHCI controllers and disks:
-#   on=disable, auto=enable
-# EXPERIMENTAL ** WARNING: auto will most likely cause system lockups/data loss
-AHCI_RUNTIME_PM_ON_AC=on
-AHCI_RUNTIME_PM_ON_BAT=on
+# Runtime Power Management for AHCI host and disks devices:
+#   on=disable, auto=enable.
+# EXPERIMENTAL ** WARNING: auto will most likely cause system lockups/data loss.
+#AHCI_RUNTIME_PM_ON_AC=on
+#AHCI_RUNTIME_PM_ON_BAT=on
 
 # Seconds of inactivity before disk is suspended.
-AHCI_RUNTIME_PM_TIMEOUT=15
+AHCI_RUNTIME_PM_TIMEOUT=300
 
 # PCI Express Active State Power Management (PCIe ASPM):
 #   default, performance, powersave.
@@ -209,11 +211,11 @@ USB_AUTOSUSPEND=1
 
 # Bluetooth devices are excluded from USB autosuspend:
 #   0=do not exclude, 1=exclude.
-USB_BLACKLIST_BTUSB=0
+USB_BLACKLIST_BTUSB=1
 
 # Phone devices are excluded from USB autosuspend:
 #   0=do not exclude, 1=exclude (enable charging).
-USB_BLACKLIST_PHONE=0
+USB_BLACKLIST_PHONE=1
 
 # Printers are excluded from USB autosuspend:
 #   0=do not exclude, 1=exclude.
@@ -268,14 +270,14 @@ RESTORE_DEVICE_STATE_ON_STARTUP=0
 # required). Charging starts when the remaining capacity falls below the
 # START_CHARGE_THRESH value and stops when exceeding the STOP_CHARGE_THRESH value.
 # Main / Internal battery (values in %)
-#START_CHARGE_THRESH_BAT0=75
-#STOP_CHARGE_THRESH_BAT0=80
+START_CHARGE_THRESH_BAT0=40
+STOP_CHARGE_THRESH_BAT0=80
 # Ultrabay / Slice / Replaceable battery (values in %)
-#START_CHARGE_THRESH_BAT1=75
-#STOP_CHARGE_THRESH_BAT1=80
+START_CHARGE_THRESH_BAT1=40
+STOP_CHARGE_THRESH_BAT1=80
 
 # Restore charge thresholds when AC is unplugged: 0=disable, 1=enable.
-#RESTORE_THRESHOLDS_ON_BAT=1
+RESTORE_THRESHOLDS_ON_BAT=1
 
 # ------------------------------------------------------------------------------
 # tlp-rdw - Parameters for the radio device wizard
