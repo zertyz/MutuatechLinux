@@ -23,6 +23,7 @@ vim
 wget
 wpa_supplicant
 xterm
+time
 zip
 
 hostnamectl set-hostname BigPi
