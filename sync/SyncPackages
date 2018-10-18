@@ -46,6 +46,7 @@ BASE=(
     systemd-swap
     unrar
     unzip
+    time
     usb_modeswitch
     wget
     wireless_tools
