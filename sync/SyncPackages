@@ -341,6 +341,7 @@ DESKTOP=(
     lxterminal
     pcmanfm
     geeqie
+    feh
 
     # compiz standalone
     _compiz
