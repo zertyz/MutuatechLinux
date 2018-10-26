@@ -51,6 +51,8 @@
         <Menu label="Media">
             <Program label="DeaDBeeF">deadbeef</Program>
             <Program label="VLC media player">/usr/bin/vlc</Program>
+            <Separator/>
+            <Program label="HandBrake">/usr/bin/ghb</Program>
         </Menu>
 
         <Separator/>
