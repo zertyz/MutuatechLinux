@@ -93,6 +93,7 @@
             <Program label="View Your Mind">/usr/bin/vym</Program>
             <Program label="TreeSheets">/usr/bin/treesheets</Program>
             <Separator/>
+            <Program label="xPDF">/usr/bin/xpdf</Program>
             <Program label="Acrobat PDF Reader">/usr/bin/acroread</Program>
             <Program label="dia">/usr/bin/dia</Program>
         </Menu>
