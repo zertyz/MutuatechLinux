@@ -2,12 +2,13 @@
 mdadm --create md0 --level=linear --raid-devices=4 /dev/sda2 /dev/sdd2 /dev/sdc2 /dev/sdb2
 mkfs.ext4 -b 4096 -E resize=$((96*(1024*1024*1024)/4096)),stride=32,stripe-width=32,packed_meta_blocks=1 -m 0 -O flex_bg /dev/md0
 tune2fs -L "BigPiArray" -c 3 -e remount-ro -o journal_data_writeback,nobarrier,discard /dev/md0
-mkfs.vfat -s 8 -n "BigPiBoot" /dev/mmcblk0p1
+mkfs.vfat -a -f 1 -h 0 -R 1 -s 8 -n "BigPiBoot" /dev/mmcblk0p1
 
 # packages
 kodi-eventclients-rbp-git kodi-rbp-git kodi-tools-texturepacker-rbp-git
 xorg xf86-video-fbturbo-git lxqt
 base-devel
+clang
 jre10-openjdk-headless
 gst-omx-rpi libbcm2835 omxplayer-git
 p7zip
@@ -38,9 +39,9 @@ hwclock -w
 
 # hacks on /boot/config.txt
 gpu_mem=16
-cma_lwm=16
-cma_hwm=32
-cma_offline_start=16
+#cma_lwm=16
+#cma_hwm=32
+#cma_offline_start=16
 
 # rPi2
 arm_freq=1100
@@ -102,7 +103,6 @@ UUID=4e3813bc-0d5c-4654-9418-e0296dd142f0       none            swap    pri=1   
 # systemd tweaks (/etc/systemd)
 coredump.conf: Storage=none
 journald.conf: Storage=none
-swap.conf:
 
 # startup script
 pkill -f systemd-udevd; pkill -f systemd-resolved; pkill -f systemd-networkd; sleep 3; dhcpcd -p eth0; sleep 5; pkill dhcpcd; date; pkill -f systemd-networkd; sleep 1; pkill -f systemd-udevd; swapoff -a; modprobe zram num_devices=5; ((z=0)); for d in /dev/mmcblk0p3 /dev/sda1 /dev/sdb1 /dev/sdc1 /dev/sdd1; do echo $d >/sys/block/zram${z}/backing_dev; echo lz4 >/sys/devices/virtual/block/zram${z}/comp_algorithm; echo 96m >/sys/devices/virtual/block/zram${z}/mem_limit; echo 512m >/sys/devices/virtual/block/zram${z}/disksize; mkswap /dev/zram${z}; swapon -p 15 /dev/zram${z}; ((z++)); done; swapon -s; systemctl stop lvm2-lvmetad; pkill -f dbus-daemon
