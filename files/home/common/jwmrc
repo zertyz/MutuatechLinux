@@ -53,6 +53,9 @@
             <Program label="VLC media player">/usr/bin/vlc</Program>
             <Separator/>
             <Program label="HandBrake">/usr/bin/ghb</Program>
+            <Separator/>
+            <Program label="Transmission">/usr/bin/transmission-gtk</Program>
+            <Program label="Transmission (remote)">/usr/bin/transmission-remote-gtk</Program>
         </Menu>
 
         <Separator/>
