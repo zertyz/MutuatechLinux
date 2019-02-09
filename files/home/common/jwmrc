@@ -107,7 +107,7 @@
 
         <Menu label="Imaging">
             <Program label="Geeqie">/usr/bin/geeqie</Program>
-            <Program label="GNU Image Manipulation Program">/usr/bin/gimp-2.8</Program>
+            <Program label="GNU Image Manipulation Program">/usr/bin/gimp</Program>
             <Program label="Inkscape">/usr/bin/inkscape</Program>
             <Program label="Scribus">/usr/bin/scribus</Program>
             <Separator/>
