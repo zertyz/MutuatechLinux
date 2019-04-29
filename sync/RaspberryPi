@@ -26,7 +26,7 @@
 mkfs.vfat -a -f 1 -h 0 -R 1 -s 8 -n "SmallPiBoot" /dev/mmcblk0p1
 
 # packages to be added after all conflicts gets solved
-git base-devel gcc clang cmake
+git base-devel gcc clang cmake boost
 gst-omx-rpi transmission-cli
 
 
