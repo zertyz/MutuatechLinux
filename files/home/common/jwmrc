@@ -205,8 +205,10 @@
     <!-- programs listed here will forcebly be undecorated. You can still access their window menu with Alt-F2 -->
     <Group>
         <Name>konsole</Name>
+        <Name>lxterminal</Name>
         <Name>subl3</Name>
         <Name>pcmanfm</Name>
+        <Name>Thunderbird</Name>
         <Option>noborder</Option>
         <Option>notitle</Option>
         <Option>aerosnap</Option>
@@ -304,15 +306,15 @@
     <!--    <Background type="solid">#111111</Background> -->
 
         <!-- desktop 1: only terminals -->
-        <Desktop></Desktop>
+	<Desktop><Background type="command">~/bin/enterDesktop 1</Background></Desktop>
         <!-- desktop 2: only chrome -->
-        <Desktop><Background type="command">pkill -cont chromium; pkill -stop firefox; pkill -stop thunderbird</Background></Desktop>
+	<Desktop><Background type="command">~/bin/enterDesktop 2</Background></Desktop>
         <!-- desktop 3: free -->
-        <Desktop><Background type="command">pkill -cont chromium; pkill -stop firefox; pkill -stop thunderbird</Background></Desktop>
+	<Desktop><Background type="command">~/bin/enterDesktop 3</Background></Desktop>
         <!-- desktop 4: free -->
-        <Desktop><Background type="command">pkill -cont chromium; pkill -stop firefox; pkill -stop thunderbird</Background></Desktop>
-        <!-- desktop 5: only firefox -->
-        <Desktop><Background type="command">pkill -stop chromium; pkill -cont firefox; pkill -cont thunderbird</Background></Desktop>
+	<Desktop><Background type="command">~/bin/enterDesktop 4</Background></Desktop>
+	<!-- desktop 5: only firefox / thunderbird -->
+	<Desktop><Background type="command">~/bin/enterDesktop 5</Background></Desktop>
 
     </Desktops>
 
@@ -370,7 +372,7 @@
     <!-- Toggle STOP/CONT with Shift-Alt-Ctrl-Z and "Swapout stopped processes to get 1G of available run" with Shift-Alt-Ctrl-X, which should be pressed twice if you want 2G and so on. Use with responsability. -->
     <!--<Key mask="ASC" key="z">exec:~/bin/toggleStopCont `xdotool getwindowfocus getwindowpid`</Key>    # dropped in favour of the next command, who requires a click -->
     <Key mask="ASC" key="z">exec:~/bin/toggleStopCont `xprop _NET_WM_PID | cut -d' ' -f3`</Key>
-    <Key mask="ASC" key="x">exec:dd if=/dev/zero of=/dev/null bs=$((1024*1024*1024)) count=1</Key>  <!-- test if it really uses 1G of ram with /usr/bin/time -f "real: %es\nuser: %Us\nsys : %Ss\nmaxR: %Mkb\nmaxT: %K\nMpgF: %F\nmpgF: %R\nswO : %W\ncswt: %c\n" dd if=/dev/zero of=/dev/null bs=$((1024*1024*1024)) count=1 -->
+    <Key mask="ASC" key="x">exec:dd if=/dev/zero of=/dev/null bs=$((1024*1024*1024)) iflag=fullblock count=3</Key>  <!-- test if it really uses 1G of ram with /usr/bin/time -f "real: %es\nuser: %Us\nsys : %Ss\nmaxR: %Mkb\nmaxT: %K\nMpgF: %F\nmpgF: %R\nswO : %W\ncswt: %c\n" dd if=/dev/zero of=/dev/null bs=$((1024*1024*1024)) iflag=fullblock count=3 -->
 
     <!-- Connects with your bluetooth device, provided that you are running pulseaudio and paired and trusted it with bluetoothctl commands. Pulseaudio is started in ~/.xinitrc  -->
     <!-- You also need to run 'pavucontrol', set bluetooth to A2DP and disable all other devices -->
