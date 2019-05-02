@@ -31,12 +31,24 @@ gst-omx-rpi transmission-cli
 
 
 # packages
+
+# kodi
 kodi-eventclients-rbp-git kodi-rbp-git kodi-tools-texturepacker-rbp-git
+
+# GUI
 xorg xf86-video-fbturbo-git lxqt
-base-devel
-clang
-jre10-openjdk-headless
+
+# pi graphics
 gst-omx-rpi libbcm2835 omxplayer-git
+fbset libcec-rpi mplayer fbida
+
+# local compilation
+base-devel clang
+
+# C++ runtime
+boost-libs
+
+# generic userland
 p7zip
 rsync
 mlocate
@@ -84,17 +96,57 @@ over_voltage=6
 over_voltage_sdram=6
 initial_turbo=60
 
-# services
+# create a new service -- contents of /etc/systemd/system/localstartup.service
+[Unit]
+Description=Local Startup Script
+ 
+[Service]
+ExecStart=/root/bin/localstartup
+ 
+[Install]
+WantedBy=multi-user.target
+
+# proceed by placing in /root/bin/localstartup
+	#! /bin/bash
+	# remember we are without systemd, so this script must manually do things like setting up the network, assembling mdadm arrays and mounting points
+
+	swapoff -a
+	modprobe zram num_devices=5
+	((z=0))
+	for d in /dev/mmcblk0p3 /dev/sda1 /dev/sdb1 /dev/sdc1 /dev/sdd1; do
+		echo $d   >/sys/block/zram${z}/backing_dev
+		echo lz4  >/sys/devices/virtual/block/zram${z}/comp_algorithm
+		echo 32m  >/sys/devices/virtual/block/zram${z}/mem_limit
+		echo 63m  >/sys/devices/virtual/block/zram${z}/disksize
+		mkswap /dev/zram${z}
+		swapon -p 15 /dev/zram${z}
+		((z++))
+	done
+	swapon -s
+
+	# network
+	sleep 3
+	ifconfig eth0 up
+	dhcpcd -p eth0
+	ifconfig -a
+	sleep 5
+	pkill dhcpcd
+
+	ntpdate br.pool.ntp.org
+
+	pkill agetty
+	pkill -f 'user'         # kills systemd --user process
+	pkill dbus-daemon
+
+	# mounting points
+	mount /boot
+	mdadm --assemble --scan
+	mount /data
+
+# systemd services enabling / disabling
+systemctl enable localstartup.service
 systemctl disable haveged
-systemctl mask serial-getty@ttyAMA0.service
-systemctl mask tmp.mount
-systemctl mask systemd-timesyncd.service
-systemctl mask systemd-logind.service
-systemctl mask systemd-journald.service
-systemctl mask getty@tty1.service
-systemctl mask lvm2-lvmetad
-systemctl mask lvm2-lvmetad.socket
---> cd to /etc/systemd/system, copy the sources and remove restart and watchdog from: systemd-resolved.service, systemd-networkd.service, systemd-udevd.service
+for service in lvm2-lvmetad lvm2-lvmetad.socket getty@tty1.service lvm2-lvmpolld.service lvm2-lvmpolld.socket lvm2-monitor.service lvm2-pvscan@.service serial-getty@ttyAMA0.service tmp.mount systemd-timesyncd.service systemd-logind.service systemd-journald.service systemd-udevd.service systemd-networkd dbus.service; do systemctl mask $service; done
 
 # /etc/sysctl.d/99-mutuatechTweaks.conf
 vm.swappiness = 10
@@ -106,32 +158,20 @@ vm.dirty_expire_centisecs    = 60000
 
 kernel.sysrq=1
 
-# Set maximum and minimum speed of raid resyncing operations
-dev.raid.speed_limit_max = 5000
-dev.raid.speed_limit_min = 1000
-
-
 
 # fstab
-
 /dev/mmcblk0p2                                  /               ext4    defaults,noatime,discard,barrier=0,commit=600   0       1
 
-UUID=def560f7-3932-41e7-ba6c-42094c903141       /data           ext4    defaults,noatime,barrier=0,commit=600   0       2
+UUID=def560f7-3932-41e7-ba6c-42094c903141       /data           ext4    defaults,noauto,noatime,barrier=0,commit=600   0       2
 
-/dev/mmcblk0p1                                  /boot           vfat    defaults        0       2
+/dev/mmcblk0p1                                  /boot           vfat    defaults,noauto        0       2
 
-UUID=380a6823-037e-4e18-9401-a9a872d50836       none            swap    pri=5        0       0
-UUID=b6774335-8ee3-48aa-b196-4fb78ef81b3d       none            swap    pri=4        0       0
-UUID=aac598cf-d4da-41b8-93a0-bc693640046b       none            swap    pri=3        0       0
-UUID=4981ad72-1325-486c-a921-e170978f15b6       none            swap    pri=2        0       0
-UUID=4e3813bc-0d5c-4654-9418-e0296dd142f0       none            swap    pri=1        0       0
+//192.168.1.1/disk1_1                           /mnt/Router32Gb cifs    async,file_mode=0777,dir_mode=0777,username=SalaShare,password=SalaShare,vers=1.0       0       0
+
 
 # systemd tweaks (/etc/systemd)
 coredump.conf: Storage=none
 journald.conf: Storage=none
-
-# startup script
-pkill -f systemd-udevd; pkill -f systemd-resolved; pkill -f systemd-networkd; sleep 3; dhcpcd -p eth0; sleep 5; pkill dhcpcd; date; pkill -f systemd-networkd; sleep 1; pkill -f systemd-udevd; swapoff -a; modprobe zram num_devices=5; ((z=0)); for d in /dev/mmcblk0p3 /dev/sda1 /dev/sdb1 /dev/sdc1 /dev/sdd1; do echo $d >/sys/block/zram${z}/backing_dev; echo lz4 >/sys/devices/virtual/block/zram${z}/comp_algorithm; echo 96m >/sys/devices/virtual/block/zram${z}/mem_limit; echo 512m >/sys/devices/virtual/block/zram${z}/disksize; mkswap /dev/zram${z}; swapon -p 15 /dev/zram${z}; ((z++)); done; swapon -s; systemctl stop lvm2-lvmetad; pkill -f dbus-daemon
 
 # root over ssh (only with keys):
 /etc/ssh/sshd_config: PermitRootLogin prohibit-password
