@@ -143,10 +143,20 @@ WantedBy=multi-user.target
 	mdadm --assemble --scan
 	mount /data
 
-# systemd services enabling / disabling
+# fstab
+/dev/mmcblk0p2                                  /               ext4    defaults,noatime,discard,barrier=0,commit=600   0       1
+
+UUID=def560f7-3932-41e7-ba6c-42094c903141       /data           ext4    defaults,noauto,noatime,barrier=0,commit=600   0       2
+
+/dev/mmcblk0p1                                  /boot           vfat    defaults,noauto        0       2
+
+//192.168.1.1/disk1_1                           /mnt/Router32Gb cifs    async,file_mode=0777,dir_mode=0777,username=SalaShare,password=SalaShare,vers=1.0       0       0
+
+
+# systemd services enabling / disabling -- WARNING: first edit your fstab and put all your non-root partitions as noauto, because they won't be able to mount at boot anymore and will render the machine unbootable if you fail to do this
 systemctl enable localstartup.service
 systemctl disable haveged
-for service in lvm2-lvmetad lvm2-lvmetad.socket getty@tty1.service lvm2-lvmpolld.service lvm2-lvmpolld.socket lvm2-monitor.service lvm2-pvscan@.service serial-getty@ttyAMA0.service tmp.mount systemd-timesyncd.service systemd-logind.service systemd-journald.service systemd-udevd.service systemd-networkd dbus.service; do systemctl mask $service; done
+for service in lvm2-lvmetad lvm2-lvmetad.socket getty@tty1.service lvm2-lvmpolld.service lvm2-lvmpolld.socket lvm2-monitor.service lvm2-pvscan@.service serial-getty@ttyAMA0.service tmp.mount systemd-timesyncd.service systemd-logind.service systemd-journald.service systemd-udevd.service systemd-networkd systemd-resolved dbus.service; do systemctl mask $service; done
 
 # /etc/sysctl.d/99-mutuatechTweaks.conf
 vm.swappiness = 10
@@ -157,16 +167,6 @@ vm.dirty_writeback_centisecs = 60000
 vm.dirty_expire_centisecs    = 60000
 
 kernel.sysrq=1
-
-
-# fstab
-/dev/mmcblk0p2                                  /               ext4    defaults,noatime,discard,barrier=0,commit=600   0       1
-
-UUID=def560f7-3932-41e7-ba6c-42094c903141       /data           ext4    defaults,noauto,noatime,barrier=0,commit=600   0       2
-
-/dev/mmcblk0p1                                  /boot           vfat    defaults,noauto        0       2
-
-//192.168.1.1/disk1_1                           /mnt/Router32Gb cifs    async,file_mode=0777,dir_mode=0777,username=SalaShare,password=SalaShare,vers=1.0       0       0
 
 
 # systemd tweaks (/etc/systemd)
