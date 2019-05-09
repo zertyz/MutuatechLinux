@@ -25,11 +25,6 @@
 # boot filesystem
 mkfs.vfat -a -f 1 -h 0 -R 1 -s 8 -n "SmallPiBoot" /dev/mmcblk0p1
 
-# packages to be added after all conflicts gets solved
-git base-devel gcc clang cmake boost
-gst-omx-rpi transmission-cli
-
-
 # packages
 
 # kodi
@@ -39,13 +34,13 @@ kodi-eventclients-rbp-git kodi-rbp-git kodi-tools-texturepacker-rbp-git
 xorg xf86-video-fbturbo-git lxqt
 
 # pi graphics
-gst-omx-rpi libbcm2835 omxplayer-git
-fbset libcec-rpi mplayer fbida
+gst-omx-rpi transmission-cli omxplayer-git libbcm2835
+fbset libcec-rpi mplayer fbida ttf-dejavu
 
 # local compilation
-base-devel clang
+git base-devel gcc clang cmake boost
 
-# C++ runtime
+# C++ runtime (not needed if set for local compilation)
 boost-libs
 
 # generic userland
@@ -107,41 +102,79 @@ ExecStart=/root/bin/localstartup
 WantedBy=multi-user.target
 
 # proceed by placing in /root/bin/localstartup
-	#! /bin/bash
-	# remember we are without systemd, so this script must manually do things like setting up the network, assembling mdadm arrays and mounting points
+##############################################
+#! /bin/bash
+# remember we are without systemd, so this script must manually do things like setting up the network, assembling mdadm arrays and mounting points
 
-	swapoff -a
-	modprobe zram num_devices=5
-	((z=0))
-	for d in /dev/mmcblk0p3 /dev/sda1 /dev/sdb1 /dev/sdc1 /dev/sdd1; do
-		echo $d   >/sys/block/zram${z}/backing_dev
-		echo lz4  >/sys/devices/virtual/block/zram${z}/comp_algorithm
-		echo 32m  >/sys/devices/virtual/block/zram${z}/mem_limit
-		echo 63m  >/sys/devices/virtual/block/zram${z}/disksize
-		mkswap /dev/zram${z}
-		swapon -p 15 /dev/zram${z}
-		((z++))
-	done
-	swapon -s
+# this Pi's storage:
+###################
+# Partitions
+#Device         Boot    Start      End  Sectors  Size Id Type
+#/dev/mmcblk0p1             1    65662    65662  32.1M  b W95 FAT32
+#/dev/mmcblk0p2         65663 15240318 15174656   7.2G  5 Extended
+#/dev/mmcblk0p4      15240320 15353855   113536  55.4M 82 Linux swap / Solaris
+#/dev/mmcblk0p5         65664  3859199  3793536   1.8G 8e Linux LVM
+#/dev/mmcblk0p6       3859328  7652863  3793536   1.8G 8e Linux LVM
+#/dev/mmcblk0p7       7652992 11446527  3793536   1.8G 8e Linux LVM
+#/dev/mmcblk0p8      11446656 15240191  3793536   1.8G 8e Linux LVM
+#/dev/sda1                128 3793663   3793536   1.8G 8e Linux LVM
+#/dev/sda4            3793664 3915775    122112  59.6M 82 Linux swap / Solaris
+#/dev/sdb1                128 3793663   3793536   1.8G 8e Linux LVM
+#/dev/sdb4            3793664 3907582    113919  55.6M 82 Linux swap / Solaris
+#/dev/sdc1                128 3793663   3793536   1.8G 8e Linux LVM
+#/dev/sdc2            3793664 7587199   3793536   1.8G 8e Linux LVM
+#/dev/sdc4            7587840 7831551    243712   119M 82 Linux swap / Solaris
+#/dev/sdd1                128 3793663   3793536   1.8G 8e Linux LVM
+#/dev/sdd2            3793664 7587199   3793536   1.8G 8e Linux LVM
+#/dev/sdd4            7587200 7884799    297600 145.3M 82 Linux swap / Solaris
+#
+# raid0 mdadm created with: (here, sdb is mmcblk0 and sdf is the fastest 4GiB pendrive)
+# mdadm --create /dev/md0 --verbose -c 64 --level=linear --raid-devices=5 /dev/sd{f1,b5,b6,b7,b8}
+# mdadm --create /dev/md1 --verbose -c 64 --level=linear --raid-devices=5 /dev/sd{e1,c1,d1,f2,d2}
+# mdadm --create /dev/md2 --verbose -c 64 --level=0 --raid-devices=2 /dev/md{0,1}
+# mkfs.ext4 -b 4096 -E resize=$((32*(1024*1024*1024)/4096)),stride=$((64/4)),stripe-width=$(((64/4)*2)),packed_meta_blocks=1 -m 0 -O flex_bg /dev/md2
+# tune2fs -L "BigPiArray" -c 3 -e remount-ro -o journal_data_writeback,nobarrier -E mount_opts=commit=600 /dev/md2
 
-	# network
-	sleep 3
-	ifconfig eth0 up
-	dhcpcd -p eth0
-	ifconfig -a
-	sleep 5
-	pkill dhcpcd
 
-	ntpdate br.pool.ntp.org
+# zram swap with round-robin across devices
+ZRAM_SWAP_PARTITIONS=(/dev/mmcblk0p4 /dev/sda4 /dev/sdb4 /dev/sdc4 /dev/sdd4)
+ZRAM_SWAP_DISK_SIZES=(     56768        61056    56959    121856    148800)       # sizes are in kilobytes
+ZRAM_SWAP_MEM_SIZES=(      28384        30528    28479     60928     74400)
 
-	pkill agetty
-	pkill -f 'user'         # kills systemd --user process
-	pkill dbus-daemon
+# activate zram swap using the above configurations
+swapoff -a
+modprobe zram num_devices=${#ZRAM_SWAP_PARTITIONS[@]}
+for z in `seq 0 $((${#ZRAM_SWAP_PARTITIONS[@]}-1))`; do
+        echo ${ZRAM_SWAP_PARTITIONS[$z]}   >/sys/block/zram${z}/backing_dev
+        echo lz4                           >/sys/devices/virtual/block/zram${z}/comp_algorithm
+        echo ${ZRAM_SWAP_MEM_SIZES[$z]}k   >/sys/devices/virtual/block/zram${z}/mem_limit
+        echo ${ZRAM_SWAP_DISK_SIZES[$z]}k  >/sys/devices/virtual/block/zram${z}/disksize
+        mkswap /dev/zram${z}
+        swapon -p 15 /dev/zram${z}
+done
+swapon -s
 
-	# mounting points
-	mount /boot
-	mdadm --assemble --scan
-	mount /data
+# network
+sleep 3
+ifconfig eth0 up
+dhcpcd -p eth0
+ifconfig -a
+sleep 5
+pkill dhcpcd
+
+ntpdate br.pool.ntp.org
+
+pkill agetty
+pkill -f 'user'         # kills systemd --user process
+pkill dbus-daemon
+
+# mounting points
+mount /boot
+
+# wallpaper
+(sleep 5; echo) | fbi -autozoom -fitwidth -noverbose -t 5 --vt 1 /root/wallpaper.jpg
+pkill fbi
+##############################################
 
 # fstab
 /dev/mmcblk0p2                                  /               ext4    defaults,noatime,discard,barrier=0,commit=600   0       1
@@ -150,10 +183,10 @@ UUID=def560f7-3932-41e7-ba6c-42094c903141       /data           ext4    defaults
 
 /dev/mmcblk0p1                                  /boot           vfat    defaults,noauto        0       2
 
-//192.168.1.1/disk1_1                           /mnt/Router32Gb cifs    async,file_mode=0777,dir_mode=0777,username=SalaShare,password=SalaShare,vers=1.0       0       0
+//192.168.1.1/disk1_1                           /mnt/Router32Gb cifs    async,noauto,file_mode=0777,dir_mode=0777,username=SalaShare,password=SalaShare,vers=1.0       0       0
 
 
-# systemd services enabling / disabling -- WARNING: first edit your fstab and put all your non-root partitions as noauto, because they won't be able to mount at boot anymore and will render the machine unbootable if you fail to do this
+# systemd services enabling / disabling -- WARNING: first edit your fstab and put all your non-root partitions as noauto, because they won't be able to mount at boot anymore and systemd agressivelly pauses boot and drops into a system shell in these situations
 systemctl enable localstartup.service
 systemctl disable haveged
 for service in lvm2-lvmetad lvm2-lvmetad.socket getty@tty1.service lvm2-lvmpolld.service lvm2-lvmpolld.socket lvm2-monitor.service lvm2-pvscan@.service serial-getty@ttyAMA0.service tmp.mount systemd-timesyncd.service systemd-logind.service systemd-journald.service systemd-udevd.service systemd-networkd systemd-resolved dbus.service; do systemctl mask $service; done
