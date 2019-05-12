@@ -3,3 +3,23 @@ find /tmp/oldroot/var/lib/pacman/local/ -name desc -exec pcregrep -L -M '%REASON
 
 echo "## From Main Repositories:"; for p in `. ./SyncPackages | grep 'arch: ' | sed 's|arch: ||'`; do if grep $p /tmp/installed &>/dev/null; then true; else echo "$p NOT INSTALLED"; fi; done; echo "## From AUR:"; for p in `. ./SyncPackages | grep 'AUR: ' | sed 's|AUR: ||'`; do if grep $p /tmp/installed &>/dev/null; then true; else echo "$p NOT INSTALLED"; fi; done; echo "## Not listed in SyncPackages:"; for p in `cat /tmp/installed`; do if . ./SyncPackages | grep $p &>/dev/null; then true; else echo "$p NOT LISTED"; fi; done
 
+
+
+--
+
+Building the readCache for overlayfs:
+
+	for ~2GiB card:
+
+		 pacman -Q | grep ttf | sed 's| .*||' >/tmp/packages; echo -en "thunderbird\ngoogle-chrome\nsmartgit\njdk8-openjdk\ngimp\njwm\nsublime-text-dev\nlibreoffice-fresh\nvisual-studio-code-bin\nkonsole\nmupdf\nxpdf\nfreeplane\ninkscape\nscribus\ngeeqie\ngkrellm\ntransmission-gtk\ntransmission-remote-gtk\n" >>/tmp/packages; for depth in {1..8}; do for p in `cat /tmp/packages`; do pacman -Qi "$p" | awk -F'[:<=>]' '/^Depends/ {print $2}' | xargs -n1 | sort -u; done | tee -a /tmp/packages; sort -u /tmp/packages >/tmp/packages2; mv /tmp/packages2 /tmp/packages; wc -l /tmp/packages; done
+
+		 for p in `cat /tmp/packages`; do pacman -Ql "$p" | sed 's|[^ ]* ||'; done | grep -E '^/usr/bin/.|\.so|^/opt/.*/.|\.ttf|\.odf' | sudo tar -c -T -  | sudo tar -xv --keep-newer-files -C /mnt/readCache
+
+
+	fstab:
+		UUID=06b03dc0-d318-4b1d-80a2-fb96cba32ecf       /mnt/readCache  ext4            rw,noatime,nobarrier,commit=600 0 2
+
+		overlay                                         /usr            overlay         x-systemd.requires=/mnt/readCache,lowerdir=/mnt/readCache/usr:/usr 0 0
+		overlay                                         /opt            overlay         x-systemd.requires=/mnt/readCache,lowerdir=/mnt/readCache/opt:/opt 0 0
+
+	remember to unmount /usr and /opt before doing a system update, and re-executing the copy process
