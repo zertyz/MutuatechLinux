@@ -19,7 +19,7 @@
 # mdadm --create /dev/md0 --verbose -c 32 --level=0 --raid-devices=$n /dev/mmcblk0p2 /dev/sda2 /dev/mmcblk0p3 /dev/sdb2  # where '32' is the common denominator between all low level media block sizes and '$n' is the number of devices on the array (4, in our case). Note to find the low level media block size one might find the following command usefull -- note that it will destroy all data on the device: 'dd if=/dev/zero of=/dev/sdX bs=$((32*1024)) oflag=sync count=$((1024*64)) status=progress' -- this command will write ~2GiB on the device using direct IO. Mess around with the number 32 (on the bs= parameter) to find the block size, in kilobytes, your device uses internally. The logic behind it is: solid state media can only write full blocks. If you attempt a number which is too low, say 8, each block will be written 4 times in order to fill the device with zeroes. Thus, the correct block size will be the smallest one (power of 2) which will produce the faster write throughput. Note that if one of the devices have a block size of 32k and another, say 128k, your RAID0 array should use a block size of 128k.
 
 # mkfs.ext4 -b 4096 -E resize=$((32*(1024*1024*1024)/4096)),stride=$((32/4)),stripe-width=$(((32/4)*n)),packed_meta_blocks=1 -m 0 -O flex_bg /dev/md0
-# tune2fs -L "SmallPiArray" -c 3 -e remount-ro -o journal_data_writeback,nobarrier /dev/md0
+# tune2fs -L "64PiArray" -c 3 -e remount-ro -o journal_data_writeback,nobarrier -E mount_opts=commit=600 /dev/md0
 # don't forget to enable 'mdadm_udev' at initcpio and use UUID in cmdline.txt to reference the meadm rootfs -- the 'HOOKS' line on /etc/mkinitcpio.conf should be something like 'HOOKS=(base udev autodetect modconf block mdadm_udev filesystems keyboard fsck)'
 
 # boot filesystem
@@ -189,7 +189,7 @@ UUID=def560f7-3932-41e7-ba6c-42094c903141       /data           ext4    defaults
 # systemd services enabling / disabling -- WARNING: first edit your fstab and put all your non-root partitions as noauto, because they won't be able to mount at boot anymore and systemd agressivelly pauses boot and drops into a system shell in these situations
 systemctl enable localstartup.service
 systemctl disable haveged
-for service in lvm2-lvmetad lvm2-lvmetad.socket getty@tty1.service lvm2-lvmpolld.service lvm2-lvmpolld.socket lvm2-monitor.service lvm2-pvscan@.service serial-getty@ttyAMA0.service tmp.mount systemd-timesyncd.service systemd-logind.service systemd-journald.service systemd-udevd.service systemd-networkd systemd-resolved dbus.service; do systemctl mask $service; done
+for service in lvm2-lvmetad lvm2-lvmetad.socket lvm2-lvmpolld.service lvm2-lvmpolld.socket lvm2-monitor.service lvm2-pvscan@.service serial-getty@ttyAMA0.service getty@tty1.service getty@.service tmp.mount systemd-timesyncd.service systemd-logind.service systemd-journald.service systemd-udevd.service systemd-networkd systemd-resolved dbus.service; do systemctl mask $service; done
 
 # /etc/sysctl.d/99-mutuatechTweaks.conf
 vm.swappiness = 10
