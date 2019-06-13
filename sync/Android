@@ -1,0 +1,6 @@
+# 1) Prevent the following processes from running on the background:
+# (after "adb shell" and "su -", you may obtain a list of packages by running "ps -A")
+    for app in com.google.android.youtube com.android.email com.android.chrome com.sygic.aura com.google.android.keep com.google.android.apps.translate ; do cmd appops set "$app" RUN_IN_BACKGROUND ignore; done
+# you may re-enable them with 'cmd appops set <package_name> RUN_IN_BACKGROUND allow'
+
+# 2) Consider disabling background processes in the development options
