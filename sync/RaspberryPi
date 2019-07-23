@@ -28,7 +28,8 @@ mkfs.vfat -a -f 1 -h 0 -R 1 -s 8 -n "SmallPiBoot" /dev/mmcblk0p1
 # packages
 
 # kodi
-kodi-eventclients-rbp-git kodi-rbp-git kodi-tools-texturepacker-rbp-git
+kodi-eventclients-rbp kodi-rbp kodi-tools-texturepacker-rbp kodi-rbp-dev kodi-platform
+# and, from AUR, kodi-addon-inputstream-adaptive kodi-addon-pvr-iptvsimple
 
 # GUI
 xorg xf86-video-fbturbo-git lxqt
@@ -60,7 +61,7 @@ xterm
 time
 zip
 
-hostnamectl set-hostname BigPi
+hostnamectl set-hostname SmallPi
 
 echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
@@ -155,25 +156,52 @@ done
 swapon -s
 
 # network
+#########
 sleep 3
+
+# wired
 ifconfig eth0 up
 dhcpcd -p eth0
-ifconfig -a
-sleep 5
+
+# wireless (configure if present)
+if ifconfig wlan0 up; then
+		# configure a password with wpa_passphrase <ESSID> >/etc/wpa_supplicant/wpa_supplicant.conf
+        wpa_supplicant -B -c /etc/wpa_supplicant/wpa_supplicant.conf -i wlan0
+        dhcpcd -p wlan0
+fi
+
+# kill dhcpcd -- note that you'd better fix the IP address on your router
+sleep 6
 pkill dhcpcd
 
 ntpdate br.pool.ntp.org
-
-pkill agetty
-pkill -f 'user'         # kills systemd --user process
-pkill dbus-daemon
 
 # mounting points
 mount /boot
 
 # wallpaper
-(sleep 5; echo) | fbi -autozoom -fitwidth -noverbose -t 5 --vt 1 /root/wallpaper.jpg
+(sleep 6; echo; sleep 2) | fbi -autozoom -fitwidth -noverbose -t 5 --vt 1 /root/wallpaper.jpg
 pkill fbi
+
+# systemd handling...
+#####################
+# systemd-udevd is allowed to start on boot so the present hardware is recognized
+
+sleep 30
+
+# stop/disable (and prevent from restarting) systemd services no longer needed after booting up
+for s in systemd-udevd.service; do systemctl mask $s; systemctl stop $s; done
+
+sleep 15
+
+# allow these important systemd services to execute on the next startup
+# (they recognize usb devices that needs configuration, like keyboard, mouse, wifi, ...)
+for s in systemd-udevd.service; do systemctl unmask $s; done	# consider dbus.service systemd-logind.service systemd-udevd.service systemd-journald.service getty@tty1.service
+
+# kill remaining unneeded systemd processes
+pkill agetty
+pkill -f 'user'         # kills systemd --user process
+pkill dbus-daemon
 ##############################################
 
 # fstab
@@ -189,13 +217,13 @@ UUID=def560f7-3932-41e7-ba6c-42094c903141       /data           ext4    defaults
 # systemd services enabling / disabling -- WARNING: first edit your fstab and put all your non-root partitions as noauto, because they won't be able to mount at boot anymore and systemd agressivelly pauses boot and drops into a system shell in these situations
 systemctl enable localstartup.service
 systemctl disable haveged
-for service in lvm2-lvmetad lvm2-lvmetad.socket lvm2-lvmpolld.service lvm2-lvmpolld.socket lvm2-monitor.service lvm2-pvscan@.service serial-getty@ttyAMA0.service getty@tty1.service getty@.service tmp.mount systemd-timesyncd.service systemd-logind.service systemd-journald.service systemd-udevd.service systemd-networkd systemd-resolved dbus.service; do systemctl mask $service; done
+for service in lvm2-lvmetad lvm2-lvmetad.socket lvm2-lvmpolld.service lvm2-lvmpolld.socket lvm2-monitor.service lvm2-pvscan@.service serial-getty@ttyAMA0.service getty@tty1.service getty@.service tmp.mount systemd-timesyncd.service systemd-logind.service systemd-journald.service -systemd-udevd.service systemd-networkd systemd-resolved dbus.service; do systemctl mask $service; done
 
 # /etc/sysctl.d/99-mutuatechTweaks.conf
-vm.swappiness = 10
-vm.vfs_cache_pressure = 10
-vm.dirty_ratio = 80
-vm.dirty_background_ratio = 80
+vm.swappiness = 50
+vm.vfs_cache_pressure = 100
+vm.dirty_ratio = 90
+vm.dirty_background_ratio = 95
 vm.dirty_writeback_centisecs = 60000
 vm.dirty_expire_centisecs    = 60000
 
