@@ -29,14 +29,17 @@ mkfs.vfat -a -f 1 -h 0 -R 1 -s 8 -n "SmallPiBoot" /dev/mmcblk0p1
 
 # kodi
 kodi-eventclients-rbp kodi-rbp kodi-tools-texturepacker-rbp kodi-rbp-dev kodi-platform
+python2-pycryptodomex # for netflix
 # and, from AUR, kodi-addon-inputstream-adaptive kodi-addon-pvr-iptvsimple
 
 # GUI
 xorg xf86-video-fbturbo-git lxqt
 
 # pi graphics
-gst-omx-rpi transmission-cli omxplayer-git libbcm2835
+gst-omx-rpi transmission-cli omxplayer-git
 fbset libcec-rpi mplayer fbida ttf-dejavu
+# from aur, jfbview -- framebuffer pdf and image viewer (really fast)
+# from git, sfml-pi (accelerated 2d standalone graphics, see below)
 
 # local compilation
 git base-devel gcc clang cmake boost
@@ -60,6 +63,14 @@ wpa_supplicant
 xterm
 time
 zip
+
+## building AUR packages
+for g in 'kodi-addon-inputstream-adaptive' 'kodi-addon-pvr-iptvsimple' 'jfbview'; do git clone "https://aur.archlinux.org/${g}.git"; chown -fR kodi:kodi "$g"; cd "$g"; sudo -u kodi makepkg -s; mv *.pkg.tar* ..; cd ..; done
+
+## building git packages
+SFML-Pi: git clone; https://github.com/mickelson/sfml-pi.git; cd sfml-pi; mkdir Release; cd Release; cmake -DSFML_RPI=1 -DEGL_INCLUDE_DIR=/opt/vc/include -DEGL_LIBRARY=/opt/vc/lib/libbrcmEGL.so -DGLES_INCLUDE_DIR=/opt/vc/include -DGLES_LIBRARY=/opt/vc/lib/libbrcmGLESv2.so -DCMAKE_BUILD_TYPE=Release ..; cmake --build .
+
+## back to system setup
 
 hostnamectl set-hostname SmallPi
 
