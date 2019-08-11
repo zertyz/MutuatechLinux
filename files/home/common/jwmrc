@@ -38,7 +38,8 @@
             <Program label="Thunderbird">thunderbird</Program>
             <Separator/>
             <Program label="FranZ">franz-bin</Program>
-            <Program label="Skype">/usr/bin/apulse32 /usr/bin/skype</Program>
+	    <!--<Program label="Skype">/usr/bin/apulse32 /usr/bin/skype</Program>-->
+            <Program label="Skype">/usr/bin/skypeforlinux</Program>
             <Separator/>
             <Program label="Wireshark">wireshark-gtk</Program>
             <Separator/>

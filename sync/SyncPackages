@@ -320,8 +320,7 @@ NETWORKING=(
     _icaclient  # citrix
 
     # conferencing
-    _skype
-    _lib32-apulse
+    _skypeforlinux
     _zoom
 
 )
