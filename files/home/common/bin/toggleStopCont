@@ -1,9 +1,15 @@
 #! /bin/bash
 ############
-# toogleStopCont: sends the stop or cont signal to all processes whose name match the argument
-# arguments: <process id>
+# toggleStopCont: sends the stop or cont signal to all processes whose name match the selected one
+# arguments: <process id>, optional. If it is not given, the user will select a window with the mouse
 
 processId=$1
+
+# if no parameter is given, we'll interactively ask the user for one, using the mouse
+if [ -z "$processId" ]; then
+	processId=`xprop _NET_WM_PID | cut -d' ' -f3`
+fi
+
 executableName=`ls -l /proc/$processId/exe | sed 's|.*exe \-> ||' | sed 's|.*/||'`
 
 # the following test command shows how to obtain the procress name 'pname', which may be used when invoking this script when a shortcut key is pressed on a window manager:
