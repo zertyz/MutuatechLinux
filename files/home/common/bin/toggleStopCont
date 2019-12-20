@@ -22,9 +22,18 @@ else
 	signal="stop"
 fi
 
-# for java applications, we'll signal just the pid; for the others, we'll signal the whole process family
-if [ "${executableName}" == "java" ]; then
-	kill -s${signal} $processId
-else
-	pkill -${signal} -f ${executableName}
-fi
+## for java applications, we'll signal just the pid; for the others, we'll signal the whole process family
+#if [ "${executableName}" == "java" ]; then
+#	kill -s${signal} $processId
+#else
+#	# visual studio code should have their full name taken into account (just 'code' is too broad)
+#	if [ "${executableName}" == "code" ]; then
+#		executableName="visual-studio-code";
+#	fi;
+#	pkill -${signal} -f ${executableName}
+#fi
+
+# signal the process and all child processes
+for pid in `pstree -T -p $processId | sed 's|[^(]*(\([^)]*\))|\1\n|g'`; do
+	kill -s${signal} $pid
+done
