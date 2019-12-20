@@ -17,14 +17,14 @@ executableName=`ls -l /proc/$processId/exe | sed 's|.*exe \-> ||' | sed 's|.*/||
 # pid=`xdotool getwindowfocus getwindowpid`; pname=`ls -l /proc/$pid/exe | sed 's|.*exe \-> ||' | sed 's|.*/||'`; echo "$pname: $pid"; ps aux | grep -i $pname; pgrep -f $pname | wc -l
 
 if grep stopped /proc/$processId/status; then
-	signal="-cont"
+	signal="cont"
 else
-	signal="-stop"
+	signal="stop"
 fi
 
 # for java applications, we'll signal just the pid; for the others, we'll signal the whole process family
 if [ "${executableName}" == "java" ]; then
-	kill ${signal} $processId
+	kill -s${signal} $processId
 else
-	pkill ${signal} -f ${executableName}
+	pkill -${signal} -f ${executableName}
 fi

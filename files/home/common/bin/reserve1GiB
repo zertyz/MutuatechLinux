@@ -4,5 +4,5 @@
 # KDE: go to settings->shortcuts->custom shortcuts and add this script using the global ctrl-shift-alt-x key
 # NOTE: this script is better run after STOPping some processes (the ones to be swapped out) with the command ~/bin/toggleStopCont
 
-(echo 0; dd if=/dev/zero of=/dev/null bs=$((1024*1024*1024)) iflag=fullblock count=3; echo 100) |
+(echo 0; sleep 0.2; echo 1; sleep 0.2; echo 2; sleep 0.2; dd if=/dev/zero of=/dev/null bs=$((1024*1024*1024)) iflag=fullblock count=3; echo 100) |
 	zenity --progress --text="Reserving 1 GiB of RESident memory (swapping out as necessary)" --pulsate --auto-close --auto-kill --time-remaining
