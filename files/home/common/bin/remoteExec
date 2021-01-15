@@ -1,0 +1,7 @@
+#! /bin/bash
+
+REMOTE_IP=192.168.1.37
+LOCAL_IP=192.168.1.70
+
+xhost +
+ssh -f "${REMOTE_IP}" "export DISPLAY=${LOCAL_IP}:0.0; nohup $@ &>/dev/null &"

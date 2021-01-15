@@ -4,143 +4,221 @@
     <StartupCommand>feh --bg-scale ~/Backgrounds/flame.png</StartupCommand>
     <StartupCommand>gkrellm</StartupCommand>
 
+    <!-- TODO:
+
+        1) Speedcrunch calculator should get its own shortcut: 4+C
+        2) Deadbeef should be listed on the audioing as well, like VLC is listed; Add: Google Earth (Amusements), Astah (dev), TuxGuitar (audioing), 
+        3) Update the desktopcache to add mpv, vlc speedcrunch, mupdf, xpdf, freeplane, lyx & possibly others from command line & menu
+        4) Idem, deleting intellij idea & clion files which would prevent them from starting
+        5) Doing (4) only makes sense if we add macro plays to the desktop starts. Doable?
+
+    -->
+
     <!-- The root menu.
-         Build the list with for f in /usr/share/applications/*.desktop; do label=`grep "Name=" "$f" | head -n 1 | sed 's|.*Name=\(.*\)|\1|'`; cmd=`grep "Exec=" "$f" | head -n 1 | sed 's|Exec=\([^ ]*\).*|\1|'`; echo "<Program label=\"${label}\">${cmd}</Program>"; done
+         Build the list with: 
+         for f in /usr/share/applications/*.desktop; do pkgName=`pacman -Qqo "$f"`; label=`grep '^Name=' "$f" | head -n 1 | sed 's|.*Name *= *\(.*\)|\1|'`; cmd=`grep "Exec=" "$f" | head -n 1 | sed 's|.*Exec *= *\([^ ]*\).*|\1|'`; iconName=`grep '^Icon' "$f" | head -n 1 | sed 's|Icon *= *\(.*\)|.*/.*\1\\\.[^/]+|'`; iconFile="`(pacman -Qql $pkgName | grep -E "$iconName" | grep -E 'icon|pixmaps' | grep 'svg' || pacman -Qql $pkgName | grep -E "$iconName" | grep -E 'icon|pixmaps' | grep '16x16' | grep 'png' || pacman -Qql $pkgName | grep -E "$iconName" | grep -E 'icon|pixmaps' | grep 'png' || pacman -Qql $pkgName | grep -E "$iconName" | grep -E 'icon|pixmaps' | grep 'xpm' || echo '') | head -n 1`"; echo "            <Program label=\"${label}\" icon=\"${iconFile}\">${cmd}</Program>" '<!-''-' $pkgName '-''->'; done | sort -u >/tmp/app.list
+         function s() { echo "            <Separator/>"; }; function p() { for n in "$@"; do grep -i "\"$n" /tmp/app.list || echo "            <Program label=\"$n\" icon=\"\">$n</Program>"; done; }; function pr() { p $@ | sed 's|" icon=| (root)" icon=|g' | sed 's|">|">sudo |g'; }; function m() { echo "        <Menu label=\"$1\">"; }; function c() { echo -en "        </Menu>\n\n        <Separator/>\n\n"; }
+         m Accessories;p lxterminal pcmanfm xarchiver l3afpad SpeedCrunch;s;p flameshot kazam;s;p xPDF Calibre;s;pr gdmap xdiskusage;s;p FreeFileSync;c
+         m Network;p google\ chrome chromium firefox opera;s;p thunderbird;s;p zoom skype;s;p transmission\ remote;s;p wireshark;s;p jmeter;c
+         m Media;p deadbeef vlc;s;p handbrake;s;p transmission\ remote;c
+         m Development;p intellij clion eclipse 'Visual Studio Code' 'Apache Netbeans' sublime editix;s;p rstudio android\ studio jadx;s;p smartgit;s;p proguardgui jmeter SoapUi;s;p ddd;s;p LibrePCB;c
+         m Office; p LyX LibreOffice Ganttproject ProjectLibre Astah;s;p FreePlane 'View Your Mind' TreeSheets yEd Gephi dia ModelIO FreeMind;s;p xPDF;c
+         m Imaging;p 'GNU Image Manipulation Program' Inkscape Scribus Krita;s;p Geeqie Darktable Fotoxx RawTherapee;s;p Blender;s;p QCad OpenSCad FreeCad 'Sweet Home 3D';c
+         m Audioing;p audacity bitwig ardour;c
+         m Videoing;p OpenShot;s;p HandBrake;s;p vlc;c
+         m 'Cross OS';p 'Oracle VM Virtualbox' 'PlayOnLinux';s;p GenyMotion Heimdall;s;p 'TigerVNC' 'RDesktop' 'Citrix';c
+         m 'Database';p DBeaver pgAdmin;s;p 'Oracle SQL Database Modeling' 'Oracle SQL Developer';c
+         m 'Security';p HashCat Ghidra Wireshark;s;p proguardgui;c
+         m 'Amusements';p celestia stellarium;c
+         m 'Games';p blinken bomber bovo gnugo granatier kajongg knights kubrick palapeli picmi;c
+         m 'System';p gkrellm;s;pr gparted gsmartcontrol i7z-gui;s;p tlpui;c
      -->
     <RootMenu onroot="3">
 
         <Menu label="Accessories">
-            <Program label="Terminal">lxterminal</Program>
-            <Program label="File Manager">pcmanfm</Program>
-            <Program label="Xarchiver">xarchiver</Program>
-            <Program label="Editor">subl3</Program>
+            <Program label="LXTerminal" icon="/usr/share/icons/hicolor/128x128/apps/lxterminal.png">lxterminal</Program> <!-- lxterminal -->
+            <Program label="pcmanfm" icon="/usr/share/icons/hicolor/22x22/apps/fsview.png">pcmanfm</Program>
+            <Program label="Xarchiver" icon="/usr/share/icons/hicolor/scalable/apps/xarchiver.svg">xarchiver</Program> <!-- xarchiver -->
+            <Program label="L3afpad" icon="/usr/share/icons/hicolor/16x16/apps/l3afpad.png">l3afpad</Program> <!-- l3afpad -->
+            <Program label="SpeedCrunch" icon="/usr/share/pixmaps/speedcrunch.png">speedcrunch</Program> <!-- speedcrunch -->
             <Separator/>
-            <Program label="GDMap (root)">sudo /usr/bin/gdmap</Program>
-            <Program label="XDiskUsage (root)">sudo /usr/bin/xdiskusage</Program>
+            <Program label="Flameshot" icon="/usr/share/icons/hicolor/scalable/apps/org.flameshot.Flameshot.svg">flameshot</Program> <!-- flameshot -->
+            <Program label="Kazam" icon="/usr/share/icons/hicolor/16x16/apps/kazam.png">kazam</Program> <!-- kazam -->
+            <Separator/>
+            <Program label="Xpdf" icon="/usr/share/pixmaps/xpdf.svg">xpdf</Program> <!-- xpdf -->
+            <Program label="Calibre" icon="/usr/share/icons/hicolor/16x16/apps/calibre-gui.png">calibre</Program> <!-- calibre -->
+            <Separator/>
+            <Program label="gdmap (root)" icon="/usr/share/icons/hicolor/22x22/actions/newfunction.png">sudo gdmap</Program>
+            <Program label="xdiskusage (root)" icon="/usr/share/icons/hicolor/22x22/actions/vcs-diff-cvs-cervisia.png">sudo xdiskusage</Program>
+            <Separator/>
+            <Program label="FreeFileSync" icon="/usr/share/pixmaps/FreeFileSync.png">FreeFileSync</Program> <!-- freefilesync -->
         </Menu>
 
         <Separator/>
 
         <Menu label="Network">
-            <Program label="Chrome">google-chrome-stable</Program>
-            <Program label="Chromium">chromium</Program>
-            <Program label="Firefox">firefox</Program>
-            <Program label="Firefox Developer">/opt/firefox-developer/firefox</Program>
-            <Program label="Vivaldi">vivaldi-stable</Program>
-            <Program label="Brave">brave</Program>
-            <Program label="Opera">opera --new-window</Program>
-            <Program label="Midori">midori</Program>
-            <Program label="QupZilla">qupzilla</Program>
-            <Program label="SeaMonkey">seamonkey</Program>
-            <Program label="Surf">surf http://mutuatech.com</Program>
-            <Program label="NetSurf">netsurf</Program>
+            <Program label="Google Chrome" icon="/usr/share/icons/hicolor/16x16/apps/google-chrome.png">/usr/bin/google-chrome-stable</Program> <!-- google-chrome -->
+            <Program label="Chromium" icon="/usr/share/icons/hicolor/16x16/apps/chromium.png">/usr/bin/chromium</Program> <!-- chromium -->
+            <Program label="Firefox" icon="/usr/share/icons/hicolor/16x16/apps/firefox.png">/usr/lib/firefox/firefox</Program> <!-- firefox -->
+            <Program label="Opera" icon="/usr/share/icons/hicolor/16x16/apps/opera.png">opera</Program> <!-- opera -->
             <Separator/>
-            <Program label="Thunderbird">thunderbird</Program>
+            <Program label="Thunderbird" icon="/usr/share/icons/hicolor/16x16/apps/thunderbird.png">/usr/lib/thunderbird/thunderbird</Program> <!-- thunderbird -->
             <Separator/>
-            <Program label="FranZ">franz-bin</Program>
-	    <!--<Program label="Skype">/usr/bin/apulse32 /usr/bin/skype</Program>-->
-            <Program label="Skype">/usr/bin/skypeforlinux</Program>
+            <Program label="Zoom" icon="/usr/share/pixmaps/Zoom.png">/usr/bin/zoom</Program> <!-- zoom -->
+            <Program label="Skype" icon="/usr/share/icons/hicolor/16x16/apps/skypeforlinux.png">/usr/bin/skypeforlinux</Program> <!-- skypeforlinux-stable-bin -->
             <Separator/>
-            <Program label="Wireshark">wireshark-gtk</Program>
+            <Program label="Transmission Remote" icon="/usr/share/icons/hicolor/scalable/apps/transmission-remote-gtk.svg">transmission-remote-gtk</Program> <!-- transmission-remote-gtk -->
+            <Separator/>
+            <Program label="Wireshark" icon="/usr/share/icons/hicolor/scalable/apps/wireshark.svg">wireshark</Program> <!-- wireshark-qt -->
+            <Separator/>
+            <Program label="JMeter" icon="/opt/jmeter/docs/images/mstile-144x144.png">/usr/bin/jmeter</Program> <!-- jmeter -->
             <Separator/>
             <!-- this many spaces are to prevent the error message from appearing on the window's title bar, as it shows the full command being executed -->
-            <Program label="wifi-menu (root)">lxterminal -l -e 'sudo wifi-menu                                                                                                                                                                || (echo -en "\n####\n\nError running wifi-menu. Maybe you do not have a wireless adapter?"; sleep 5)'</Program>
+            <Program label="wifi-menu (root)" icon="/usr/share/icons/hicolor/22x22/apps/ModemManager.png">lxterminal -l -e 'sudo wifi-menu                                                                                                                                                                || (echo -en "\n####\n\nError running wifi-menu. Maybe you do not have a wireless adapter?"; sleep 5)'</Program>
         </Menu>
+
 
         <Separator/>
 
         <Menu label="Media">
-            <Program label="DeaDBeeF">deadbeef</Program>
-            <Program label="VLC media player">/usr/bin/vlc</Program>
+            <Program label="DeaDBeeF" icon="/usr/share/icons/hicolor/scalable/apps/deadbeef.svg">deadbeef</Program> <!-- deadbeef -->
+            <Program label="VLC media player" icon="/usr/share/icons/hicolor/16x16/apps/vlc.png">/usr/bin/vlc</Program> <!-- vlc -->
             <Separator/>
-            <Program label="HandBrake">/usr/bin/ghb</Program>
+            <Program label="HandBrake" icon="/usr/share/icons/hicolor/scalable/apps/fr.handbrake.ghb.svg">ghb</Program> <!-- handbrake -->
             <Separator/>
-            <Program label="Transmission">/usr/bin/transmission-gtk</Program>
-            <Program label="Transmission (remote)">/usr/bin/transmission-remote-gtk</Program>
+            <Program label="Transmission Remote" icon="/usr/share/icons/hicolor/scalable/apps/transmission-remote-gtk.svg">transmission-remote-gtk</Program> <!-- transmission-remote-gtk -->
         </Menu>
 
         <Separator/>
 
         <Menu label="Development">
-            <Program label="IntelliJ IDEA Ultimate Edition">~/bin/intellij-idea-ultimate-edition || /usr/bin/intellij-idea-ultimate-edition</Program>
-            <Program label="CLion">~/bin/clion || /usr/bin/clion</Program>
-            <Program label="Eclipse (JEE)">~/bin/eclipse-jee || /usr/bin/eclipse</Program>
-            <Program label="Eclipse (C++)">~/bin/eclipse-cpp || /opt/eclipse/eclipse</Program>
-            <Program label="Visual Studio Code">~/bin/code || /usr/bin/code</Program>
-            <Program label="NetBeans">~/bin/netbeans || /usr/bin/netbeans</Program>
-            <Program label="Sublime Text">subl3</Program>
-            <Program label="Atom">/usr/bin/atom</Program>
-            <Program label="EditiX XML">editix</Program>
+            <Program label="IntelliJ IDEA Ultimate" icon="/usr/share/pixmaps/intellij-idea-ultimate-edition.png">intellij-idea-ultimate-edition</Program> <!-- intellij-idea-ultimate-edition -->
+            <Program label="CLion" icon="/usr/share/pixmaps/clion.svg">"/usr/bin/clion"</Program> <!-- clion -->
+            <Program label="Eclipse" icon="/usr/share/icons/hicolor/16x16/apps/eclipse.png">eclipse</Program> <!-- eclipse-rust -->
+            <Program label="Visual Studio Code" icon="/usr/share/icons/visual-studio-code.png">/opt/visual-studio-code/code</Program> <!-- visual-studio-code-bin -->
+            <Program label="Apache NetBeans" icon="/usr/share/pixmaps/netbeans.png">netbeans</Program> <!-- netbeans -->
+            <Program label="Sublime Text 3" icon="/usr/share/icons/hicolor/16x16/apps/sublime-text.png">subl3</Program> <!-- sublime-text-dev -->
+            <Program label="EditiX XML" icon="/usr/share/icons/hicolor/22x22/actions/freehand.png">editix</Program>
             <Separator/>
-            <Program label="RStudio">/usr/bin/rstudio-bin</Program>
-            <Program label="Android Studio">~/bin/android-studio || /usr/bin/android-studio</Program>
-            <Program label="Jad X">jadx-gui</Program>
+            <Program label="RStudio" icon="/usr/share/icons/hicolor/16x16/apps/rstudio.png">/usr/bin/rstudio-bin</Program> <!-- rstudio-desktop-bin -->
+            <Program label="Android Studio" icon="/usr/share/pixmaps/android-studio.png">android-studio</Program> <!-- android-studio -->
+            <!--<Program label="Jad X" icon="">jadx</Program>-->
             <Separator/>
-            <Program label="SmartGit">/usr/bin/smartgit</Program>
+            <Program label="SmartGit" icon="/usr/share/icons/hicolor/128x128/apps/smartgit.png">smartgit</Program> <!-- smartgit -->
             <Separator/>
-            <Program label="ProGuard">/usr/bin/proguardgui</Program>
-            <Program label="JMeter">/opt/jmeter/bin/jmeter.sh</Program>
+            <Program label="ProGuard" icon="/usr/share/icons/hicolor/22x22/apps/kajongg.png">proguardgui</Program>
+            <Program label="JMeter" icon="/opt/jmeter/docs/images/mstile-144x144.png">/usr/bin/jmeter</Program> <!-- jmeter -->
+            <Program label="soapUI" icon="/usr/share/icons/hicolor/48x48/apps/soapui.png">soapui</Program> <!-- soapui -->
             <Separator/>
-            <Program label="ddd">/usr/bin/ddd</Program>
+            <Program label="ddd" icon="/usr/share/icons/hicolor/22x22/apps/kturtle.png">ddd</Program>
+            <Separator/>
+            <Program label="LibrePCB" icon="/usr/share/icons/hicolor/scalable/apps/org.librepcb.LibrePCB.svg">librepcb</Program> <!-- librepcb -->
         </Menu>
 
         <Separator/>
 
         <Menu label="Office">
-            <Program label="LibreOffice">/usr/bin/libreoffice</Program>
-            <Program label="yEd Graph Editor">/usr/bin/yed</Program>
-            <Program label="Gephi">/usr/bin/gephi</Program>
-            <Program label="Ganttproject">/opt/ganttproject/ganttproject</Program>
-            <Program label="ProjectLibre">_JAVA_OPTIONS='-Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel' /usr/sbin/projectlibre</Program>
-            <Program label="Astah Comunity">/usr/bin/astah</Program>
-            <Program label="Modelio">/opt/modelio/modelio</Program>
+            <Program label="LyX" icon="/usr/share/icons/hicolor/scalable/apps/lyx.svg">lyx</Program> <!-- lyx -->
+            <Program label="LibreOffice" icon="/usr/share/icons/gnome/128x128/apps/libreoffice-base.svg">libreoffice</Program> <!-- libreoffice-fresh -->
+            <Program label="Ganttproject" icon="/opt/ganttproject/plugins/2.8.11/ganttproject/data/resources/icons/ganttproject.png">/opt/ganttproject/ganttproject</Program> <!-- ganttproject -->
+            <Program label="ProjectLibre" icon="/usr/share/pixmaps/projectlibre.png">/usr/bin/projectlibre</Program> <!-- projectlibre -->
+            <Program label="Astah* Community" icon="/usr/share/pixmaps/astah_community.png">astah</Program> <!-- astah-community -->
             <Separator/>
-            <Program label="FreeMind">/usr/bin/freemind</Program>
-            <Program label="View Your Mind">/usr/bin/vym</Program>
-            <Program label="TreeSheets">/usr/bin/treesheets</Program>
+            <Program label="Freeplane" icon="/usr/share/pixmaps/freeplane.svg">freeplane</Program> <!-- freeplane -->
+            <Program label="View Your Mind" icon="/usr/share/app-info/icons/archlinux-arch-community/64x64/vym_vym.png">View Your Mind</Program>
+            <Program label="TreeSheets" icon="/usr/share/pixmaps/treesheets.svg">treesheets</Program> <!-- treesheets-git -->
+            <Program label="yEd Graph Editor" icon="/usr/share/icons/hicolor/16x16/apps/yed.png">yed</Program> <!-- yed -->
+            <Program label="Gephi - Graph Viz" icon="/opt/ghidra/docs/images/function_graph.png">gephi</Program> <!-- gephi -->
+            <Program label="Dia Diagram Editor" icon="/usr/share/icons/hicolor/scalable/apps/dia.svg">dia</Program> <!-- dia -->
+            <Program label="Modelio" icon="/usr/share/dia/shapes/BPMN/Intermediate-Event-Multiple.png">/opt/modelio/modelio.sh</Program> <!-- modelio-bin -->
+            <Program label="FreeMind" icon="/usr/share/icons/breeze/apps/48/freemind.svg">FreeMind</Program>
             <Separator/>
-            <Program label="xPDF">/usr/bin/xpdf</Program>
-            <Program label="Acrobat PDF Reader">/usr/bin/acroread</Program>
-            <Program label="dia">/usr/bin/dia</Program>
+            <Program label="Xpdf" icon="/usr/share/pixmaps/xpdf.svg">xpdf</Program> <!-- xpdf -->
         </Menu>
 
         <Separator/>
 
         <Menu label="Imaging">
-            <Program label="Geeqie">/usr/bin/geeqie</Program>
-            <Program label="GNU Image Manipulation Program">/usr/bin/gimp</Program>
-            <Program label="Inkscape">/usr/bin/inkscape</Program>
-            <Program label="Scribus">/usr/bin/scribus</Program>
+            <Program label="Gimp" icon="/usr/share/icons/hicolor/16x16/apps/gimp.png">gimp-2.10</Program> <!-- gimp -->
+            <Program label="Inkscape" icon="/usr/share/inkscape/icons/Tango/scalable/apps/org.inkscape.Inkscape.svg">inkscape</Program> <!-- inkscape -->
+            <Program label="Scribus" icon="/usr/share/icons/hicolor/16x16/apps/scribus.png">scribus</Program> <!-- scribus -->
+            <Program label="Krita" icon="/usr/share/icons/breeze/mimetypes/22/application-x-krita.svg">krita</Program> <!-- krita -->
             <Separator/>
-            <Program label="QCad">/usr/bin/qcad</Program>
-            <Program label="OpenSCad">/usr/bin/openscad</Program>
-            <Program label="FreeCad">/usr/bin/freecad</Program>
-            <Program label="Sweet Home 3D">SWEETHOME3D_JAVA3D=1.5 /usr/bin/sweethome3d</Program>
+            <Program label="Geeqie" icon="/usr/share/pixmaps/geeqie.png">geeqie</Program> <!-- geeqie -->
+            <Program label="Darktable" icon="/usr/share/icons/hicolor/scalable/apps/darktable.svg">/usr/bin/darktable</Program> <!-- darktable -->
+            <Program label="Fotoxx" icon="/usr/share/pixmaps/fotoxx.png">fotoxx</Program> <!-- fotoxx -->
+            <Program label="RawTherapee" icon="/usr/share/icons/hicolor/16x16/apps/rawtherapee.png">rawtherapee</Program> <!-- rawtherapee -->
+            <Separator/>
+            <Program label="Blender" icon="/usr/share/icons/hicolor/scalable/apps/blender.svg">blender</Program> <!-- blender -->
+            <Separator/>
+            <Program label="QCAD" icon="/usr/lib/qcad/scripts/qcad_icon.svg">qcad</Program> <!-- qcad -->
+            <!--<Program label="OpenSCad" icon="">OpenSCad</Program>
+            <Program label="FreeCad" icon="">FreeCad</Program>-->
+            <Program label="Sweet Home 3D" icon="/usr/share/pixmaps/sweethome3d.png">sweethome3d</Program> <!-- sweethome3d - SWEETHOME3D_JAVA3D=1.5 /usr/bin/sweethome3d -->
+        </Menu>
+
+        <Separator/>
+
+        <Menu label="Audioing">
+            <Program label="Audacity" icon="/usr/share/icons/hicolor/scalable/apps/audacity.svg">env</Program> <!-- audacity -->
+            <Program label="Bitwig Studio" icon="/usr/share/icons/hicolor/scalable/apps/bitwig-studio.svg">"/usr/bin/bitwig-studio"</Program> <!-- bitwig-studio -->
+            <Program label="Ardour" icon="/usr/share/icons/hicolor/16x16/apps/ardour6.png">ardour6</Program> <!-- ardour -->
+        </Menu>
+
+        <Separator/>
+
+        <Menu label="Videoing">
+            <Program label="OpenShot Video Editor" icon="/usr/share/icons/hicolor/scalable/apps/openshot-qt.svg">openshot-qt</Program> <!-- openshot -->
+            <Separator/>
+            <Program label="HandBrake" icon="/usr/share/icons/hicolor/scalable/apps/fr.handbrake.ghb.svg">ghb</Program> <!-- handbrake -->
+            <Separator/>
+            <Program label="VLC media player" icon="/usr/share/icons/hicolor/16x16/apps/vlc.png">/usr/bin/vlc</Program> <!-- vlc -->
         </Menu>
 
         <Separator/>
 
         <Menu label="Cross OS">
-            <Program label="Oracle VM VirtualBox">VirtualBox</Program>
-            <Program label="PlayOnLinux">playonlinux</Program>
+            <Program label="Oracle VM VirtualBox" icon="/usr/share/icons/hicolor/scalable/mimetypes/virtualbox.svg">VirtualBox</Program> <!-- virtualbox -->
+            <!--<Program label="PlayOnLinux" icon="">PlayOnLinux</Program>-->
             <Separator/>
-            <Program label="Genymotion">/usr/bin/genymotion</Program>
-            <Program label="Heimdall">heimdall-frontend</Program>
+            <Program label="Genymotion" icon="/opt/genymotion/icons/icon.png">/usr/bin/genymotion</Program> <!-- genymotion -->
+            <!--<Program label="Heimdall" icon="">Heimdall</Program>-->
             <Separator/>
-            <Program label="TigerVNC Viewer">~/bin/vncviewer || /usr/bin/vncviewer</Program>
-            <Program label="RDesktop">~/bin/rdesktop || lxterminal -l -e 'rdesktop; echo "## Press CTRL-D to exit. Please create a ~/bin/rdesktop file to invoke this program with the right options"; cat'</Program>
+            <Program label="TigerVNC Viewer" icon="/usr/share/icons/hicolor/scalable/apps/tigervnc.svg">/usr/bin/vncviewer</Program> <!-- tigervnc -->
+            <Program label="RDesktop" icon="/usr/share/icons/breeze-dark/actions/32/document-open-remote.svg">~/bin/rdesktop || lxterminal -l -e 'rdesktop; echo "## Press CTRL-D to exit. Please create a ~/bin/rdesktop file to invoke this program with the right options"; cat'</Program>
+            <Program label="Citrix Receiver Engine" icon="/opt/Citrix/ICAClient/icons/receiver.png">/opt/Citrix/ICAClient/wfica.sh</Program> <!-- icaclient -->
         </Menu>
+
 
         <Separator/>
 
         <Menu label="Database">
-            <Program label="DBeaver">/usr/bin/dbeaver</Program>
-            <Program label="pgAdmin 4">/usr/bin/pgadmin4</Program>
-            <Program label="Oracle SQL Database Modeling">/usr/bin/oracle-datamodeler</Program>
-            <Program label="Oracle SQL Developer">/usr/bin/oracle-sqldeveloper</Program>
+            <Program label="DBeaver Community" icon="/usr/share/icons/hicolor/16x16/apps/dbeaver.png">dbeaver</Program> <!-- dbeaver -->
+            <Program label="pgAdmin 4" icon="/usr/share/icons/hicolor/16x16/apps/pgAdmin4.png">/usr/lib/pgadmin4/runtime/pgAdmin4</Program> <!-- pgadmin4 -->
+            <Separator/>
+            <Program label="Oracle SQL Database Modeling" icon="">Oracle SQL Database Modeling</Program>
+            <Program label="Oracle SQL Developer" icon="">Oracle SQL Developer</Program>
         </Menu>
 
         <Separator/>
+
+        <Menu label="Security">
+            <Program label="HashCat" icon="/usr/share/app-info/icons/archlinux-arch-community/48x48/catfish_catfish.png">HashCat</Program>
+            <Program label="Ghidra" icon="/opt/ghidra/docs/GhidraClass/Advanced/ghidraRight.png">Ghidra</Program>
+            <Program label="Wireshark" icon="/usr/share/icons/hicolor/scalable/apps/wireshark.svg">wireshark</Program> <!-- wireshark-qt -->
+            <Separator/>
+            <Program label="ProGuard" icon="/usr/share/icons/hicolor/22x22/apps/kajongg.png">proguardgui</Program>
+        </Menu>
+
+        <Separator/>
+
+        <Menu label="Amusements">
+            <Program label="Celestia (Gtk+)" icon="/usr/share/pixmaps/celestia.png">celestia-gtk</Program> <!-- celestia -->
+            <Program label="Stellarium" icon="/usr/share/icons/hicolor/16x16/apps/stellarium.png">stellarium</Program> <!-- stellarium -->
+        </Menu>
+
+        <Separator/>
+
 
         <Menu label="B.I.">
             <Program label="Spoon (Pentaho's Data Integration)">cd /opt/pentaho/data-integration; exec ./spoon.sh</Program>
@@ -152,12 +230,28 @@
 
         <Separator/>
 
+        <Menu label="Games">
+            <Program label="Blinken" icon="/usr/share/icons/hicolor/scalable/apps/blinken.svgz">blinken</Program> <!-- blinken -->
+            <Program label="Bomber" icon="/usr/share/icons/hicolor/128x128/apps/bomber.png">bomber</Program> <!-- bomber -->
+            <Program label="Bovo" icon="/usr/share/icons/hicolor/16x16/apps/bovo.png">bovo</Program> <!-- bovo -->
+            <Program label="Granatier" icon="/usr/share/icons/hicolor/16x16/apps/granatier.png">granatier</Program> <!-- granatier -->
+            <Program label="Kajongg" icon="/usr/share/icons/hicolor/scalable/apps/kajongg.svgz">kajongg</Program> <!-- kajongg -->
+            <Program label="Knights" icon="/usr/share/icons/hicolor/16x16/apps/knights.png">knights</Program> <!-- knights -->
+            <Program label="Kubrick" icon="/usr/share/icons/hicolor/16x16/apps/kubrick.png">kubrick</Program> <!-- kubrick -->
+            <Program label="Palapeli" icon="/usr/share/icons/hicolor/16x16/apps/palapeli.png">palapeli</Program> <!-- palapeli -->
+            <Program label="picmi" icon="/usr/share/icons/hicolor/16x16/apps/picmi.png">picmi</Program> <!-- picmi -->
+        </Menu>
+
+        <Separator/>
+
         <Menu label="System">
-            <Program label="GParted (root)">xhost +; sudo /usr/bin/gparted</Program>
-            <Program label="GSmartControl (root)">xhost +; sudo /usr/bin/gsmartcontrol_polkit</Program>
-            <Program label="i7z (root)">xhost +; sudo i7z-gui</Program>
+            <Program label="gkrellm" icon="/usr/share/icons/breeze-dark/apps/48/utilities-system-monitor.svg">gkrellm</Program>
             <Separator/>
-            <Program label="TLPui (root)">xhost +; sudo /usr/bin/tlpui</Program>
+            <Program label="gparted (root)" icon="/usr/share/icons/hicolor/scalable/apps/gparted.svg">sudo gparted</Program>
+            <Program label="GSmartControl (root)" icon="/usr/share/icons/hicolor/16x16/apps/gsmartcontrol.png">sudo /usr/bin/gsmartcontrol_polkit</Program> <!-- gsmartcontrol -->
+            <Program label="i7z-gui (root)" icon="/usr/share/icons/breeze/devices/64/cpu.svg">sudo i7z-gui</Program>
+            <Separator/>
+            <Program label="TLPUI (root)" icon="/usr/lib/python3.9/site-packages/tlpui/icons/OnBAT.svg">sudo tlpui</Program> <!-- tlpui-git -->
         </Menu>
 
         <Separator/>
@@ -175,13 +269,10 @@
         <Separator/>
 
         <Menu label="Remote">
-            <Program label="Preferred Applications">libfm-pref-apps</Program>
-            <Program label="Java">/usr/lib/jvm/java-8-jdk/jre/bin/jcontrol</Program>
-            <Program label="JavaWS">/usr/lib/jvm/java-8-jdk/jre/bin/javaws</Program>
-            <Program label="Java Monitoring and Management Console">/usr/lib/jvm/java-8-jdk/bin/jconsole</Program>
-            <Program label="Java Mission Control">/usr/lib/jvm/java-8-jdk/bin/jmc</Program>
-            <Program label="Java Monitoring and Performance Monitoring Tool">/usr/lib/jvm/java-8-jdk/bin/jvisualvm</Program>
-            <Program label="Java Policy Settings">/usr/lib/jvm/java-8-jdk/jre/bin/policytool</Program>
+            <Program label="LXTerminal" icon="/usr/share/icons/hicolor/128x128/apps/lxterminal.png">~/bin/remoteExec lxterminal</Program>
+            <Program label="gkrellm" icon="/usr/share/icons/breeze-dark/apps/48/utilities-system-monitor.svg">~/bin/remoteExec gkrellm</Program>
+            <Program label="IntelliJ IDEA Ultimate" icon="/usr/share/pixmaps/intellij-idea-ultimate-edition.png">~/bin/remoteExec intellij-idea-ultimate-edition</Program>
+            <Program label="Firefox" icon="/usr/share/icons/hicolor/16x16/apps/firefox.png">~/bin/remoteExec /usr/lib/firefox/firefox</Program>
         </Menu>
 
         <Separator/>
@@ -203,13 +294,15 @@
         <Option>tiled</Option>
         <Option>aerosnap</Option>
     </Group>
-    <!-- programs listed here will forcebly be undecorated. You can still access their window menu with Alt-F2 -->
+    <!-- programs listed here will forcebly be undecorated. You can still access their window menu with Alt-F2. Get names from WM_CLASS using 'xprop' -->
     <Group>
         <Name>konsole</Name>
         <Name>lxterminal</Name>
         <Name>subl3</Name>
         <Name>pcmanfm</Name>
         <Name>Thunderbird</Name>
+        <Name>code</Name>
+        <!--<Name>jetbrains-idea</Name>-->
         <Option>noborder</Option>
         <Option>notitle</Option>
         <Option>aerosnap</Option>
@@ -219,9 +312,15 @@
         <Name>gkrellm</Name>
         <Option>noborder</Option>
         <Option>notitle</Option>
-	<Option>nofocus</Option>
-	<Option>sticky</Option>
-	<Option>opacity:0.5</Option>
+        <Option>nofocus</Option>
+        <Option>sticky</Option>
+        <Option>opacity:0.5</Option>
+    </Group>
+    <!-- programs that will get the alt-lclick & alt-rclick event - the event won't be consumed moving & resizing the window -->
+    <Group>
+        <Name>libreoffice</Name>
+        <Option>nodrag</Option>
+        <!-- joe's temporary fix: https://github.com/joewing/jwm/issues/311 -->
     </Group>
 
     <!-- Tray at the bottom. -->
@@ -360,10 +459,12 @@
     <Key mask="A" key="Up">udesktop</Key>
     <Key mask="A" key="Down">ddesktop</Key>-->
 
-    <Key mask="4" key="t">exec:konsole</Key>
+    <Key mask="4" key="t">exec:lxterminal</Key>
     <Key mask="4" key="e">exec:subl3</Key>
     <!--<Key mask="4" key="b">exec:netsurf</Key>-->
     <Key mask="4" key="f">exec:pcmanfm</Key>
+    <Key mask="4" key="c">exec:speedcrunch</Key>
+    <Key mask="4" key="m">exec:pacmd unload-module module-loopback | grep 'not loaded' && pacmd load-module module-loopback latency_msec=1</Key>     <!-- mute / unmute (loopback, not mic). Useful for recording or own audio on the monitor interface -->
     <Key mask="A" key="F3">exec:~/.config/dmenu/dmenu-bind.sh</Key>
 
     <!-- Toggle fullscreen with F11 -->
