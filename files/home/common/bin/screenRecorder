@@ -14,6 +14,21 @@
 N="`date +%s`_unnamed_ffmpeg_encoding.mp4"
 D=~/Videos/ScreenRecordings/
 
+# Encoder hardware & settings
+VAAPI_DEVICE=/dev/dri/renderD128
+VIDEO_ENCODER=h264_vaapi
+#VIDEO_ENCODER=hevc_vaapi
+
+# h264 MINIMUM QUALITY (Win+PtrSc) for documentation
+FRAMERATE=20
+QP=32
+AUDIO_VBR=1
+
+# h264 COOL QUALITY (Win+Shift+PtrSc) for processing & transcoding
+#FRAMERATE=30
+#QP=16
+#AUDIO_VBR=3
+
 if pgrep -f " -y $D"; then
 	# end screen recording
 	pkill -sigint -f " -y $D"
@@ -35,14 +50,9 @@ else
 	ffmpeg --help
 	pacmd --help
 	pacmd load-module module-loopback latency_msec=1
-	ffmpeg -hwaccel auto -vaapi_device /dev/dri/renderD128 -video_size ${w}x${h} -framerate 20 -thread_queue_size 16 -f x11grab -i :0.0+${x},${y} -thread_queue_size 4096 -f pulse -i default -vf 'format=nv12,hwupload' -c:v h264_vaapi -rc_mode ICQ -qp 32 -preset:v veryslow -c:a libfdk_aac -profile:a aac_he_v2 -vbr 1 -afterburner 1 -f mp4 -movflags faststart -y "${D}${N}"
+	ffmpeg -hwaccel auto -vaapi_device ${VAAPI_DEVICE} -video_size ${w}x${h} -framerate ${FRAMERATE} -thread_queue_size 16 -f x11grab -i :0.0+${x},${y} -thread_queue_size 4096 -f pulse -i default -vf 'format=nv12,hwupload' -c:v ${VIDEO_ENCODER} -qp ${QP} -preset:v veryslow -c:a libfdk_aac -profile:a aac_he_v2 -vbr ${AUDIO_VBR} -afterburner 1 -f mp4 -movflags faststart -y "${D}${N}"
 	pacmd unload-module module-loopback
 	pkill -f "Killing ffmpeg"
 	NAME=`zenity --entry --title="ffmpeg" --text="Stopped. Type in a description" --entry-text=""`
 	mv "${D}${N}" "${D}${N/unnamed_ffmpeg_encoding/${NAME}}"
 fi
-
-#
-#<!-- old version, without fdkaac & less h264 compression -->
-#    <Key mask="4" key="r">exec:N="`date +%s`_unnamed_ffmpeg_encoding.mp4"; D=~/Videos/ScreenRecordings/; if pgrep -f " -y $D"; then pkill -sigint -f " -y $D"; sleep 3 | zenity --progress --text="Killing ffmpeg" --pulsate --auto-close; else mkdir -p "$D"; sudo chrt -rr -p 99 `pgrep -f "pulseaudio"`; sudo renice -n -20 `pgrep -f "pulseaudio"`; (sleep 5; sudo chrt -rr -p 99 `pgrep -f " -y $D"`; sudo renice -n -20 `pgrep -f " -y $D"`) & pacmd load-module module-loopback latency_msec=1; ffmpeg -hwaccel auto -vaapi_device /dev/dri/renderD128 -video_size 1366x768 -framerate 20 -thread_queue_size 16 -f x11grab -i :0.0+0,1080 -thread_queue_size 4096 -f pulse -ac 1 -i default -vf 'format=nv12,hwupload' -c:v h264_vaapi -f mp4 -rc_mode 1 -qp 18 -acodec aac -b:a 96k -f mp4 -movflags faststart -y "${D}${N}"; pacmd unload-module module-loopback; NAME=`zenity --entry --title="ffmpeg" --text="Parado. Ditige um nome" --entry-text=""`; mv "${D}${N}" "${D}${N/unnamed_ffmpeg_encoding/${NAME}}"; fi</Key>
-
