@@ -1,0 +1,48 @@
+#! /bin/bash
+
+# Screen recording with ffmpeg & hardware encoding.
+# If you hear your voice out of sync, press WIN+m to turn off the loopback (you won't hear nor record yourself anymore on this session).
+# To stop, press the same shortcut used to start
+#
+# NOTE: to record mic mixed with audio out, don't forget to go to 'pavucontrol',
+#       put recording of ffmpeg to listen to monitor of <your-sound-card> as input
+#       (with ffmpeg already recording)
+#
+# This script is intended to be started by a shortcut key (like Win+PrtSc). To stop recording, press it again
+
+
+N="`date +%s`_unnamed_ffmpeg_encoding.mp4"
+D=~/Videos/ScreenRecordings/
+
+if pgrep -f " -y $D"; then
+	# end screen recording
+	pkill -sigint -f " -y $D"
+	while pgrep -f " -y $D"; do sleep 1; done | zenity --progress --text="Killing ffmpeg" --pulsate --auto-close
+else
+	# start screen recording
+
+	# screen recording coordinates
+	unset x,y,w,h
+	# be based on the focused window
+	#eval $(xdotool getactivewindow getwindowgeometry | sed -n -e 's|\s*Position:\s*\([0-9]*\),\([0-9]*\).*|x=\1;y=\2|p' -e 's|\s*Geometry:\s*\([0-9]*\)x\([0-9]*\).*|w=\1;h=\2|p')
+	# based on the clicked window
+	eval $(xwininfo | sed -n -e 's|\s*Absolute upper-left X:\s*\([0-9]*\).*|x=\1|p' -e 's|\s*Absolute upper-left Y:\s*\([0-9]*\).*|y=\1|p' -e 's|\s*Width:\s*\([0-9]*\).*|w=\1|p' -e 's|\s*Height:\s*\([0-9]*\).*|h=\1|p');
+
+	mkdir -p "$D"
+	sudo chrt -rr -p 99 `pgrep "pulseaudio"`
+	sudo renice -n -20 `pgrep "pulseaudio"`
+	(sleep 5; sudo chrt -rr -p 99 `pgrep -f " -y $D"`; sudo renice -n -20 `pgrep -f " -y $D"`) &
+	ffmpeg --help
+	pacmd --help
+	pacmd load-module module-loopback latency_msec=1
+	ffmpeg -hwaccel auto -vaapi_device /dev/dri/renderD128 -video_size ${w}x${h} -framerate 20 -thread_queue_size 16 -f x11grab -i :0.0+${x},${y} -thread_queue_size 4096 -f pulse -i default -vf 'format=nv12,hwupload' -c:v h264_vaapi -rc_mode ICQ -qp 32 -preset:v veryslow -c:a libfdk_aac -profile:a aac_he_v2 -vbr 1 -afterburner 1 -f mp4 -movflags faststart -y "${D}${N}"
+	pacmd unload-module module-loopback
+	pkill -f "Killing ffmpeg"
+	NAME=`zenity --entry --title="ffmpeg" --text="Stopped. Type in a description" --entry-text=""`
+	mv "${D}${N}" "${D}${N/unnamed_ffmpeg_encoding/${NAME}}"
+fi
+
+#
+#<!-- old version, without fdkaac & less h264 compression -->
+#    <Key mask="4" key="r">exec:N="`date +%s`_unnamed_ffmpeg_encoding.mp4"; D=~/Videos/ScreenRecordings/; if pgrep -f " -y $D"; then pkill -sigint -f " -y $D"; sleep 3 | zenity --progress --text="Killing ffmpeg" --pulsate --auto-close; else mkdir -p "$D"; sudo chrt -rr -p 99 `pgrep -f "pulseaudio"`; sudo renice -n -20 `pgrep -f "pulseaudio"`; (sleep 5; sudo chrt -rr -p 99 `pgrep -f " -y $D"`; sudo renice -n -20 `pgrep -f " -y $D"`) & pacmd load-module module-loopback latency_msec=1; ffmpeg -hwaccel auto -vaapi_device /dev/dri/renderD128 -video_size 1366x768 -framerate 20 -thread_queue_size 16 -f x11grab -i :0.0+0,1080 -thread_queue_size 4096 -f pulse -ac 1 -i default -vf 'format=nv12,hwupload' -c:v h264_vaapi -f mp4 -rc_mode 1 -qp 18 -acodec aac -b:a 96k -f mp4 -movflags faststart -y "${D}${N}"; pacmd unload-module module-loopback; NAME=`zenity --entry --title="ffmpeg" --text="Parado. Ditige um nome" --entry-text=""`; mv "${D}${N}" "${D}${N/unnamed_ffmpeg_encoding/${NAME}}"; fi</Key>
+

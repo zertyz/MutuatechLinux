@@ -27,7 +27,7 @@
          m Audioing;p audacity bitwig ardour;c
          m Videoing;p OpenShot;s;p HandBrake;s;p vlc;c
          m 'Cross OS';p 'Oracle VM Virtualbox' 'PlayOnLinux';s;p GenyMotion Heimdall;s;p 'TigerVNC' 'RDesktop' 'Citrix';c
-         m 'Database';p DBeaver pgAdmin;s;p 'Oracle SQL Database Modeling' 'Oracle SQL Developer';c
+         m 'Database';p DbVis DBeaver pgAdmin;s;p 'Oracle SQL Database Modeling' 'Oracle SQL Developer';c
          m 'Security';p HashCat Ghidra Wireshark;s;p proguardgui;c
          m 'Amusements';p celestia stellarium;c
          m 'Games';p blinken bomber bovo gnugo granatier kajongg knights kubrick palapeli picmi;c
@@ -193,6 +193,7 @@
         <Separator/>
 
         <Menu label="Database">
+            <Program label="DbVisualizer" icon="/usr/share/icons/hicolor/24x24/apps/dbvis.png">dbvis</Program> <!-- dbvis -->
             <Program label="DBeaver Community" icon="/usr/share/icons/hicolor/16x16/apps/dbeaver.png">dbeaver</Program> <!-- dbeaver -->
             <Program label="pgAdmin 4" icon="/usr/share/icons/hicolor/16x16/apps/pgAdmin4.png">/usr/lib/pgadmin4/runtime/pgAdmin4</Program> <!-- pgadmin4 -->
             <Separator/>
@@ -292,7 +293,7 @@
     <!-- Options for program groups. -->
     <Group>
         <Option>tiled</Option>
-        <Option>aerosnap</Option>
+        <!--<Option>aerosnap</Option>-->
     </Group>
     <!-- programs listed here will forcebly be undecorated. You can still access their window menu with Alt-F2. Get names from WM_CLASS using 'xprop' -->
     <Group>
@@ -305,7 +306,7 @@
         <!--<Name>jetbrains-idea</Name>-->
         <Option>noborder</Option>
         <Option>notitle</Option>
-        <Option>aerosnap</Option>
+        <!--<Option>aerosnap</Option>-->
     </Group>
     <!-- programs that can't receive focus -->
     <Group>
@@ -428,7 +429,7 @@
     <FocusModel>click</FocusModel>
 
     <!-- The snap mode (none, screen, or border) -->
-    <SnapMode distance="10">border</SnapMode>
+    <SnapMode distance="2">none</SnapMode>
 
     <!-- The move mode (outline or opaque) -->
     <MoveMode coordinates="off">opaque</MoveMode>
@@ -478,11 +479,17 @@
 
     <!-- Connects with your bluetooth device, provided that you are running pulseaudio and paired and trusted it with bluetoothctl commands. Pulseaudio is started in ~/.xinitrc  -->
     <!-- You also need to run 'pavucontrol', set bluetooth to A2DP and disable all other devices -->
-    <Key mask="4" key="b">exec:echo -en "power on\nconnect FC:A8:9A:1F:4A:34\nexit\n"|bluetoothctl</Key>
+    <Key mask="4" key="b">exec:pacmd load-module module-switch-on-connect; echo -en "power on\nconnect FC:A8:9A:1F:4A:34\nexit\n"|bluetoothctl</Key>
 
-    <!-- Printscreen -- defaults to edit a selected window image in gimp. Shift + Print Screen to edit the whole screen -->
-    <Key key="Print">exec:import -window `xwininfo | grep "Window id" | cut -d' ' -f4` /tmp/printscrn$$.png; gimp /tmp/printscrn$$.png; rm /tmp/printscrn$$.png</Key>
-    <Key mask="S" key="Print">exec:import -window root /tmp/printscrn$$.png; gimp /tmp/printscrn$$.png; rm /tmp/printscrn$$.png</Key>
+    <!-- Printscreen -- edit a selected window image in gimp. Shift + Print Screen to edit the whole screen -->
+<!--    <Key key="Print">exec:import -window `xwininfo | grep "Window id" | cut -d' ' -f4` /tmp/printscrn$$.png; gimp /tmp/printscrn$$.png; sleep 5; rm /tmp/printscrn$$.png</Key>
+    <Key mask="S" key="Print">exec:import -window root /tmp/printscrn$$.png; gimp /tmp/printscrn$$.png; sleep 5; rm /tmp/printscrn$$.png</Key>-->
+
+    <!-- Printscreen -- do it in flameshot, openning the results afterwords. Shift + Print Screen to edit the whole screen -->
+    <Key key="Print">exec:N=`date +%s`_printwindow$$.png;D=~/Pictures/ScreenShots; mkdir -p "$D"; import -window `xwininfo | grep "Window id" | cut -d' ' -f4` "$D"/"$N"; gimp "$D"/"$N" #geeqie -r "$D"/"$N"</Key>
+    <Key mask="S" key="Print">exec:N=`date +%s`_printscreen$$.png;D=~/Pictures/ScreenShots; mkdir -p "$D"; import -window root "$D"/"$N"; gimp "$D"/"$N" #geeqie -r "$D"/"$N"</Key>
+
+    <Key mask="4" key="Print">exec:~/bin/screenRecorder</Key>
 
     <!-- Set screen opacity. It only works if you are using a screen compositing daemon. See ~/.xinitrc -->
     <Key mask="4" key="-">exec:transset-df -v -a --dec 0.1</Key>
