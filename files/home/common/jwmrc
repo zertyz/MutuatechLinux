@@ -93,7 +93,7 @@
 
         <Menu label="Development">
             <Program label="IntelliJ IDEA Ultimate" icon="/usr/share/pixmaps/intellij-idea-ultimate-edition.png">intellij-idea-ultimate-edition</Program> <!-- intellij-idea-ultimate-edition -->
-            <Program label="CLion" icon="/usr/share/pixmaps/clion.svg">"/usr/bin/clion"</Program> <!-- clion -->
+            <Program label="CLion" icon="/usr/share/pixmaps/clion.svg">"~/bin/clion"</Program> <!-- clion -->
             <Program label="Eclipse" icon="/usr/share/icons/hicolor/16x16/apps/eclipse.png">eclipse</Program> <!-- eclipse-rust -->
             <Program label="Visual Studio Code" icon="/usr/share/icons/visual-studio-code.png">/opt/visual-studio-code/code</Program> <!-- visual-studio-code-bin -->
             <Program label="Apache NetBeans" icon="/usr/share/pixmaps/netbeans.png">netbeans</Program> <!-- netbeans -->

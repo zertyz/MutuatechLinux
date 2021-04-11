@@ -1,0 +1,8 @@
+#! /bin/bash
+
+# day to day use -- always good before expiration
+rm -fr  ~/.config/JetBrains/CLion*/eval/
+exec /usr/bin/clion
+
+# In case the above fails, you may try the Full Shits:
+#rm -fr ~/.java/.userPrefs/{prefs.xml,jetbrains,.user.lock.luiz,.userRootModFile.luiz} ~/.local/share/JetBrains/ ~/.CLion* ~/.local/share/JetBrains/ ~/.cache/JetBrains/ ~/.config/JetBrains/
