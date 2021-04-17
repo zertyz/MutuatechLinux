@@ -20,4 +20,7 @@ fi
 . ~/bin/setInput &
 pkill gvfsd
 
+# dev settings (max open files)
+ulimit -Sn 8192
+
 exec /usr/bin/jwm

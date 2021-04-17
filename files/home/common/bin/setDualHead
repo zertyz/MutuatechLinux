@@ -27,8 +27,11 @@
 #xrandr --output VGA-1-2 --mode 1920x1080_60.00 --above VGA-0
 
 # new cpu -- for some reason, we need to blank the displays before the second display's image shows up
-xrandr --output VGA1 --mode 1920x1080 --above VGA-2
-sleep 1
-xset dpms force off
-sleep 1
-xset dpms force on
+#xrandr --output VGA1 --mode 1920x1080 --above VGA-2
+#sleep 1
+#xset dpms force off
+#sleep 1
+#xset dpms force on
+
+sleep 2
+xrandr --output DP1 --below eDP1 --mode 1280x1024 --output HDMI1 --above eDP1 --mode 1920x1080 || xrandr --output DP1 --above eDP1 --auto
