@@ -31,8 +31,8 @@ AUDIO_VBR=1
 
 if pgrep -f " -y $D"; then
 	# end screen recording
+	while pgrep -f " -y $D"; do sleep 1; done | zenity --progress --text="Killing ffmpeg" --pulsate --auto-close &
 	pkill -sigint -f " -y $D"
-	while pgrep -f " -y $D"; do sleep 1; done | zenity --progress --text="Killing ffmpeg" --pulsate --auto-close
 else
 	# start screen recording
 
@@ -46,13 +46,22 @@ else
 	mkdir -p "$D"
 	sudo chrt -rr -p 99 `pgrep "pulseaudio"`
 	sudo renice -n -20 `pgrep "pulseaudio"`
-	(sleep 5; sudo chrt -rr -p 99 `pgrep -f " -y $D"`; sudo renice -n -20 `pgrep -f " -y $D"`) &
 	ffmpeg --help
 	pacmd --help
+	(sleep 5; sudo renice -n -20 `pgrep -f " -y $D"`; sudo chrt -rr -p 99 `pgrep -f " -y $D"`) &
 	pacmd load-module module-loopback latency_msec=1
-	ffmpeg -hwaccel auto -vaapi_device ${VAAPI_DEVICE} -video_size ${w}x${h} -framerate ${FRAMERATE} -thread_queue_size 16 -f x11grab -i :0.0+${x},${y} -thread_queue_size 4096 -f pulse -i default -vf 'format=nv12,hwupload' -c:v ${VIDEO_ENCODER} -qp ${QP} -preset:v veryslow -c:a libfdk_aac -profile:a aac_he_v2 -vbr ${AUDIO_VBR} -afterburner 1 -f mp4 -movflags faststart -y "${D}${N}"
+	ffmpeg -hwaccel auto -vaapi_device ${VAAPI_DEVICE} -video_size ${w}x${h} -framerate ${FRAMERATE} -thread_queue_size 60 -f x11grab -i :0.0+${x},${y} -thread_queue_size 8192 -f pulse -i default -vf 'format=nv12,hwupload' -c:v ${VIDEO_ENCODER} -qp ${QP} -preset:v veryslow -c:a libfdk_aac -profile:a aac_he_v2 -vbr ${AUDIO_VBR} -afterburner 1 -f mp4 -movflags faststart -y "${D}${N}"
 	pacmd unload-module module-loopback
 	pkill -f "Killing ffmpeg"
 	NAME=`zenity --entry --title="ffmpeg" --text="Stopped. Type in a description" --entry-text=""`
 	mv "${D}${N}" "${D}${N/unnamed_ffmpeg_encoding/${NAME}}"
 fi
+
+
+# failed experiments on old hardware
+####################################
+
+# Audio monitor + mic mixed into a single channel (lag issues) + screen + webcam streams
+# ffmpeg -hwaccel auto -vaapi_device /dev/dri/renderD128 -thread_queue_size 8192 -f pulse -i 0 -ac 2 -thread_queue_size 8192 -f pulse -i 1 -ac 2 -filter_complex "[0:a][1:a]amerge=inputs=2,pan=stereo|c0<c0+c2|c1<c1+c3[a]" -video_size 1920x1080 -framerate 30 -thread_queue_size 120 -f x11grab -i :0.0+0,0 -thread_queue_size 120 -f v4l2 -framerate 30 -i /dev/video0 -vf 'format=nv12,hwupload' -c:v h264_vaapi -qp 16 -preset:v veryslow -c:a libfdk_aac -profile:a aac_he_v2 -vbr 3 -afterburner 1 -f mp4 -movflags faststart -map '[a]' -map 2:v -map 3:v -y "/tmp/experiment.mp4"
+# Each audio & video on it's own stream -- seem to work best if we had two encoders for the video for not all frames are recorded on the x11grab
+#ffmpeg -hwaccel auto -vaapi_device /dev/dri/renderD128 -video_size 1920x1080 -framerate 30 -thread_queue_size 16 -f x11grab -i :0.0+0,0 -thread_queue_size 8192 -f pulse -i 0 -thread_queue_size 8192 -f pulse -i 1 -thread_queue_size 16 -f v4l2 -framerate 30 -video_size 640x480 -i /dev/video0 -vf 'format=nv12,hwupload' -c:v h264_vaapi -qp 16 -preset:v veryslow -c:a libfdk_aac -profile:a aac_he_v2 -vbr 3 -afterburner 1 -f mp4 -movflags faststart -map 0 -map 1 -map 2 -map 3 -y "/tmp/experiment.mp4"

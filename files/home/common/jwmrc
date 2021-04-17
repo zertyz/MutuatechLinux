@@ -22,8 +22,8 @@
          m Network;p google\ chrome chromium firefox opera;s;p thunderbird;s;p zoom skype;s;p transmission\ remote;s;p wireshark;s;p jmeter;c
          m Media;p deadbeef vlc;s;p handbrake;s;p transmission\ remote;c
          m Development;p intellij clion eclipse 'Visual Studio Code' 'Apache Netbeans' sublime editix;s;p rstudio android\ studio jadx;s;p smartgit;s;p proguardgui jmeter SoapUi;s;p ddd;s;p LibrePCB;c
-         m Office; p LyX LibreOffice Ganttproject ProjectLibre Astah;s;p FreePlane 'View Your Mind' TreeSheets yEd Gephi dia ModelIO FreeMind;s;p xPDF;c
-         m Imaging;p 'GNU Image Manipulation Program' Inkscape Scribus Krita;s;p Geeqie Darktable Fotoxx RawTherapee;s;p Blender;s;p QCad OpenSCad FreeCad 'Sweet Home 3D';c
+         m Office; p LyX LibreOffice Ganttproject ProjectLibre Astah;s;p FreePlane 'View Your Mind' TreeSheets yEd Gephi dia ModelIO FreeMind;s;p xPDF;p 'Epson Scan 2';c
+         m Imaging;p 'GNU Image Manipulation Program' Inkscape Scribus Krita;s;p Geeqie Darktable Fotoxx RawTherapee;s;p Blender;s;p QCad OpenSCad FreeCad 'Sweet Home 3D';s;p 'Epson Scan 2';c
          m Audioing;p audacity bitwig ardour;c
          m Videoing;p OpenShot;s;p HandBrake;s;p vlc;c
          m 'Cross OS';p 'Oracle VM Virtualbox' 'PlayOnLinux';s;p GenyMotion Heimdall;s;p 'TigerVNC' 'RDesktop' 'Citrix';c
@@ -119,8 +119,8 @@
 
         <Menu label="Office">
             <Program label="LyX" icon="/usr/share/icons/hicolor/scalable/apps/lyx.svg">lyx</Program> <!-- lyx -->
-            <Program label="LibreOffice" icon="/usr/share/icons/gnome/128x128/apps/libreoffice-base.svg">libreoffice</Program> <!-- libreoffice-fresh -->
-            <Program label="Ganttproject" icon="/opt/ganttproject/plugins/2.8.11/ganttproject/data/resources/icons/ganttproject.png">/opt/ganttproject/ganttproject</Program> <!-- ganttproject -->
+            <Program label="LibreOffice" icon="/usr/share/icons/hicolor/scalable/apps/libreoffice-base.svg">libreoffice</Program> <!-- libreoffice-fresh -->
+            <Program label="Ganttproject" icon="/usr/share/icons/hicolor/64x64/apps/ganttproject.png">/opt/ganttproject/ganttproject</Program> <!-- ganttproject -->
             <Program label="ProjectLibre" icon="/usr/share/pixmaps/projectlibre.png">/usr/bin/projectlibre</Program> <!-- projectlibre -->
             <Program label="Astah* Community" icon="/usr/share/pixmaps/astah_community.png">astah</Program> <!-- astah-community -->
             <Separator/>
@@ -134,6 +134,8 @@
             <Program label="FreeMind" icon="/usr/share/icons/breeze/apps/48/freemind.svg">FreeMind</Program>
             <Separator/>
             <Program label="Xpdf" icon="/usr/share/pixmaps/xpdf.svg">xpdf</Program> <!-- xpdf -->
+            <Separator/>
+            <Program label="Epson's Scan" icon="/usr/share/icons/breeze/devices/64/scanner.svg">epsonscan2</Program> <!-- Epson Scan 2 -->
         </Menu>
 
         <Separator/>
@@ -155,6 +157,8 @@
             <!--<Program label="OpenSCad" icon="">OpenSCad</Program>
             <Program label="FreeCad" icon="">FreeCad</Program>-->
             <Program label="Sweet Home 3D" icon="/usr/share/pixmaps/sweethome3d.png">sweethome3d</Program> <!-- sweethome3d - SWEETHOME3D_JAVA3D=1.5 /usr/bin/sweethome3d -->
+            <Separator/>
+            <Program label="Epson's Scan" icon="/usr/share/icons/breeze/devices/64/scanner.svg">epsonscan2</Program> <!-- Epson Scan 2 -->
         </Menu>
 
         <Separator/>
