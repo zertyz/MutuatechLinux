@@ -50,7 +50,7 @@ else
 	pacmd --help
 	(sleep 5; sudo renice -n -20 `pgrep -f " -y $D"`; sudo chrt -rr -p 99 `pgrep -f " -y $D"`) &
 	pacmd load-module module-loopback latency_msec=1
-	ffmpeg -hwaccel auto -vaapi_device ${VAAPI_DEVICE} -video_size ${w}x${h} -framerate ${FRAMERATE} -thread_queue_size 60 -f x11grab -i :0.0+${x},${y} -thread_queue_size 8192 -f pulse -i default -vf 'format=nv12,hwupload' -c:v ${VIDEO_ENCODER} -qp ${QP} -preset:v veryslow -c:a libfdk_aac -profile:a aac_he_v2 -vbr ${AUDIO_VBR} -afterburner 1 -f mp4 -movflags faststart -y "${D}${N}"
+	ffmpeg -hwaccel auto -vaapi_device ${VAAPI_DEVICE} -video_size ${w}x${h} -framerate ${FRAMERATE} -thread_queue_size 60 -f x11grab -i ${DISPLAY}+${x},${y} -thread_queue_size 8192 -f pulse -i default -vf 'format=nv12,hwupload' -c:v ${VIDEO_ENCODER} -qp ${QP} -preset:v veryslow -c:a libfdk_aac -profile:a aac_he_v2 -vbr ${AUDIO_VBR} -afterburner 1 -f mp4 -movflags faststart -y "${D}${N}"
 	pacmd unload-module module-loopback
 	pkill -f "Killing ffmpeg"
 	NAME=`zenity --entry --title="ffmpeg" --text="Stopped. Type in a description" --entry-text=""`

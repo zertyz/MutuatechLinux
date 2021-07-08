@@ -19,7 +19,7 @@
          for f in /usr/share/applications/*.desktop; do pkgName=`pacman -Qqo "$f"`; label=`grep '^Name=' "$f" | head -n 1 | sed 's|.*Name *= *\(.*\)|\1|'`; cmd=`grep "Exec=" "$f" | head -n 1 | sed 's|.*Exec *= *\([^ ]*\).*|\1|'`; iconName=`grep '^Icon' "$f" | head -n 1 | sed 's|Icon *= *\(.*\)|.*/.*\1\\\.[^/]+|'`; iconFile="`(pacman -Qql $pkgName | grep -E "$iconName" | grep -E 'icon|pixmaps' | grep 'svg' || pacman -Qql $pkgName | grep -E "$iconName" | grep -E 'icon|pixmaps' | grep '16x16' | grep 'png' || pacman -Qql $pkgName | grep -E "$iconName" | grep -E 'icon|pixmaps' | grep 'png' || pacman -Qql $pkgName | grep -E "$iconName" | grep -E 'icon|pixmaps' | grep 'xpm' || echo '') | head -n 1`"; echo "            <Program label=\"${label}\" icon=\"${iconFile}\">${cmd}</Program>" '<!-''-' $pkgName '-''->'; done | sort -u >/tmp/app.list
          function s() { echo "            <Separator/>"; }; function p() { for n in "$@"; do grep -i "\"$n" /tmp/app.list || echo "            <Program label=\"$n\" icon=\"\">$n</Program>"; done; }; function pr() { p $@ | sed 's|" icon=| (root)" icon=|g' | sed 's|">|">sudo |g'; }; function m() { echo "        <Menu label=\"$1\">"; }; function c() { echo -en "        </Menu>\n\n        <Separator/>\n\n"; }
          m Accessories;p lxterminal pcmanfm xarchiver l3afpad SpeedCrunch;s;p flameshot kazam;s;p xPDF Calibre;s;pr gdmap xdiskusage;s;p FreeFileSync;c
-         m Network;p google\ chrome chromium firefox opera;s;p thunderbird;s;p zoom skype;s;p transmission\ remote;s;p wireshark;s;p jmeter;c
+         m Network;p google\ chrome chromium firefox opera;s;p thunderbird;s;p telegram-desktop zoom skype;s;p transmission\ remote;s;p wireshark;s;p jmeter;c
          m Media;p deadbeef vlc;s;p handbrake;s;p transmission\ remote;c
          m Development;p intellij clion eclipse 'Visual Studio Code' 'Apache Netbeans' sublime editix;s;p rstudio android\ studio jadx;s;p smartgit;s;p proguardgui jmeter SoapUi;s;p ddd;s;p LibrePCB;c
          m Office; p LyX LibreOffice Ganttproject ProjectLibre Astah;s;p FreePlane 'View Your Mind' TreeSheets yEd Gephi dia ModelIO FreeMind;s;p xPDF;p 'Epson Scan 2';c
@@ -29,7 +29,7 @@
          m 'Cross OS';p 'Oracle VM Virtualbox' 'PlayOnLinux';s;p GenyMotion Heimdall;s;p 'TigerVNC' 'RDesktop' 'Citrix';c
          m 'Database';p DbVis DBeaver pgAdmin;s;p 'Oracle SQL Database Modeling' 'Oracle SQL Developer';c
          m 'Security';p HashCat Ghidra Wireshark;s;p proguardgui;c
-         m 'Amusements';p celestia stellarium;c
+         m 'Amusements';p google-earth-pro celestia stellarium;c
          m 'Games';p blinken bomber bovo gnugo granatier kajongg knights kubrick palapeli picmi;c
          m 'System';p gkrellm;s;pr gparted gsmartcontrol i7z-gui;s;p tlpui;c
      -->
@@ -64,6 +64,7 @@
             <Separator/>
             <Program label="Thunderbird" icon="/usr/share/icons/hicolor/16x16/apps/thunderbird.png">/usr/lib/thunderbird/thunderbird</Program> <!-- thunderbird -->
             <Separator/>
+            <Program label="Telegram" icon="/usr/share/icons/hicolor/16x16/apps/telegram.png">/usr/bin/telegram-desktop</Program> <!-- telegram -->
             <Program label="Zoom" icon="/usr/share/pixmaps/Zoom.png">/usr/bin/zoom</Program> <!-- zoom -->
             <Program label="Skype" icon="/usr/share/icons/hicolor/16x16/apps/skypeforlinux.png">/usr/bin/skypeforlinux</Program> <!-- skypeforlinux-stable-bin -->
             <Separator/>
@@ -93,11 +94,11 @@
 
         <Menu label="Development">
             <Program label="IntelliJ IDEA Ultimate" icon="/usr/share/pixmaps/intellij-idea-ultimate-edition.png">intellij-idea-ultimate-edition</Program> <!-- intellij-idea-ultimate-edition -->
-            <Program label="CLion" icon="/usr/share/pixmaps/clion.svg">"~/bin/clion"</Program> <!-- clion -->
+            <Program label="CLion" icon="/usr/share/pixmaps/clion.svg">~/bin/clion</Program> <!-- clion -->
             <Program label="Eclipse" icon="/usr/share/icons/hicolor/16x16/apps/eclipse.png">eclipse</Program> <!-- eclipse-rust -->
             <Program label="Visual Studio Code" icon="/usr/share/icons/visual-studio-code.png">/opt/visual-studio-code/code</Program> <!-- visual-studio-code-bin -->
             <Program label="Apache NetBeans" icon="/usr/share/pixmaps/netbeans.png">netbeans</Program> <!-- netbeans -->
-            <Program label="Sublime Text 3" icon="/usr/share/icons/hicolor/16x16/apps/sublime-text.png">subl3</Program> <!-- sublime-text-dev -->
+            <Program label="Sublime Text" icon="/usr/share/icons/hicolor/32x32/apps/sublime-text.png">subl</Program> <!-- sublime-text-dev -->
             <Program label="EditiX XML" icon="/usr/share/icons/hicolor/22x22/actions/freehand.png">editix</Program>
             <Separator/>
             <Program label="RStudio" icon="/usr/share/icons/hicolor/16x16/apps/rstudio.png">/usr/bin/rstudio-bin</Program> <!-- rstudio-desktop-bin -->
@@ -218,6 +219,7 @@
         <Separator/>
 
         <Menu label="Amusements">
+            <Program label="Google Earth Pro" icon="/usr/share/icons/hicolor/32x32/apps/google-earth-pro.png">/usr/bin/google-earth-pro</Program> <!-- google-earth-pro -->
             <Program label="Celestia (Gtk+)" icon="/usr/share/pixmaps/celestia.png">celestia-gtk</Program> <!-- celestia -->
             <Program label="Stellarium" icon="/usr/share/icons/hicolor/16x16/apps/stellarium.png">stellarium</Program> <!-- stellarium -->
         </Menu>
@@ -303,7 +305,7 @@
     <Group>
         <Name>konsole</Name>
         <Name>lxterminal</Name>
-        <Name>subl3</Name>
+        <Name>subl</Name>
         <Name>pcmanfm</Name>
         <Name>Thunderbird</Name>
         <Name>code</Name>
@@ -465,7 +467,7 @@
     <Key mask="A" key="Down">ddesktop</Key>-->
 
     <Key mask="4" key="t">exec:lxterminal</Key>
-    <Key mask="4" key="e">exec:subl3</Key>
+    <Key mask="4" key="e">exec:subl</Key>
     <!--<Key mask="4" key="b">exec:netsurf</Key>-->
     <Key mask="4" key="f">exec:pcmanfm</Key>
     <Key mask="4" key="c">exec:speedcrunch</Key>
