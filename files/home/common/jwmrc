@@ -70,7 +70,7 @@
             <Separator/>
             <Program label="Transmission Remote" icon="/usr/share/icons/hicolor/scalable/apps/transmission-remote-gtk.svg">transmission-remote-gtk</Program> <!-- transmission-remote-gtk -->
             <Separator/>
-            <Program label="Wireshark" icon="/usr/share/icons/hicolor/scalable/apps/wireshark.svg">wireshark</Program> <!-- wireshark-qt -->
+            <Program label="Wireshark" icon="/usr/share/icons/hicolor/scalable/apps/org.wireshark.Wireshark.svg">wireshark</Program> <!-- wireshark-qt -->
             <Separator/>
             <Program label="JMeter" icon="/opt/jmeter/docs/images/mstile-144x144.png">/usr/bin/jmeter</Program> <!-- jmeter -->
             <Separator/>
@@ -113,14 +113,14 @@
             <Separator/>
             <Program label="ddd" icon="/usr/share/icons/hicolor/22x22/apps/kturtle.png">ddd</Program>
             <Separator/>
-            <Program label="LibrePCB" icon="/usr/share/icons/hicolor/scalable/apps/org.librepcb.LibrePCB.svg">librepcb</Program> <!-- librepcb -->
+            <Program label="LibrePCB" _icon="/usr/share/icons/hicolor/scalable/apps/org.librepcb.LibrePCB.svg">librepcb</Program> <!-- librepcb -->
         </Menu>
 
         <Separator/>
 
         <Menu label="Office">
             <Program label="LyX" icon="/usr/share/icons/hicolor/scalable/apps/lyx.svg">lyx</Program> <!-- lyx -->
-            <Program label="LibreOffice" icon="/usr/share/icons/hicolor/scalable/apps/libreoffice-base.svg">libreoffice</Program> <!-- libreoffice-fresh -->
+            <Program label="LibreOffice" _icon="/usr/share/icons/hicolor/scalable/apps/libreoffice-base.svg">libreoffice</Program> <!-- libreoffice-fresh -->
             <Program label="Ganttproject" icon="/usr/share/icons/hicolor/64x64/apps/ganttproject.png">/opt/ganttproject/ganttproject</Program> <!-- ganttproject -->
             <Program label="ProjectLibre" icon="/usr/share/pixmaps/projectlibre.png">/usr/bin/projectlibre</Program> <!-- projectlibre -->
             <Program label="Astah* Community" icon="/usr/share/pixmaps/astah_community.png">astah</Program> <!-- astah-community -->
@@ -154,7 +154,7 @@
             <Separator/>
             <Program label="Blender" icon="/usr/share/icons/hicolor/scalable/apps/blender.svg">blender</Program> <!-- blender -->
             <Separator/>
-            <Program label="QCAD" icon="/usr/lib/qcad/scripts/qcad_icon.svg">qcad</Program> <!-- qcad -->
+            <Program label="QCAD" _icon="/usr/lib/qcad/scripts/qcad_icon.svg">qcad</Program> <!-- qcad -->
             <!--<Program label="OpenSCad" icon="">OpenSCad</Program>
             <Program label="FreeCad" icon="">FreeCad</Program>-->
             <Program label="Sweet Home 3D" icon="/usr/share/pixmaps/sweethome3d.png">sweethome3d</Program> <!-- sweethome3d - SWEETHOME3D_JAVA3D=1.5 /usr/bin/sweethome3d -->
@@ -165,7 +165,7 @@
         <Separator/>
 
         <Menu label="Audioing">
-            <Program label="Audacity" icon="/usr/share/icons/hicolor/scalable/apps/audacity.svg">env</Program> <!-- audacity -->
+            <Program label="Audacity" icon="/usr/share/icons/hicolor/scalable/apps/audacity.svg">audacity</Program> <!-- audacity -->
             <Program label="Bitwig Studio" icon="/usr/share/icons/hicolor/scalable/apps/bitwig-studio.svg">"/usr/bin/bitwig-studio"</Program> <!-- bitwig-studio -->
             <Program label="Ardour" icon="/usr/share/icons/hicolor/16x16/apps/ardour6.png">ardour6</Program> <!-- ardour -->
         </Menu>
@@ -190,7 +190,7 @@
             <!--<Program label="Heimdall" icon="">Heimdall</Program>-->
             <Separator/>
             <Program label="TigerVNC Viewer" icon="/usr/share/icons/hicolor/scalable/apps/tigervnc.svg">/usr/bin/vncviewer</Program> <!-- tigervnc -->
-            <Program label="RDesktop" icon="/usr/share/icons/breeze-dark/actions/32/document-open-remote.svg">~/bin/rdesktop || lxterminal -l -e 'rdesktop; echo "## Press CTRL-D to exit. Please create a ~/bin/rdesktop file to invoke this program with the right options"; cat'</Program>
+            <Program label="RDesktop" _icon="/usr/share/icons/breeze-dark/actions/32/document-open-remote.svg">~/bin/rdesktop || lxterminal -l -e 'rdesktop; echo "## Press CTRL-D to exit. Please create a ~/bin/rdesktop file to invoke this program with the right options"; cat'</Program>
             <Program label="Citrix Receiver Engine" icon="/opt/Citrix/ICAClient/icons/receiver.png">/opt/Citrix/ICAClient/wfica.sh</Program> <!-- icaclient -->
         </Menu>
 
@@ -211,7 +211,7 @@
         <Menu label="Security">
             <Program label="HashCat" icon="/usr/share/app-info/icons/archlinux-arch-community/48x48/catfish_catfish.png">HashCat</Program>
             <Program label="Ghidra" icon="/opt/ghidra/docs/GhidraClass/Advanced/ghidraRight.png">Ghidra</Program>
-            <Program label="Wireshark" icon="/usr/share/icons/hicolor/scalable/apps/wireshark.svg">wireshark</Program> <!-- wireshark-qt -->
+            <Program label="Wireshark" icon="/usr/share/icons/hicolor/scalable/apps/org.wireshark.Wireshark.svg">wireshark</Program> <!-- wireshark-qt -->
             <Separator/>
             <Program label="ProGuard" icon="/usr/share/icons/hicolor/22x22/apps/kajongg.png">proguardgui</Program>
         </Menu>
@@ -279,7 +279,8 @@
             <Program label="LXTerminal" icon="/usr/share/icons/hicolor/128x128/apps/lxterminal.png">~/bin/remoteExec lxterminal</Program>
             <Program label="gkrellm" icon="/usr/share/icons/breeze-dark/apps/48/utilities-system-monitor.svg">~/bin/remoteExec gkrellm</Program>
             <Program label="IntelliJ IDEA Ultimate" icon="/usr/share/pixmaps/intellij-idea-ultimate-edition.png">~/bin/remoteExec intellij-idea-ultimate-edition</Program>
-            <Program label="Firefox" icon="/usr/share/icons/hicolor/16x16/apps/firefox.png">~/bin/remoteExec /usr/lib/firefox/firefox</Program>
+            <Separator/>
+            <Program label="x2Go!" icon="/usr/share/icons/hicolor/32x32/apps/x2goclient.png">~/bin/remoteExec "sudo systemctl start x2goserver"; x2goclient</Program>
         </Menu>
 
         <Separator/>
@@ -331,10 +332,10 @@
     </Group>
 
     <!-- Tray at the bottom. -->
-    <Tray x="0" y="-1" autohide="bottom">
-	<Spacer width="5"/>
-	<TrayButton label="Menu">root:3</TrayButton>
-	<Spacer width="5"/>
+    <Tray x="0" width="1280" y="1771" autohide="bottom"> <!-- magical number for 3 monitors DomLap. y="0" or y="-1" stopped working on the right monitor AND the trick requires setting the width of the desired monitor -->
+	   <Spacer width="5"/>
+	   <TrayButton label="Menu">root:3</TrayButton>
+	   <Spacer width="5"/>
         <Pager labeled="true"/>
         <TaskList maxwidth="256"/>
         <Dock/>
@@ -465,6 +466,10 @@
     <Key mask="A" key="Left">ldesktop</Key>
     <Key mask="A" key="Up">udesktop</Key>
     <Key mask="A" key="Down">ddesktop</Key>-->
+
+    <!-- get keycodes with 'xev' -->
+    <Key keycode="122">exec:pactl -- set-sink-volume 0 -10%</Key>
+    <Key keycode="123">exec:pactl -- set-sink-volume 0 +10%</Key>
 
     <Key mask="4" key="t">exec:lxterminal</Key>
     <Key mask="4" key="e">exec:subl</Key>
