@@ -16,18 +16,18 @@ D=~/Videos/ScreenRecordings/
 
 # Encoder hardware & settings
 VAAPI_DEVICE=/dev/dri/renderD128
-VIDEO_ENCODER=h264_vaapi
-#VIDEO_ENCODER=hevc_vaapi
+#VIDEO_ENCODER=h264_vaapi
+VIDEO_ENCODER=hevc_vaapi
 
 # h264 MINIMUM QUALITY (Win+PtrSc) for documentation
-FRAMERATE=20
-QP=32
-AUDIO_VBR=1
+#FRAMERATE=20
+#QP=32
+#AUDIO_VBR=1
 
-# h264 COOL QUALITY (Win+Shift+PtrSc) for processing & transcoding
-#FRAMERATE=30
-#QP=16
-#AUDIO_VBR=3
+# h264 COOL QUALITY (Win+Shift+PtrSc) for processing & transcoding -- useful to h265 as well?
+FRAMERATE=30
+QP=16
+AUDIO_VBR=3
 
 if pgrep -f " -y $D"; then
 	# end screen recording
