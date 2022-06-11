@@ -1,0 +1,70 @@
+TO_EXCLUDE_ENTRIES=(
+        /var/lib/{rpcbind,nfs,dhcpcd,transmission,mlocate,systemd}
+        /var/cache/{minidlna,ldconfig,pacman/pkg/}
+        /var/{log,tmp}/
+        /root/{.kodi,.new_kodi,.cargo}
+        /etc/{ld.so.cache}
+)
+
+RELEASE_N=2     # 2021/07/10
+RELEASE_N=3     # 2021/10/09
+
+
+touch start
+
+# /boot
+tar -cv /boot | xz -9evv >rPi3_boot_r${RELEASE_N}.tar.xz
+touch finish_boot
+
+# generate the new sfs
+(sleep 5; pid=`pgrep mksquashfs`; sudo chrt -i -p 0 $pid; sudo renice -n 20 $pid) &
+block="1024k"; mksquashfs README /etc /root /opt /var /usr "./rPi3_sfs_${block}_r${RELEASE_N}.sfs" -always-use-fragments -comp xz -Xbcj arm -b ${block} -Xdict-size ${block} -progress -ef <(for i in ${TO_EXCLUDE_ENTRIES[@]}; do echo $i; done) # 2>&1 | tee mksquashfs_root.out
+touch finish_sfs
+
+# temporarily backup /
+umount -l /tmp/root
+mkdir -p /tmp/root
+mount --bind / /tmp/root
+tar -cv -C /tmp/root etc/ data/ home/ rw/root/ | xz -9vv >rPi3.root_r${RELEASE_N}.tar.xz
+#mksquashfs /tmp/root "./rPi3.root_r${RELEASE_N}.sfs" -always-use-fragments -comp xz -Xbcj arm -b ${block} -Xdict-size ${block} -progress -ef <(echo -en "/tmp/root/sfs\n/sfs\n")
+touch finish_root
+umount /tmp/root
+echo "$RELEASE_N" >rPi3.LATEST_RELEASE_N
+
+ln -f rPi3_sfs_${block}_r${RELEASE_N}.sfs rPi3_sfs_r${RELEASE_N}.sfs
+ls -l
+
+# publish
+rsync -Pa --inplace README rPi3_boot_r${RELEASE_N}.tar.xz rPi3_sfs_r${RELEASE_N}.sfs rPi3.root_r${RELEASE_N}.tar.xz rPi3.LATEST_RELEASE_N mutuatec@mutuatech.com:/home/mutuatec/mutuatech.com/linux/download
+touch finish_rsync
+
+return || exit 0
+
+# on the first setup,
+
+mkdir -p /rw/{etc,opt,usr,root,var}
+mkdir -p /work/{etc,opt,usr,root,var}
+mkdir -p /sfs/{etc,opt,usr,root,var}
+
+: /etc/fstab.initcpio.script 
+#!/usr/bin/ash
+
+msg "waiting a little so devices needed to boot may have the time to turn up and be recognized by initramfs' udev before fstab is processed"
+sleep 5
+msg "done waiting. Devices should have already been recognized and we (may) be able to boot. If this is not the case, increase the sleep time"
+
+
+: /etc/fstab.initcpio
+# keep this file in sync with /rw/etc/fstab
+
+# SFS mount points that will be rewritable
+/new_root/sfs/sfs.sfs                           /new_root/sfs/        squashfs    defaults                               0       2
+/dev/mmcblk0p1                                  /new_root/boot        vfat        defaults                               0       2
+
+# overlays to allow writable SFSes
+overlay                                         /new_root/usr            overlay         x-systemd.requires=/new_root/sfs/sfs.sfs,upperdir=/new_root/rw/usr,lowerdir=/new_root/sfs/usr,workdir=/new_root/work/usr 0 0
+overlay                                         /new_root/opt            overlay         x-systemd.requires=/new_root/sfs/sfs.sfs,upperdir=/new_root/rw/opt,lowerdir=/new_root/sfs/opt,workdir=/new_root/work/opt 0 0
+overlay                                         /new_root/var            overlay         x-systemd.requires=/new_root/sfs/sfs.sfs,upperdir=/new_root/rw/var,lowerdir=/new_root/sfs/var,workdir=/new_root/work/var 0 0
+overlay                                         /new_root/etc            overlay         x-systemd.requires=/new_root/sfs/sfs.sfs,upperdir=/new_root/rw/etc,lowerdir=/new_root/sfs/etc,workdir=/new_root/work/etc 0 0
+overlay                                         /new_root/root           overlay         x-systemd.requires=/new_root/sfs/sfs.sfs,upperdir=/new_root/rw/root,lowerdir=/new_root/sfs/root,workdir=/new_root/work/root 0 0
+

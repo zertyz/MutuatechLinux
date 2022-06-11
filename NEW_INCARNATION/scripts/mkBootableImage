@@ -1,0 +1,106 @@
+#! /bin/bash
+
+# builds a pendrive image based on the current running system
+
+# usage: ... # now you have /tmp/pendrive.img file available
+
+TMP="/tmp/pendrive_img"
+IMG_FILE="/tmp/pendrive.img"
+IMG_FILE_SIZE=$((14848*1024*1024))
+EFS_PART_SIZE="4M"
+
+function cleanup {
+  sudo umount "${TMP}/root/efi" "${TMP}/root" "${TMP}/system_root" &>/dev/null
+  sudo losetup -d $LO_DEV
+  rmdir "${TMP}"/{root,system_root} "${TMP}"
+}
+
+function failure {
+  echo " ** FAILED"
+  cleanup
+  exit 1
+}
+
+function ok {
+	echo " OK"
+}
+
+echo -en "Setup:\n"
+  echo -en "  Creating temporary folders..."
+    mkdir -p "${TMP}/"{root,system_root} && ok || failure
+  echo -en "  Creating image file..."
+    rm -f "${IMG_FILE}"
+    fallocate -l ${IMG_FILE_SIZE} "${IMG_FILE}" && ok || failure
+  echo -en "  Setting loopback device..."
+    LO_DEV=`sudo losetup -P -f --show ${IMG_FILE} || failure`
+    echo -en " '${LO_DEV}' OK\n"
+  echo -en "  Binding system root..."
+    sudo mount --bind / "${TMP}/system_root" && ok || failure
+
+echo -en "Partitioning:\n"
+  echo -en "  Partitioning with 128k alignment..."
+    echo -en "x\nl\n1\nm\nn\n1\n34\n+${EFS_PART_SIZE}\nEF00\nx\nl\n256\nm\nn\n2\n\n\n8300\nw\nY\n" | gdisk ${LO_DEV} &>/dev/null && ok || failure
+  echo -en "  Reloading partitions (partprobe)..."
+    sudo partprobe ${LO_DEV} && ok || failure
+  echo -en "  Creating the UEFI Boot fs..."
+    sudo mkfs.vfat -a -f 1 -h 0 -R 1 -s 8 -n "MTLBoot" ${LO_DEV}p1 &>/dev/null && ok || failure
+  echo -en "  Creating the RW file system optimized for flash media..."
+    echo -en " mkfs.ext4;"
+    sudo mkfs.ext4 -b 4096 -D -E packed_meta_blocks=1 -m 0 -O flex_bg ${LO_DEV}p2 &>/dev/null || failure
+    echo -en " tune2fs;"
+    sudo tune2fs -L "MTLRoot" -c 3 -e remount-ro -o journal_data_writeback,nobarrier -E mount_opts=commit=600 ${LO_DEV}p2 &>/dev/null && ok || failure
+
+echo -en "Populating EXT4:\n"
+  echo -en "  Mounting 'root'..."
+    sudo mount ${LO_DEV}p2 "${TMP}/root" && ok || failure
+  echo -en "  Populating '/boot'..."
+    sudo mkdir "${TMP}/root/boot" &&
+    sudo cp -a /boot/{grub,intel-ucode.img,amd-ucode.img,vmlinuz-linux*,initramfs-linux*.img,memtest86+} "${TMP}/root/boot" && ok || failure
+  echo -en "  Creating Mutuatech directories..."
+    for u in `grep '/home/' /etc/passwd | sed 's|:.*||'`; do sudo mkdir -p "${TMP}/root/$u"; done &&
+    sudo mkdir -p "${TMP}/root"/{sfs,rw/{etc,home,opt,root,usr,var},work/{etc,home,opt,root,usr,var}} &&
+    sudo mkdir -m 1777 "${TMP}/root/tmp" && ok || failure
+  echo -en "  Copying system dirs..."
+    sudo cp -a "${TMP}/system_root/home/common" "${TMP}/root/home" &&
+    sudo cp -a "${TMP}/system_root"/{bin,dev,etc,lib,lib64,mnt,opt,proc,root,run,sbin,srv,sys,usr,var} "${TMP}/root" && ok || failure
+  echo -en "  Copying /sfs..."
+    sudo cp -a "${TMP}/system_root/sfs"/{AUTHORIZED_UPDATES,README,RELEASE_N,home_update_script*,sfs.sfs} "${TMP}/root/sfs" && ok || failure
+  echo -en "  Configuring:\n"
+    echo -en "    hostname..."
+      sudo bash -c "echo 'MTLPen' >'${TMP}/root/rw/etc/hostname'" && ok || failure
+    echo -en "    fstab..."
+      ROOT_UUID=`blkid ${LO_DEV}p2 | sed 's|.* UUID="\([^"]*\)".*|UUID=\1|'` &&
+      EFI_UUID=`blkid ${LO_DEV}p1 | sed 's|.* UUID="\([^"]*\)".*|UUID=\1|'` &&
+      sudo bash -c "echo '# Static information about the filesystems.' >'${TMP}/root/rw/etc/fstab'" &&
+      sudo bash -c "echo '# See fstab(5) for details.' >>'${TMP}/root/rw/etc/fstab'" &&
+      sudo bash -c "echo -en '\n# <file system> <dir> <type> <options> <dump> <pass>\n\n' >>'${TMP}/root/rw/etc/fstab'" &&
+      sudo bash -c "echo '${ROOT_UUID}     /       ext4    noatime,nobarrier,commit=600    0       1' >>'${TMP}/root/rw/etc/fstab'" &&
+      sudo bash -c "echo '${EFI_UUID}                                /efi    vfat    defaults                        0       2' >>'${TMP}/root/rw/etc/fstab'" &&
+      ok || failure
+
+echo -en "Populating EFI:\n"
+  echo -en "  Mounting '/efi'..."
+    sudo mkdir "${TMP}/root/efi" &&
+    sudo mount ${LO_DEV}p1 "${TMP}/root/efi" && ok || failure
+  echo -en "  Adjusting 'grub.cfg'..."
+    sudo sed -i "s|set root='hd0,gpt[0-9]*'|set root='hd0,gpt2'|" "${TMP}/root/boot/grub/grub.cfg" &&
+    sudo sed -i "s|set rootfs='UUID=.*'|set rootfs='${ROOT_UUID}'|" "${TMP}/root/boot/grub/grub.cfg" && ok || failure
+  echo -en "  Installing GRUB into EFI..."
+    sudo grub-install --removable --boot-directory="${TMP}/root/boot" --efi-directory="${TMP}/root/efi" && ok || failure
+
+echo -en "Unmounting image..."
+  sudo umount "${TMP}/root/efi" "${TMP}/root" && ok || failure
+
+echo -en "Running qEMU for you to test it..."
+  sudo qemu-system-x86_64 -m 1024M -bios /usr/share/edk2-ovmf/x64/OVMF.fd "${IMG_FILE}"
+
+echo -en "--------------------------------------------------\n"
+sudo mount ${LO_DEV}p2 "${TMP}/root"
+ls -l "${TMP}/root"
+echo -en "--------------------------------------------------\n"
+echo -en "Entering TEST bash -- press CTRL-D when satisfied:\n"
+echo -en "*** WARNING: this is not a chroot\n\n"
+cd "${TMP}/root"; bash; cd -
+
+echo -en "Cleaning up..."
+  cleanup && ok || failure

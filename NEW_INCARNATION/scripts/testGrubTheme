@@ -1,0 +1,77 @@
+#! /bin/bash
+
+# tests our grub theme in qEMU
+
+# usage: fallocate -l $((128*1024*1024)) /tmp/grub_test.img; sudo losetup -P -f /tmp/grub_test.img
+
+# usage: . ./testGrubTheme
+
+TMP="/tmp/grub_test"
+IMG_FILE="${TMP}/img.raw"
+IMG_FILE_SIZE=$((512*1024*1024))
+EFS_PART_SIZE="4M"
+
+function cleanup {
+  sudo umount "${TMP}/root/efi" "${TMP}/root"
+  sudo losetup -d $LO_DEV
+  rm -fr "${TMP}"
+}
+
+function failure {
+  echo " ** FAILED"
+  cleanup
+  exit 1
+}
+
+function ok {
+	echo " OK"
+}
+
+echo -en "Setup:\n"
+  echo -en "  Creating temporary folders..."
+    mkdir -p "${TMP}/"{root,boot} && ok || failure
+  echo -en "  Creating image file..."
+    fallocate -l ${IMG_FILE_SIZE} "${IMG_FILE}" && ok || failure
+  echo -en "  Setting loopback device..."
+    LO_DEV=`sudo losetup -P -f --show ${IMG_FILE} || failure`
+    echo -en " '${LO_DEV}' OK"
+
+echo -en "Partitioning:\n"
+  echo -en "  Partitioning with 128k alignment..."
+    echo -en "x\nl\n1\nm\nn\n1\n34\n+${EFS_PART_SIZE}\nEF00\nx\nl\n256\nm\nn\n2\n\n\n8300\nw\nY\n" | gdisk ${LO_DEV} &>/dev/null && ok || failure
+  echo -en "  Reloading partitions (partprobe)..."
+    sudo partprobe ${LO_DEV} && ok || failure
+  echo -en "  Creating the UEFI Boot fs..."
+    sudo mkfs.vfat -a -f 1 -h 0 -R 1 -s 8 -n "MTLBoot" ${LO_DEV}p1 &>/dev/null && ok || failure
+  echo -en "  Creating the RW file system optimized for flash media..."
+    echo -en " mkfs.ext4;"
+    sudo mkfs.ext4 -b 4096 -D -E packed_meta_blocks=1 -m 0 -O flex_bg ${LO_DEV}p2 &>/dev/null || failure
+    echo -en " tune2fs;"
+    sudo tune2fs -L "MTLRoot" -c 3 -e remount-ro -o journal_data_writeback,nobarrier -E mount_opts=commit=600 ${LO_DEV}p2 &>/dev/null && ok || failure
+
+echo -en "Populating EXT4:\n"
+  echo -en "  Mounting 'root'..."
+    sudo mount ${LO_DEV}p2 "${TMP}/root" && ok || failure
+  echo -en "  Populating '/boot'..."
+    sudo mkdir "${TMP}/root/boot" &&
+    sudo cp -a /boot/{grub,intel-ucode.img,amd-ucode.img,vmlinuz-linux*,initramfs-linux*.img,memtest86+} "${TMP}/root/boot" && ok || failure
+
+echo -en "Populating EFI:\n"
+  echo -en "  Mounting '/efi'..."
+    sudo mkdir "${TMP}/root/efi" &&
+    sudo mount ${LO_DEV}p1 "${TMP}/root/efi" && ok || failure
+#  echo -en "  Making GRUB config..."
+#    sudo grub-mkconfig -o "${TMP}/root/boot/grub/grub.cfg" && ok || failure
+  echo -en "  Adjusting 'grub.cfg'..."
+    sudo sed -i "s|set root='hd0,gpt[0-9]*'|set root='hd0,gpt2'|" "${TMP}/root/boot/grub/grub.cfg" && ok || failure
+  echo -en "  Installing GRUB into EFI..."
+    sudo grub-install --removable --boot-directory="${TMP}/root/boot" --efi-directory="${TMP}/root/efi" && ok || failure
+
+echo -en "Unmounting..."
+  sudo umount "${TMP}/root/efi" "${TMP}/root" && ok || failure
+
+echo -en "Running qEMU for you to test it..."
+  sudo qemu-system-x86_64 -bios /usr/share/edk2-ovmf/x64/OVMF.fd "${IMG_FILE}"
+
+echo -en "Cleaning up..."
+  cleanup && ok || failure
