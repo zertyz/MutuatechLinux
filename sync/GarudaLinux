@@ -1,0 +1,2 @@
+1. Inatall selecting manual partitioning -- add a swap partition (otherwise it won't be added). Resume boot param is properly set this way
+2. Garuda boot options: disable CPU mitigations, enable SysRq
