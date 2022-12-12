@@ -3,7 +3,7 @@
 3. Tweak /etc/fstab with compress=zstd:7,commit=600 and comment out the tmpfs for /tmp + systemctl mask tmp.mount
 4. Tweak other /etc files based on Mutuatech linux files to sync
 5. Reboot and recompress all files: btrfs filesystem defragment -r -v -czstd /
-6. Install custom packages served by repositories (this command may be useful for determining new additions to this list "pacman -Qen | sed 's| .*||'"): arp-scan compsize cpupower-gui docker ffmpeg-full fluxctl freeplane gcompris-qt gephi gimp gnuplot google-chrome hugo i7z inkscape intellij-idea-ultimate-edition iotop jdk jwm libreoffice-fresh pavucontrol rlottie-git rustup screen scribus smartgit speedcrunch stellarium testdisk tigervnc time transmission-remote-gtk valgrind gvim virtualbox xterm zoom
+6. Install custom packages served by repositories (this command may be useful for determining new additions to this list "pacman -Qen | sed 's| .*||'"): arp-scan base-devel clang cmake compsize cpupower-gui docker ffmpeg-full fluxctl freeplane gcompris-qt gephi gimp gnuplot google-chrome hugo i7z inkscape intellij-idea-ultimate-edition iotop jdk jwm libreoffice-fresh mingw-w64 pavucontrol rlottie-git rustup screen scribus smartgit speedcrunch stellarium testdisk tigervnc time transmission-remote-gtk valgrind gvim virtualbox xterm zoom
 7. Install additional AUR packages not present in AUR (pacman -Qe --foreign | sed 's| .*||'): paru -S --needed angular-cli celestia dbvis evcxr_repl ganttproject hamsket-bin jdk11 jre11 kafka presto-cli projectlibre pulse-secure xmacro
 8. Get any uncompilable packages: rsync -Pa mutuatec@mutuatech.com:/home/mutuatec/mutuatech.com/linux/aur/{xmacro,jdk,jre}* .
 9. Restore home directories
