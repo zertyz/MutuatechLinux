@@ -6,7 +6,7 @@
 
 TMP="/tmp/pendrive_img"
 IMG_FILE="/tmp/pendrive.img"
-IMG_FILE_SIZE=$((14848*1024*1024))
+IMG_FILE_SIZE=$((14786*1024*1024))
 EFS_PART_SIZE="4M"
 
 function cleanup {
