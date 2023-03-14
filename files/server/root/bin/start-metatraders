@@ -1,0 +1,71 @@
+#! /bin/bash
+
+# Starts local headless (or VNC) metatrader instances
+
+################### PRELUDE #####################
+script_base_dir=`dirname "$0"`
+script_base_name=`basename "$0"`
+script_group_name="${script_base_name/*-//}"	# start-metatrader will be just metatrader
+
+# Log all outputs
+exec 1<&-
+exec 2<&-
+exec 1>>/tmp/${script_group_name}.scripts.log
+exec 2>&1
+
+# load config variables
+script_config_file="${script_base_dir}/${script_group_name}.config"
+. ${script_config_file} || (echo "####### `date`: ERROR in script '${script_base_name}': could not load config '${script_config_file}'. ABORTING SCRIPT"; exit)
+
+#################################################
+
+local_script="${script_base_dir}/${script_base_name}.local"
+echo -en "`date`: Running local script '${local_script}', if present..."
+[ -s ${local_script} ] && . ${local_script} && echo " OK" || echo " NOT PRESENT"
+
+echo "`date`: Generating X start script '${X_START_SCRIPT}'"
+(
+	echo "#! /bin/bash"
+	echo ""
+	echo "# to be called by xvfb-run or jwm, start the meta trader instances, returning only when they are closed"
+	echo
+
+	for mt_instance_num in `seq 0 $((${#METATRADER_INSTANCE_NAMES[@]}-1))`; do
+		mt_instance_name="${METATRADER_INSTANCE_NAMES[$mt_instance_num]}"
+		mt_dir="${METATRADER_BASE_DIR}/${mt_instance_name}"
+		mt_win_dir="${METATRADER_BASE_WINE_DIR}\\${mt_instance_name}"
+		# "exec" if last, "" if not
+		exec_prefix=`eval "if ((mt_instance_num == ${#METATRADER_INSTANCE_NAMES[@]}-1)); then echo 'exec'; fi"`
+		# "" if last, else, the command to execute between instance starts
+		exec_suffix=`eval "if ((mt_instance_num != ${#METATRADER_INSTANCE_NAMES[@]}-1)); then echo '& sleep ${INSTANCE_ESTIMATED_START_SECS}; pkill -stop -f terminal64.exe'; fi"`
+		echo "cd '${mt_dir}'; touch "${METATRADER_LOG_NAME}"; chattr +m "${METATRADER_LOG_NAME}"; WINEPREFIX='/home/${USER}/.wine' ${exec_prefix} wine64 '${mt_win_dir}\\terminal64.exe' ${exec_suffix}"
+	done
+) > "${X_START_SCRIPT}"
+
+echo "`date`: Tunning swap..."
+echo 0 >/proc/sys/vm/swappiness
+echo N >/sys/module/zswap/parameters/enabled
+
+echo "`date`: Starting metatraders on behalf of '${USER}'"
+# xvfb (oldie: sudo -u ${USER} xvfb-run ${X_START_SCRIPT} &>/dev/null &)
+sudo -u ${USER} bash -c "export DISPLAY=:99; Xvfb \${DISPLAY} -screen 0 640x480x16 -nolisten tcp & sleep 5; exec '${X_START_SCRIPT}'" &>/dev/null &
+# vnc (oldie: sudo -u luiz vncserver :1 &>/dev/null &)
+#sudo -u ${USER} bash -c "export DISPLAY=:1; /usr/bin/Xvnc \${DISPLAY} -auth /home/${USER}/.Xauthority -desktop '`hostname`:1 (${USER})' -pn -rfbauth /home/${USER}/.vnc/passwd -rfbport 5901 & sleep 5; exec '${X_START_SCRIPT}'" &>/dev/null &
+
+# tune process priorities
+sleep 15
+for pid in `pgrep -f 'Xvnc|top|sshd|jwm'`; do
+	chrt -i -p 0 $pid
+	renice -n 20 $pid
+done
+sleep $((${#METATRADER_INSTANCE_NAMES[@]} * ${INSTANCE_ESTIMATED_START_SECS}))
+pkill -cont -f 'terminal64.exe'
+for pid in `pgrep -f 'ogre-robot-gateway|terminal64.exe'`; do
+	chrt -rr -p 99 $pid
+	renice -n -20 $pid
+done
+for pid in `pgrep -f 'wineserver'`; do
+	renice -n -20 $pid
+done
+
+echo "`date`: DONE."

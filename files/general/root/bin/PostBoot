@@ -1,0 +1,175 @@
+#! /bin/bash
+
+# post boot script for server / desktop
+
+################### PRELUDE #####################
+script_base_dir=`dirname "$0"`
+script_base_name=`basename "$0"`
+
+# Log all outputs
+exec 1<&-
+exec 2<&-
+exec 1>>/tmp/mutuatechlinux.services.log
+exec 2>&1
+
+# load config variables
+script_config_file="${script_base_dir}/config"
+. ${script_config_file} || (echo "####### `date`: ERROR in script '${script_base_name}': could not load config '${script_config_file}'. ABORTING SCRIPT"; exit)
+
+#################################################
+
+
+# set for performance or powersave depending on the power source in play
+/home/common/bin/BackFromSuspension
+
+echo "### `date`: 'PostBoot' script STARTED"
+
+echo "### `date`: Waiting 60s for all systemd services to load"
+sleep 60
+echo "### `date`: Done waiting. Continueing with PostBoot"
+
+local_script="${script_base_dir}/${script_base_name}.local"
+echo -en "`date`: Running local script '${local_script}', if present..."
+[ -s ${local_script} ] && . ${local_script} && echo " OK" || echo " NOT PRESENT"
+
+if ((DESKTOP_MODE==0)); then
+	# wallpaper (if console login is disabled)
+	if pgrep tty || pgrep logind; then
+		echo "Not entering in graphics mode, since you wouldn't be able to login in the console"
+	else
+		/usr/bin/fbset -g 1920 1080 1920 1080 16
+		echo 0 > /sys/class/vtconsole/vtcon1/bind
+		#fbi -autozoom -fitwidth -noverbose -t 5 -1 --vt 1 /root/wallpaper.jpg &>/dev/null
+		fbi -autozoom -fitwidth -noverbose --vt 1 -d /dev/fb0 -t 5 -1 /root/wallpaper.jpg &>/dev/null
+	fi
+fi
+
+# Apply the power settings again, after all systemd services were loaded
+/root/bin/BackFromSuspension
+
+# tune usb devices
+eval `(find /sys -name 'max_sectors' -printf "echo 4096 >'%p';\n"; find /sys -name 'max_sectors_kb' -printf "echo $((4096/2)) >'%p';\n"
+) | grep -E 'sd|usb'`
+
+# SERVER-ONLY things
+if ((SERVER_MODE > 0)); then
+
+	# sshd
+	systemctl start sshd
+	
+	if ((SERVER_MODE >= 2)); then
+
+		# swap (servers don't use zswap, as long running services tends to have a lot of unused pages -- which we want to simply offload to the disk)
+	
+		# stop systemd services which doesn't make sense for a 24x7 server
+		##################################################################
+
+		for s in systemd-journald getty@tty1; do
+			systemctl mask $s;
+		done;
+		for s in systemd-oomd; do
+			systemctl disable $s;
+		done;
+		for s in ModemManager NetworkManager systemd-udevd systemd-logind systemd-timesyncd systemd-oomd avahi polkit dbus; do
+			systemctl stop $s;
+		done;
+		sleep 1;
+		for s in systemd-journald "systemd --user" systemd-oomd dbus-daemon agetty; do
+			pkill -f "$s"; 
+		done;
+		for s in systemd-journald getty@tty1; do
+			systemctl unmask $s;
+		done;
+		sleep 2;
+		for s in systemd-oomd; do
+			systemctl enable $s;
+		done;
+		sleep 2;
+		pkill -f dbus-daemon
+
+		# network without fancy services (with retries)
+		###############################################
+		for pk in lvmetad polkitd wpa_supplicant NetworkManager dhcpcd dhclient; do
+			pkill $pk;
+		done
+		for i in {1..2}; do
+			# wired network until proven otherwise
+			ifconfig ${ETH} up
+			sleep 1
+			NETDEV=${ETH}
+
+			if [ `cat /sys/class/net/${ETH}/carrier_up_count` -eq 0 ]; then
+				# try wireless network if the cable is unplugged (if wirless does not work, it is probably due to the time it takes to detect the wireless hardware: a sleep may help)
+				if ifconfig ${WLAN} up; then
+					wpa_supplicant -B -c /etc/wpa_supplicant/wpa_supplicant.conf -i ${WLAN}
+					sleep 3
+					ifconfig ${ETH} down   # try to save a little power
+					NETDEV=${WLAN}
+				fi
+			fi
+			# get the IP
+			dhcpcd -b -p -l -1 -w -1 -B ${NETDEV} || dhclient ${NETDEV}
+			# time set & network test
+			sleep 3
+			ntpdate br.pool.ntp.org && hwclock -w && break || sleep 16
+		done    # network retries
+
+		# clean some useless data to free some RAM (known to make keyboard and mouse stop working)
+		if lsusb | grep '248a:8566'; then
+		        echo "Service Keyboard / Mouse dongle detected. Not cleaning udev data..."
+		else
+		        rm -fr /run/udev/data/
+		fi
+
+	fi # internet / home server
+
+	if ((SERVER_MODE==3)); then
+		# nfs service
+		echo Y >/sys/module/overlay/parameters/nfs_export
+		mount --bind /data                        /srv/nfs/data
+		#mount --bind /mnt/hd/media                /srv/nfs/media
+		mount --bind /mnt/hd/                     /srv/nfs/hd
+		#mount --bind /mnt/hd/media/dlna/music     /srv/nfs/hd/media/dlna/music
+		# mount local backup overlays as read-write over NFS
+		# music
+		cd /srv/nfs/hd/media/dlna
+		mount music/sfs/music-*.sfs music/sfs && mount -t overlay -o upperdir=music/rw,lowerdir=music/sfs,workdir=music/work -o comment=Music -o nfs_export=on -o index=on -o redirect_dir=nofollow overlay music
+		cd -
+		# local fs binds
+		mount --bind /srv/nfs/hd/media/dlna/music /mnt/hd/media/dlna/music
+		systemctl start nfs-server
+		# start media services
+		systemctl start minidlna
+		systemctl start transmission || sudo -u transmission /usr/bin/transmission-daemon -e /dev/null --log-error &> /dev/null &
+		# set service priorities
+		sleep 5
+		#chrt -rr -p 99 `pgrep minidlnad`               # minidlna will have the greater (realtime) priority
+		chrt -i -p 0 `pgrep transmission-daemon`       # transmission has the lowest (idle) priority
+	fi
+
+fi # server-only shananigans
+
+
+
+if ((DESKTOP_MODE>0)); then
+	# nfs client, if we're @ home
+	mount -t nfs -o noatime,nolock 192.168.1.5:/srv/nfs                     /mnt/nfs
+	mount -t nfs -o noatime,nolock 192.168.1.5:/srv/nfs/hd/media/dlna/music /mnt/nfs/hd/media/dlna/music
+	ls -l /mnt/nfs/{,data,media,mutuatech,hd,hd/media/dlna/music}            # making the first access here prevents udev from starting later
+fi
+
+if ((DESKTOP_MODE==0)); then
+	# if there is no console, start the interface
+	if pgrep tty || pgrep logind; then
+		echo "Not starting any framebuffer applications or else you wouldn't be able to login via console -- if you want FB, do systemctl disable getty\\@tty1; systemctl disable systemctl-logind"
+	else
+		HOME=/root USER=root LOGNAME=root exec /root/bin/StartGUI
+	fi
+fi
+
+if ((DESKTOP_MODE==2)); then
+	systemctl start sddm
+	systemctl start cups
+fi
+
+echo "### `date`: 'PostBoot' script ENDED"

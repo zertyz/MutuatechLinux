@@ -1,0 +1,12 @@
+
+# hd
+hdparm -B 254 /dev/sda
+
+# dvd drive
+echo on >/sys/block/sr0/device/power/control
+
+# power up wifi, keep eth down
+ethtool -s $ETH wol d
+ethtool -s $ETH autoneg off speed 100
+ifconfig $ETH down
+for txpower in 16; do iwconfig $WLAN txpower $txpower; sleep 1; done

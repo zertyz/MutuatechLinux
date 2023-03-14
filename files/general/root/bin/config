@@ -1,0 +1,5 @@
+ETH=`ifconfig -a -s | grep '^e' | sed 's| .*||'`
+WLAN=`ifconfig -a -s | grep '^w' | sed 's| .*||'`
+
+DESKTOP_MODE=1  # 0: no console / blank screen; 1: textual console; 2: login manager
+SERVER_MODE=1	# 0: nothing served; 1: sshd; 2: internet server; 3: the main home / file-repository server

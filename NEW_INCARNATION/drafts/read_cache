@@ -1,8 +1,0 @@
-Drafts for new MTL scripts
-
-# monitor accessed files
-inotifywait -e ACCESS -e OPEN -m -r /etc /opt /usr /var /root /home --format "%e - %w%f" | tee /tmp/watched_files.out
-
-# generate read cache files from accessed files list
-grep '^[^ ]* - ' /tmp/watched_files.out | sort | uniq -c | sort -k 1 | sed 's|[ 0-9]*[^ ]* - ||' | sort | while read f; do touch "$f" -r "$f"; done
-

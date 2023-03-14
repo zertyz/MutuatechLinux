@@ -1,0 +1,30 @@
+*this document was built before the packages were introduced -- they attempt to do what the packages does*
+*out of this, pre and post installation documents should be derived*
+
+# Desktop
+
+The following instructions apply to KDE Dr460nized Gaming edition:
+
+1. Inatall selecting manual partitioning -- add a swap partition (otherwise it won't be added). Resume boot param is properly set this way
+2. Garuda boot options: disable CPU mitigations, enable SysRq
+3. Tweak /etc/fstab with compress=zstd:7,commit=600,discard=async,ssd and comment out the tmpfs for /tmp + systemctl mask tmp.mount
+4. Reboot and recompress all files: btrfs filesystem defragment -r -v -czstd /
+5. Install custom packages served by repositories (this command may be useful for determining new additions to this list "pacman -Qen | sed 's| .*||'"): pacman -S --needed arp-scan base-devel clang cmake compsize cpupower-gui docker ffmpeg-full fluxctl freeplane gcompris-qt gephi gimp gnuplot google-chrome hugo i7z inkscape intellij-idea-ultimate-edition iotop jdk jwm libreoffice-fresh mingw-w64 pavucontrol rlottie-git rustup screen scribus smartgit speedcrunch stellarium testdisk tigervnc time transmission-remote-gtk valgrind gvim virtualbox xterm zoom  sublime-text-4 icaclient hunspell-pt-br google-earth-pro genymotion evdi displaylink deadbeef bitwig-studio android-studio skypeforlinux-stable-bin visual-studio-code-bin  android-tools ardour aspell-en aspell-pt audacity blender calibre darktable dbeaver ddrescue electron fdkaac fdupes flameshot geeqie ghidra gkrellm gparted gsmartcontrol handbrake hashcat hunspell-en_us jq kazam krita kubectl l3afpad lighttpd mupdf nvidia-dkms nvidia-settings openshot qcad qtcreator rawtherapee rdesktop redis scrot sox squashfs-tools strace wireshark-qt wmctrl xarchiver xdiskusage xdot yt-dlp printer-support gource gperf grpc-cli nvidia-dkms nvidia-settings obsidian ttf-mac-fonts
+6. Install additional AUR packages not present in AUR (pacman -Qe --foreign | sed 's| .*||'): paru -S --needed angular-cli celestia dbvis evcxr_repl ganttproject hamsket-bin jdk11 jre11 kafka presto-cli projectlibre pulse-secure xmacro  astah-community ddd dia-git editix-free epsonscan2 epsonscan2-non-free-plugin fotoxx freefilesync-bin gdmap httpstat-go jmeter modelio-bin proguard rstudio-desktop-bin skypeforlinux-stable-bin soapui sweethome3d-furniture-library treesheets-git ttf-ms-win10-auto tuxguitar tuxguitar-common visual-studio-code-bin xxdiff yed astah-uml kafka
+7. Get any not currently available packages: rsync -Pa mutuatec@mutuatech.com:/home/mutuatec/mutuatech.com/linux/aur/{xmacro,jdk,jre,astah-community,*funfonts,ephifonts*}* .
+8. Tweak other /etc files based on Mutuatech linux files to sync, giving special attention to /etc/groups (add the user to cups, vboxusers, wireshark, docker). Visudo to enable sudo without a password. Printer (copy /etc/cups/{ppd,printers.conf}). /etc/ssh/sshd_config: uncomment PermitRootLogin. Reboot.
+9. Restore home directories
+10. Install auto-boot scripts
+
+Additionals:
+a. If swap is not not on its own partition, a replacement for zram (RAM only) can be created with 'swapoff /swap; rm /swap; touch /swap; chattr +C /swap; fallocate -l $((1024*1024*512)) /swap; chmod 600 /swap; mkswap /swap; swapon /swap'.
+
+
+# Server:
+
+To be used with Garuda i3WM Edition. Do as for Desktop installation, with the following exceptions:
+
+3. zstd:15
+4. pacman -S --needed  yt-dlp arp-scan base-devel clang cmake compsize iotop jwm rust screen testdisk tigervnc time xterm l3afpad lighttpd mupdf squashfs-tools strace wmctrl yt-dlp  vbetool minidlna transmission-cli fbset
+5. paru -S --needed angular-cli xmacro httpstat-go wine-x64
+9. restore home / mutua / ogre directories (including /operations)

@@ -1,6 +1,0 @@
-# set blocked write timeouts
-echo 60000 >/proc/sys/vm/dirty_writeback_centisecs; echo 60000 >/proc/sys/vm/dirty_expire_centisecs; echo 60 >/proc/sys/vm/dirty_background_ratio; echo 60 >/proc/sys/vm/dirty_ratio;
-
-# set optimum sector fetching for usb stick media
-for f in `find /sys | grep max_sectors$`; do echo "`cat $f` --> 256"; echo 256 > "$f"; done
-

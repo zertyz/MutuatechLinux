@@ -1,0 +1,2 @@
+# disable performance & enable power saving settings when AC is unplugged
+SUBSYSTEM=="power_supply", ATTR{status}=="Discharging", RUN+="/root/bin/PowerSave"

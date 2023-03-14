@@ -1,0 +1,45 @@
+#! /bin/bash
+
+# Stops all metatrader instances & any headless vnc server, processing the log files
+
+################### PRELUDE #####################
+script_base_dir=`dirname "$0"`
+script_base_name=`basename "$0"`
+script_group_name="${script_base_name/*-//}"	# stop-metatrader will be just metatrader
+
+# Log all outputs
+exec 1<&-
+exec 2<&-
+exec 1>>/tmp/${script_group_name}.scripts.log
+exec 2>&1
+
+# load config variables
+script_config_file="${script_base_dir}/${script_group_name}.config"
+. ${script_config_file} || (echo "####### `date`: ERROR in script '${script_base_name}': could not load config '${script_config_file}'. ABORTING SCRIPT"; exit)
+
+#################################################
+
+
+echo "`date`: Stopping metatraders"
+sudo -u $USER wineserver -k
+sleep 10
+sudo -u $USER pkill 'Xvnc|Xvfb'
+sleep 5
+sudo -u $USER pkill -f windows
+
+echo -en "`date`: Restoring swap tunning"
+echo 1 >/proc/sys/vm/swappiness
+
+local_script="${script_base_dir}/${script_base_name}.local"
+echo -en "`date`: Running local script '${local_script}', if present..."
+[ -s ${local_script} ] && . ${local_script} && echo " OK" || echo " NOT PRESENT"
+
+for mt_instance_num in `seq 0 $((${#METATRADER_INSTANCE_NAMES[@]}-1))`; do
+	mt_instance_name="${METATRADER_INSTANCE_NAMES[$mt_instance_num]}"
+	mt_dir="${METATRADER_BASE_DIR}/${mt_instance_name}"
+	echo "`date`: Processing logs in '${mt_dir}'"
+	cd "${mt_dir}"
+	sed 's|\] <[^>]*>:|] |' "${METATRADER_LOG_NAME}" | chrt -i 0 nice -n 20 xz -9ecv >"${METATRADER_LOG_NAME}.`date +%Y-%m-%d`.xz" && rm "${METATRADER_LOG_NAME}"
+done
+
+echo "`date`: DONE."

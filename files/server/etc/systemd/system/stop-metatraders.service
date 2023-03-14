@@ -1,0 +1,11 @@
+[Unit]
+Description=Stops all metatrader instances & any headless vnc server, processing the log files
+
+[Service]
+Type=forking
+ExecStart=/root/bin/stop-metatraders
+KillMode=none
+TimeoutSec=600
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,2 @@
+# Suspend when battery is at 6% or bellow
+SUBSYSTEM=="power_supply", ATTR{status}=="Discharging", ATTR{capacity}=="[0-6]", RUN+="/usr/bin/systemctl suspend"

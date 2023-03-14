@@ -1,0 +1,10 @@
+[Unit]
+Description=Run after returning from suspension or hibernation
+After=suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
+
+
+[Service]
+ExecStart=/root/bin/BackFromSuspension
+
+[Install]
+WantedBy=suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target

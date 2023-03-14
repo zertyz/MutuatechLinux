@@ -1,0 +1,20 @@
+#! /bin/bash
+
+# Applies the power save / performance settings depending on the power source being used
+
+# Procedure to redirect STDOUT and STDERR to a file: close streams, open stdout appending to a file, redirect stderr to stdout
+exec 1<&-
+exec 2<&-
+exec 1>>/tmp/mutuatechlinux.services.log
+exec 2>&1
+
+
+echo "### `date`: 'BackFromSuspension' script STARTED"
+
+if [ `cat '/sys/class/power_supply/AC*/online'` == "0" ]; then
+	`dirname "$0"`/PowerSave
+else
+	`dirname "$0"`/Performance
+fi;
+
+echo "### `date`: 'BackFromSuspension' script ENDED"

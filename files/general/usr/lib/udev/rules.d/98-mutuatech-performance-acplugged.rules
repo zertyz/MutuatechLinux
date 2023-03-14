@@ -1,0 +1,2 @@
+# disable power saving & enable performance settings when AC is plugged
+SUBSYSTEM=="power_supply", ATTR{status}=="Charging", RUN+="/root/bin/Performance"

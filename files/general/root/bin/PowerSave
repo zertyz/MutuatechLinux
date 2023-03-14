@@ -1,0 +1,38 @@
+#! /bin/bash
+
+################### PRELUDE #####################
+script_base_dir=`dirname "$0"`
+script_base_name=`basename "$0"`
+
+# Log all outputs
+exec 1<&-
+exec 2<&-
+exec 1>>/tmp/mutuatechlinux.services.log
+exec 2>&1
+
+# load config variables
+script_config_file="${script_base_dir}/config"
+. ${script_config_file} || (echo "####### `date`: ERROR in script '${script_base_name}': could not load config '${script_config_file}'. ABORTING SCRIPT"; exit)
+
+#################################################
+
+
+echo "### `date`: 'PowerSave' script STARTED"
+
+tlp bat
+
+# system
+powertop --auto-tune
+sysctl --system			# restore writeback settings that powertop messes with
+echo 600 >/proc/sys/vm/laptop_mode
+echo powersupersave >/sys/module/pcie_aspm/parameters/policy
+
+# cpu
+for p in /sys/devices/system/cpu/cpu[0-9]*/power/energy_perf_bias; do echo 15 >"$p"; done
+for p in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/scaling_governor; do echo powersave >"$p"; done
+
+local_script="${script_base_dir}/${script_base_name}.local"
+echo -en "`date`: Running local script '${local_script}', if present..."
+[ -s ${local_script} ] && . ${local_script} && echo " OK" || echo " NOT PRESENT"
+
+echo "### `date`: 'PowerSave' script ENDED"

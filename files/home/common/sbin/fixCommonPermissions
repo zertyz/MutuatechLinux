@@ -1,8 +1,0 @@
-#! /bin/bash
-
- # fix /home/common permissions, so all newly created directories and files are writable by the 'users' group
- # therefore, allowing it to be used as a shared folder for caches -- where users are able to write / delete / read from it.
-
-chown -fR :users /home/common
-chmod -fR g+w /home/common
-setfacl -m default:group:users:rwx -R /home/common

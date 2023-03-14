@@ -1,0 +1,11 @@
+[Unit]
+Description=Local Startup Script
+ 
+[Service]
+Type=forking
+ExecStart=/root/bin/PostBoot
+KillMode=none
+TimeoutSec=600
+ 
+[Install]
+WantedBy=multi-user.target
