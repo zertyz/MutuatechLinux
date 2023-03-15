@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily B3 operation (archive)
+
+[Timer]
+OnCalendar=Mon..Fri 21:50
+OnCalendar=Mon..Fri 22:50
+OnCalendar=Mon..Fri 23:50
+Persistent=false
+
+[Install]
+WantedBy=timers.target

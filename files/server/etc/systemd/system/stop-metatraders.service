@@ -1,5 +1,5 @@
 [Unit]
-Description=Stops all metatrader instances & any headless vnc server, processing the log files
+Description=timer: Stops all metatrader instances & any headless vnc server, processing the log files
 
 [Service]
 Type=forking

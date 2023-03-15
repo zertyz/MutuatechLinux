@@ -24,28 +24,41 @@ script_config_file="${script_base_dir}/config"
 
 echo "### `date`: 'PostBoot' script STARTED"
 
-echo "### `date`: Waiting 60s for all systemd services to load"
+# In case the usual systemd services are disabled (they do for headless), we
+# temporarily enable them to give the user the change to login after boot
+if ((DESKTOP_MODE == 0)); then
+	for s in systemd-journald systemd-udevd systemd-logind systemd-oomd getty@tty1 NetworkManager ModemManager avahi polkit dbus; do
+		systemctl unmask $s
+		systemctl start $s
+	done
+fi
+
+echo "### `date`: Waiting 60s for all systemd services to load (user have the change to login and kill this script within 60 seconds)"
 sleep 60
-echo "### `date`: Done waiting. Continueing with PostBoot"
+echo "### `date`: Done waiting. Continuing with PostBoot"
 
 local_script="${script_base_dir}/${script_base_name}.local"
 echo -en "`date`: Running local script '${local_script}', if present..."
 [ -s ${local_script} ] && . ${local_script} && echo " OK" || echo " NOT PRESENT"
 
-if ((DESKTOP_MODE==0)); then
-	# wallpaper (if console login is disabled)
-	if pgrep tty || pgrep logind; then
-		echo "Not entering in graphics mode, since you wouldn't be able to login in the console"
-	else
-		/usr/bin/fbset -g 1920 1080 1920 1080 16
-		echo 0 > /sys/class/vtconsole/vtcon1/bind
-		#fbi -autozoom -fitwidth -noverbose -t 5 -1 --vt 1 /root/wallpaper.jpg &>/dev/null
-		fbi -autozoom -fitwidth -noverbose --vt 1 -d /dev/fb0 -t 5 -1 /root/wallpaper.jpg &>/dev/null
-	fi
-fi
-
 # Apply the power settings again, after all systemd services were loaded
 /root/bin/BackFromSuspension
+
+if ((DESKTOP_MODE==0)); then
+	# disable interactive services
+	for s in systemd-udevd systemd-logind getty@tty1 ModemManager NetworkManager systemd-oomd systemd-journald avahi polkit dbus; do
+		systemctl mask $s
+		systemctl stop $s
+		pkill -f "$s"
+	done
+	for p in agetty 'systemd --user' dbus-daemon agetty; do pkill -f "$p"; done
+
+	# fancy screen
+	/usr/bin/fbset -g 1920 1080 1920 1080 16
+	echo 0 > /sys/class/vtconsole/vtcon1/bind
+	#fbi -autozoom -fitwidth -noverbose -t 5 -1 --vt 1 /root/wallpaper.jpg &>/dev/null
+	fbi -autozoom -fitwidth -noverbose --vt 1 -d /dev/fb0 -t 5 -1 /root/wallpaper.jpg &>/dev/null
+fi
 
 # tune usb devices
 eval `(find /sys -name 'max_sectors' -printf "echo 4096 >'%p';\n"; find /sys -name 'max_sectors_kb' -printf "echo $((4096/2)) >'%p';\n"
@@ -60,32 +73,12 @@ if ((SERVER_MODE > 0)); then
 	if ((SERVER_MODE >= 2)); then
 
 		# swap (servers don't use zswap, as long running services tends to have a lot of unused pages -- which we want to simply offload to the disk)
+		echo N >/sys/module/zswap/parameters/enabled
+		rmmod zram
 	
-		# stop systemd services which doesn't make sense for a 24x7 server
-		##################################################################
-
-		for s in systemd-journald getty@tty1; do
-			systemctl mask $s;
-		done;
-		for s in systemd-oomd; do
-			systemctl disable $s;
-		done;
-		for s in ModemManager NetworkManager systemd-udevd systemd-logind systemd-timesyncd systemd-oomd avahi polkit dbus; do
-			systemctl stop $s;
-		done;
-		sleep 1;
-		for s in systemd-journald "systemd --user" systemd-oomd dbus-daemon agetty; do
-			pkill -f "$s"; 
-		done;
-		for s in systemd-journald getty@tty1; do
-			systemctl unmask $s;
-		done;
-		sleep 2;
-		for s in systemd-oomd; do
-			systemctl enable $s;
-		done;
-		sleep 2;
-		pkill -f dbus-daemon
+		# hd never sleeps, for a long and healthy life
+		##############################################
+		hdparm -B 128 -M 128 /dev/sda
 
 		# network without fancy services (with retries)
 		###############################################
@@ -108,7 +101,7 @@ if ((SERVER_MODE > 0)); then
 				fi
 			fi
 			# get the IP
-			dhcpcd -b -p -l -1 -w -1 -B ${NETDEV} || dhclient ${NETDEV}
+			dhcpcd -4p ${NETDEV} || dhclient ${NETDEV}
 			# time set & network test
 			sleep 3
 			ntpdate br.pool.ntp.org && hwclock -w && break || sleep 16
@@ -125,11 +118,11 @@ if ((SERVER_MODE > 0)); then
 
 	if ((SERVER_MODE==3)); then
 		# nfs service
+		modprobe overlay
 		echo Y >/sys/module/overlay/parameters/nfs_export
 		mount --bind /data                        /srv/nfs/data
-		#mount --bind /mnt/hd/media                /srv/nfs/media
 		mount --bind /mnt/hd/                     /srv/nfs/hd
-		#mount --bind /mnt/hd/media/dlna/music     /srv/nfs/hd/media/dlna/music
+		mount --bind /media                       /srv/nfs/media
 		# mount local backup overlays as read-write over NFS
 		# music
 		cd /srv/nfs/hd/media/dlna
@@ -143,7 +136,7 @@ if ((SERVER_MODE > 0)); then
 		systemctl start transmission || sudo -u transmission /usr/bin/transmission-daemon -e /dev/null --log-error &> /dev/null &
 		# set service priorities
 		sleep 5
-		#chrt -rr -p 99 `pgrep minidlnad`               # minidlna will have the greater (realtime) priority
+		chrt -rr -p 99 `pgrep minidlnad`               # minidlna will have the greater (realtime) priority
 		chrt -i -p 0 `pgrep transmission-daemon`       # transmission has the lowest (idle) priority
 	fi
 

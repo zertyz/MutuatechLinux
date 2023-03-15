@@ -43,7 +43,7 @@ echo "`date`: Generating X start script '${X_START_SCRIPT}'"
 ) > "${X_START_SCRIPT}"
 
 echo "`date`: Tunning swap..."
-echo 0 >/proc/sys/vm/swappiness
+echo 1 >/proc/sys/vm/swappiness
 echo N >/sys/module/zswap/parameters/enabled
 
 echo "`date`: Starting metatraders on behalf of '${USER}'"

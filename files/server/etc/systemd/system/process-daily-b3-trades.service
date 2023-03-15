@@ -1,0 +1,11 @@
+[Unit]
+Description=timer: Downloads & Archives the daily B3 trades data
+
+[Service]
+Type=forking
+ExecStart=/root/bin/process-daily-b3-trades
+KillMode=none
+TimeoutSec=600
+
+[Install]
+WantedBy=multi-user.target

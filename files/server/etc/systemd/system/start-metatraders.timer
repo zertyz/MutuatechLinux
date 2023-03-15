@@ -1,0 +1,9 @@
+[Unit]
+Description=Daily MetaTrader operation (start)
+
+[Timer]
+OnCalendar=Mon..Fri 09:45
+Persistent=false
+
+[Install]
+WantedBy=timers.target
