@@ -20,7 +20,7 @@ script_config_file="${script_base_dir}/config"
 
 
 # set for performance or powersave depending on the power source in play
-/home/common/bin/BackFromSuspension
+/root/bin/BackFromSuspension
 
 echo "### `date`: 'PostBoot' script STARTED"
 
@@ -32,6 +32,10 @@ if ((DESKTOP_MODE == 0)); then
 		systemctl start $s
 	done
 fi
+
+# load config variables once again (after reloading the services above)
+script_config_file="${script_base_dir}/config"
+. ${script_config_file} || (echo "####### `date`: ERROR in script '${script_base_name}': could not load config '${script_config_file}'. ABORTING SCRIPT"; exit)
 
 echo "### `date`: Waiting 60s for all systemd services to load (user have the change to login and kill this script within 60 seconds)"
 sleep 60
@@ -46,7 +50,7 @@ echo -en "`date`: Running local script '${local_script}', if present..."
 
 if ((DESKTOP_MODE==0)); then
 	# disable interactive services
-	for s in systemd-udevd systemd-logind getty@tty1 ModemManager NetworkManager systemd-oomd systemd-journald avahi polkit dbus; do
+	for s in _systemd-udevd_ systemd-logind getty@tty1 ModemManager NetworkManager systemd-oomd systemd-journald avahi polkit dbus; do
 		systemctl mask $s
 		systemctl stop $s
 		pkill -f "$s"
@@ -75,7 +79,7 @@ if ((SERVER_MODE > 0)); then
 		# swap (servers don't use zswap, as long running services tends to have a lot of unused pages -- which we want to simply offload to the disk)
 		echo N >/sys/module/zswap/parameters/enabled
 		rmmod zram
-	
+
 		# hd never sleeps, for a long and healthy life
 		##############################################
 		hdparm -B 128 -M 128 /dev/sda
@@ -91,7 +95,7 @@ if ((SERVER_MODE > 0)); then
 			sleep 1
 			NETDEV=${ETH}
 
-			if [ `cat /sys/class/net/${ETH}/carrier_up_count` -eq 0 ]; then
+			if [ `cat /sys/class/net/${ETH}/carrier_up_count || echo 0` -eq 0 ]; then
 				# try wireless network if the cable is unplugged (if wirless does not work, it is probably due to the time it takes to detect the wireless hardware: a sleep may help)
 				if ifconfig ${WLAN} up; then
 					wpa_supplicant -B -c /etc/wpa_supplicant/wpa_supplicant.conf -i ${WLAN}
@@ -100,6 +104,7 @@ if ((SERVER_MODE > 0)); then
 					NETDEV=${WLAN}
 				fi
 			fi
+			echo "### `date`: PostBoot: starting network for interface ${NETDEV} -- eth is ${ETH}; wlan is ${WLAN}"
 			# get the IP
 			dhcpcd -4p ${NETDEV} || dhclient ${NETDEV}
 			# time set & network test
