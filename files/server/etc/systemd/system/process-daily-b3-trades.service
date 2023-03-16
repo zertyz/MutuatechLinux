@@ -2,10 +2,8 @@
 Description=timer: Downloads & Archives the daily B3 trades data
 
 [Service]
-Type=forking
+Type=simple
 ExecStart=/root/bin/process-daily-b3-trades
 KillMode=none
-TimeoutSec=600
-
-[Install]
-WantedBy=multi-user.target
+IOSchedulingClass=idle
+CPUSchedulingPolicy=idle

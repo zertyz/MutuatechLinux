@@ -1,0 +1,18 @@
+
+for p in packages/*; do
+
+	cd $p;
+
+	F='PKGBUILD'
+	UNPUBLISHED_VERSION=`grep --max-count 1 pkgver $F | sed 's|[^=]*=\(.*\)|\1|'`
+	V_PREFIX=`echo ${UNPUBLISHED_VERSION} | sed "s|\(.*\.\)\(.*\)|\1|"`
+	V_SUFFIX=`echo ${UNPUBLISHED_VERSION} | sed "s|\(.*\.\)\(.*\)|\2|"`
+	NEXT_V_SUFFIX=$((V_SUFFIX+1))
+	NEXT_VERSION="${V_PREFIX}${NEXT_V_SUFFIX}"
+	echo -en "$p: from ${UNPUBLISHED_VERSION} to ${NEXT_VERSION}...";
+	sed -i "s|pkgver=${UNPUBLISHED_VERSION}|pkgver=${NEXT_VERSION}|" $F && echo "OK" || echo " FAILED"
+
+	rm *.pkg.tar*
+	makepkg -sdf
+	cd -
+done

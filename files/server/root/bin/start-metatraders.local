@@ -1,8 +1,0 @@
-# us's OgreBot1
-systemctl stop sshd
-for s in systemd-udevd systemd-logind getty@tty1; do systemctl mask $s; systemctl stop $s; sleep 5; systemctl unmask $s; done
-systemctl stop ModemManager
-for p in agetty 'systemd --user'; do pkill -f "$p"; done
-(sleep 60; pkill -f 'udisksd|dbus-daemon') &
-# oldlap
-# /root/bin/Performance

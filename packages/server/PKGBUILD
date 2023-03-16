@@ -1,10 +1,10 @@
 pkgname=mutuatechlinux-server
-pkgver=0.1.0
+pkgver=0.1.4
 pkgrel=1
 pkgdesc="Server part of the MutuaTech Linux packages"
 arch=('x86_64')
 url="https://github.com/zertyz/MutuatechLinux"
-depends=('mutuatechlinux-general' 'wine-x64' 'rust' 'vbetool' 'minidlna' 'transmission-cli' 'ntp' 'hdparm')
+depends=('mutuatechlinux-general' wine-x64 rust vbetool minidlna transmission-cli ntp hdparm)
 source=()
 sha512sums=()
 

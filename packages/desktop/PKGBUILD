@@ -1,10 +1,27 @@
 pkgname=mutuatechlinux-desktop
-pkgver=0.1.0
+pkgver=0.1.4
 pkgrel=1
 pkgdesc="Desktop part of the MutuaTech Linux packages"
 arch=('x86_64')
 url="https://github.com/zertyz/MutuatechLinux"
-depends=('mutuatechlinux-general' cpupower-gui docker ffmpeg-full fluxctl freeplane gcompris-qt gephi gimp gnuplot google-chrome hugo i7z inkscape intellij-idea-ultimate-edition jdk libreoffice-fresh pavucontrol rlottie-git rustup scribus smartgit speedcrunch stellarium transmission-remote-gtk valgrind gvim virtualbox zoom  sublime-text-4 icaclient hunspell-pt-br google-earth-pro genymotion evdi displaylink deadbeef bitwig-studio android-studio skypeforlinux-stable-bin visual-studio-code-bin  android-tools ardour aspell-en aspell-pt audacity blender calibre darktable dbeaver ddrescue electron fdkaac fdupes flameshot geeqie ghidra gkrellm gparted gsmartcontrol handbrake hashcat hunspell-en_us jq kazam krita kubectl nvidia-dkms nvidia-settings openshot qcad qtcreator rawtherapee rdesktop redis scrot sox wireshark-qt xarchiver xdiskusage xdot printer-support gource gperf grpc-cli nvidia-dkms nvidia-settings obsidian ttf-mac-fonts angular-cli celestia dbvis evcxr_repl ganttproject hamsket-bin jdk11 jre11 kafka presto-cli projectlibre pulse-secure xmacro astah-uml ddd dia-git editix-free epsonscan2 epsonscan2-non-free-plugin fotoxx freefilesync-bin gdmap httpstat-go jmeter modelio-bin proguard rstudio-desktop-bin skypeforlinux-stable-bin soapui sweethome3d-furniture-library treesheets-git ttf-ms-win10-auto tuxguitar tuxguitar-common visual-studio-code-bin xxdiff yed astah-uml kafka)
+depends=('mutuatechlinux-general' cpupower-gui docker ffmpeg-full fluxctl freeplane gcompris-qt gephi gimp gnuplot google-chrome hugo i7z inkscape intellij-idea-ultimate-edition
+jdk libreoffice-fresh pavucontrol rlottie-git rustup scribus smartgit speedcrunch stellarium transmission-remote-gtk valgrind gvim virtualbox zoom  sublime-text-4 icaclient
+hunspell-pt-br google-earth-pro genymotion evdi displaylink deadbeef bitwig-studio android-studio skypeforlinux-stable-bin visual-studio-code-bin  android-tools ardour aspell-en
+aspell-pt audacity blender calibre darktable dbeaver ddrescue electron fdkaac fdupes flameshot geeqie ghidra gkrellm gparted gsmartcontrol handbrake hashcat hunspell-en_us jq
+kazam krita kubectl nvidia-dkms nvidia-settings openshot qcad qtcreator rawtherapee rdesktop redis scrot sox wireshark-qt xarchiver xdiskusage xdot printer-support gource gperf
+grpc-cli nvidia-dkms nvidia-settings obsidian ttf-mac-fonts angular-cli celestia dbvis evcxr_repl ganttproject hamsket-bin jdk11 jre11 kafka presto-cli projectlibre pulse-secure
+xmacro astah-uml ddd dia-git editix-free epsonscan2 epsonscan2-non-free-plugin fotoxx freefilesync-bin gdmap httpstat-go jmeter modelio-bin proguard rstudio-desktop-bin
+skypeforlinux-stable-bin soapui sweethome3d-furniture-library treesheets-git ttf-ms-win10-auto tuxguitar tuxguitar-common visual-studio-code-bin xxdiff yed astah-uml kafka
+
+# games
+#######
+
+openarena
+supertux
+supertuxkart
+warmux
+
+)
 source=()
 sha512sums=()
 

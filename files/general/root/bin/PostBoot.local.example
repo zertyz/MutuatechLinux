@@ -1,4 +1,4 @@
-# put here any modules or other fine-tuning for your hardware
+# put on PostBoot.local any modules or other fine-tuning for your hardware
 
 # some systems required that udevd is not masked to boot
 # (and requires it to be running to mount temporary storage)

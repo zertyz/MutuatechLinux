@@ -160,7 +160,7 @@ if ((DESKTOP_MODE==0)); then
 	fi
 fi
 
-if ((DESKTOP_MODE==2)); then
+if ((DESKTOP_MODE>=2)); then
 	systemctl start sddm
 	systemctl start cups
 fi

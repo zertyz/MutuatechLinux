@@ -2,10 +2,8 @@
 Description=timer: Stops all metatrader instances & any headless vnc server, processing the log files
 
 [Service]
-Type=forking
+Type=simple
 ExecStart=/root/bin/stop-metatraders
 KillMode=none
-TimeoutSec=600
-
-[Install]
-WantedBy=multi-user.target
+IOSchedulingClass=idle
+CPUSchedulingPolicy=idle

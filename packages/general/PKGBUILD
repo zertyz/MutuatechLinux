@@ -1,11 +1,11 @@
 pkgname=mutuatechlinux-general
-pkgver=0.1.0
+pkgver=0.1.4
 pkgrel=1
 pkgdesc="Generic part (shared between 'server' and 'desktop') of the MutuaTech Linux packages"
 arch=('x86_64')
 url="https://github.com/zertyz/MutuatechLinux"
-depends=('arp-scan' 'base-devel' 'ddrescue' 'clang' 'cmake' 'compsize' 'iotop' 'jwm' 'screen' 'testdisk' 'tigervnc' 'time' 'xterm' 'l3afpad' 'lighttpd'
-         'mupdf' 'squashfs-tools' 'strace' 'wmctrl' 'yt-dlp' 'fbset')
+depends=(arp-scan base-devel ddrescue clang cmake compsize iotop jwm screen testdisk tigervnc time xterm l3afpad lighttpd
+         mupdf squashfs-tools strace tlp wmctrl yt-dlp fbset)
 source=()
 sha512sums=()
 

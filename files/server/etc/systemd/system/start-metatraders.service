@@ -2,10 +2,6 @@
 Description=timer: Starts (and forgets) local headless metatrader instances
 
 [Service]
-Type=forking
+Type=simple
 ExecStart=/root/bin/start-metatraders
 KillMode=none
-TimeoutSec=600
-
-[Install]
-WantedBy=multi-user.target
