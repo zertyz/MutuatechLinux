@@ -1,0 +1,16 @@
+#! /bin/bash
+
+today=`date +%Y-%m-%d`
+logfile="/tmp/b3.archives.log"
+csvfile="/operations/OgreRobot.com/datasets/B3/trades/trades.${today}.xz"
+if [ ! -s "$csvfile" ]; then
+	echo "### `date`: $0: Downloading B3 csv file '${csvfile}'..." >>"${logfile}"
+	wget -qO /tmp/zip.zip "https://arquivos.b3.com.br/apinegocios/tickercsv/${today}" && unzip -p /tmp/zip.zip | chrt -i 0 nice -n 20 xz --lzma2=dict=64MiB,lc=4,lp=0,pb=0,mode=normal,nice=273,mf=bt2,depth=1024 -cvv >"${csvfile}"
+	rm /tmp/zip.zip
+	echo "### `date`: $0: Loading the CSV into the Ogre RKYV Archive" >>"${logfile}"
+	/usr/bin/time -v /operations/OgreRobot.com/bin/archive-converter update -d Trades &>>"${logfile}"
+	echo "### `date`: $0: Querying for the best daytrade assets (and sending to telegram)" >>"${logfile}"
+	/usr/bin/time -v /operations/OgreRobot.com/bin/archive-converter trades-query optimal-trading-opportunities-analysis --asset-length-range 0..=64 --asset-price-range 0.00..=99999.00 --num-trades-range 4800..=9999999 &>>"${logfile}"
+else
+	echo "### `date`: $0: skipping execution: B3 csv file '${csvfile}' is already present" >>"${logfile}"
+fi

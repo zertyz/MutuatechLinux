@@ -11,7 +11,7 @@ exec 2>&1
 
 echo "### `date`: 'BackFromSuspension' script STARTED"
 
-if [ `cat '/sys/class/power_supply/AC*/online'` == "0" ]; then
+if [ `cat /sys/class/power_supply/AC*/online` == "0" ]; then
 	`dirname "$0"`/PowerSave
 else
 	`dirname "$0"`/Performance

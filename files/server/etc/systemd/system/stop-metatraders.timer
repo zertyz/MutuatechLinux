@@ -2,7 +2,7 @@
 Description=Daily MetaTrader operation (stop)
 
 [Timer]
-OnCalendar=Mon..Fri 18:15
+OnCalendar=Mon..Fri 17:15
 Persistent=false
 
 [Install]

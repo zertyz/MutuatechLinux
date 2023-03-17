@@ -22,7 +22,7 @@ echo "### `date`: 'Performance' script STARTED"
 tlp ac
 
 # system
-sysctl --system
+sysctl --system &>/dev/null
 echo 0 >/proc/sys/vm/laptop_mode
 echo performance >/sys/module/pcie_aspm/parameters/policy
 

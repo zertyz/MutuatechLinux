@@ -22,8 +22,8 @@ echo "### `date`: 'PowerSave' script STARTED"
 tlp bat
 
 # system
-powertop --auto-tune
-sysctl --system			# restore writeback settings that powertop messes with
+powertop --auto-tune &>/dev/null
+sysctl --system &>/dev/null			# restore writeback settings that powertop messes with
 echo 600 >/proc/sys/vm/laptop_mode
 echo powersupersave >/sys/module/pcie_aspm/parameters/policy
 
