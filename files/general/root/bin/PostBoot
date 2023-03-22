@@ -143,6 +143,8 @@ if ((SERVER_MODE > 0)); then
 		sleep 5
 		chrt -rr -p 99 `pgrep minidlnad`               # minidlna will have the greater (realtime) priority
 		chrt -i -p 0 `pgrep transmission-daemon`       # transmission has the lowest (idle) priority
+		# turn off the screen
+		/usr/bin/vbetool dpms off
 	fi
 
 fi # server-only shananigans
