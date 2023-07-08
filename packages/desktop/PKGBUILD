@@ -4,9 +4,14 @@ pkgrel=1
 pkgdesc="Desktop part of the MutuaTech Linux packages"
 arch=('x86_64')
 url="https://github.com/zertyz/MutuatechLinux"
-depends=('mutuatechlinux-general' cpupower-gui docker ffmpeg-full fluxctl freeplane gcompris-qt gephi gimp gnuplot google-chrome hugo i7z inkscape intellij-idea-ultimate-edition
+
+depends=(
+
+'mutuatechlinux-general'
+
+cpupower-gui docker ffmpeg-full fluxctl freeplane gcompris-qt gephi gimp gnuplot google-chrome hugo i7z inkscape intellij-idea-ultimate-edition
 jdk libreoffice-fresh pavucontrol rlottie-git rustup scribus smartgit speedcrunch stellarium transmission-remote-gtk valgrind gvim virtualbox zoom  sublime-text-4 icaclient
-hunspell-pt-br google-earth-pro genymotion evdi displaylink deadbeef bitwig-studio android-studio skypeforlinux-stable-bin visual-studio-code-bin  android-tools ardour aspell-en
+hunspell-pt-br google-earth-pro genymotion evdi displaylink deadbeef bitwig-studio skypeforlinux-stable-bin visual-studio-code-bin  android-tools ardour aspell-en
 aspell-pt audacity blender calibre darktable dbeaver ddrescue electron fdkaac fdupes flameshot geeqie ghidra gkrellm gparted gsmartcontrol handbrake hashcat hunspell-en_us jq
 kazam krita kubectl nvidia-dkms nvidia-settings openshot qcad qtcreator rawtherapee rdesktop redis scrot sox wireshark-qt xarchiver xdiskusage xdot printer-support gource gperf
 grpc-cli nvidia-dkms nvidia-settings obsidian ttf-mac-fonts angular-cli celestia dbvis evcxr_repl ganttproject hamsket-bin jdk11 jre11 kafka presto-cli projectlibre pulse-secure
@@ -21,7 +26,23 @@ supertux
 supertuxkart
 warmux
 
+
+# development
+#############
+
+# android
+android-ndk
+android-platform-25
+android-sdk
+android-sdk-build-tools-25
+android-sdk-cmdline-tools-latest
+android-sdk-platform-tools
+android-tools
+android-udev
+android-studio
+
 )
+
 source=()
 sha512sums=()
 
