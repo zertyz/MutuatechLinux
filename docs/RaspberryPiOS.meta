@@ -1,0 +1,31 @@
+echo Y >/sys/module/zswap/parameters/enabled; echo 80 > /sys/module/zswap/parameters/max_pool_percent; echo zstd > /sys/module/zswap/parameters/compressor ; swapon /var/swap
+
+rm /var/swap; touch /var/swap; chattr +C /var/swap; fallocate -l256m /var/swap; chmod 600 /var/swap; mkswap /var/swap; swapon /var/swap;
+
+free; for service in systemd-udevd systemd-timesyncd systemd-logind colord cron dbus polkit pulseaudio-enable-autospawn rtkit-daemon; do systemctl mask $service; systemctl stop $service; systemctl unmask $service; done; free
+
+apt-get install gcompris
+apt-get install tuxpaint scratch kturtle geogebra openarena hedgewars minetest supertux
+
+apt-get install freeplane chromium-browser stellarium astro-simulation libreoffice-pi
+
+apt-get install apt-file; apt-file update; apt-file search compsize
+apt-get install xxxx
+
+apt-get install raspberrypi-ui-mods
+
+apt-get install unknown-horizons armagetronad 0ad warzone2100 astromenace alien-arena torcs wesnoth freeciv assaultcube cube2 redeclipse colobot runescape supertuxkart cataclysm-dda-sdl openttd openrct2 teeworlds
+
+apt-get install flatpak
+# apt-get install stardew-valley terraria minecraft-pi baba-is-you celeste
+flatpak install com.playism.StardewValley
+flatpak install com.terraria.Terraria
+flatpak install com.mojang.MinecraftPi
+flatpak install com.babaisyou.babaisyou
+flatpak install com.celestegame.Celeste
+
+flatpak run com.playism.StardewValley
+flatpak run com.terraria.Terraria
+flatpak run com.mojang.MinecraftPi
+flatpak run com.babaisyou.babaisyou
+flatpak run com.celestegame.Celeste
