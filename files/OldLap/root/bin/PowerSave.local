@@ -1,0 +1,4 @@
+# tlp and powertop messes with those SATA configs, which causes the undesired effect of HD spinning down... The following circumvents this:
+echo on >/sys/bus/pci/devices/0000:00:1f.2/ata1/power/control
+echo max_performance >/sys/bus/pci/devices/0000:00:1f.2/ata1/host0/scsi_host/host0/link_power_management_policy
+echo on >/sys/block/sda/device/power/control

@@ -1,0 +1,12 @@
+# put on PostBoot.local any modules or other fine-tuning for your hardware
+
+# some systems required that udevd is not masked to boot
+# (and requires it to be running to mount temporary storage)
+systemctl unmask systemd-udevd
+
+# try to get a 1Gb speed on the network:
+ethtool -s enp3s0 speed 1000 duplex full # autoneg off
+ifconfig enp3s0 down
+ethtool -s enp3s0 speed 1000 duplex full # autoneg off
+ifconfig enp3s0 up
+ethtool -s enp3s0 speed 1000 duplex full # autoneg off

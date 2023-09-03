@@ -1,0 +1,14 @@
+cat stop-metatraders.local
+
+# restablish timers stopped at MT5 start -- keep both lists in sync
+for timer in logrotate.timer shadow.timer updatedb.timer man-db.timer snapper-cleanup.timer systemd-tmpfiles-clean.timer archlinux-keyring-wkd-sync.timer btrfs-balance.timer btrfs-defrag.timer btrfs-scrub.timer btrfs-trim.timer pamac-cleancache.timer; do
+	systemctl start $timer
+done
+
+# back transmitting... (with the lowest possible priority)
+systemctl start transmission
+sleep 15; for pid in `pgrep transmission-daemon`; do chrt -i -p 0 $pid; done
+
+# easy on heat and energy consumption during serving hours
+/root/bin/PowerSave
+echo 0 >/sys/devices/system/cpu/intel_pstate/no_turbo
