@@ -1,0 +1,78 @@
+
+
+1) Install FreeBSD using ZFS and creating a default user
+
+
+2) PermitRootLogin in /etc/ssh/sshd_config -- either yes or prohibit-password
+
+
+3) Compress the ZFS:
+    zfs set compression=zstd-19 zroot
+
+
+4) Optionally set a low latency workspace:
+    zfs create zroot/lowlatency
+    zfs set mountpoint=/lowlatency zroot/lowlatency
+    zfs set compression=off zroot/lowlatency
+
+
+5) Tweaks to /etc/sysctl.conf -- reload with /etc/rc.d/sysctl restart
+# tune block sizes for compression -- ChatGPT said this allows multi cpu compression...
+vfs.zfs.min_auto_ashift: 12
+vfs.zfs.max_auto_ashift: 16
+
+# default automatic syncing time outs & buffer sizes
+vfs.zfs.txg.timeout: 600
+
+vfs.zfs.dirty_data_max_percent=95
+vfs.zfs.dirty_data_max_max_percent=98
+vfs.zfs.dirty_data_max_max=1610612736
+
+vfs.zfs.delay_min_dirty_percent=95
+vfs.zfs.dirty_data_sync_percent=98
+vfs.zfs.vdev.async_write_active_min_dirty_percent=90
+vfs.zfs.vdev.async_write_active_max_dirty_percent=98
+
+
+6) Tweaks to /boot/loader.conf:
+# tunables for ZFS performance --
+# default automatic syncing time outs & buffer sizes
+vfs.zfs.txg.timeout: 600
+
+vfs.zfs.dirty_data_max_percent=95
+vfs.zfs.dirty_data_max_max_percent=98
+vfs.zfs.dirty_data_max_max=1610612736
+
+vfs.zfs.delay_min_dirty_percent=95
+vfs.zfs.dirty_data_sync_percent=98
+vfs.zfs.vdev.async_write_active_min_dirty_percent=90
+vfs.zfs.vdev.async_write_active_max_dirty_percent=98
+
+7) Tweaks to /etc/rc.conf:
+# mutuatech's
+performance_cpu_freq="HIGH"
+nfs_client_enable="YES"
+
+8) Update the system: freebsd-update fetch ; freebsd-update install ; pkg update ; pkg upgrade ; pkg clean
+
+9) Install additional packages: pkg install btop git screen rsync bash vim wine wine-gecko tigervnc-server xorg-vfbserver
+
+10) Install Rust via rustup
+
+11) Configure /root/bin/PostBoot:
+service sendmail stop ; service getty stop ; service syslogd stop ; service devd stop ; service cron stop
+mount -t nfs -o noatime 192.168.1.5:/srv/nfs /mnt/nfs
+
+12) In case tunning for Ogre Robot operations:
+rsync -Pa --exclude=backend/target /mnt/nfs/data/binded_operations/OgreRobot.com/bin /operations/OgreRobot.com/
+setenv RUSTFLAGS "-C target-cpu=native" ; cd /operations/OgreRobot.com/development/backend ; cargo test --release --no-run ; cargo build --release -p archive-converter ; touch target/release/archive-converter -r /mnt/nfs/data/binded_operations/OgreRobot.com/datasets/B3/trades/README ; ls -l target/release/ ; cp -av target/release/archive-converter /operations/OgreRobot.com/bin
+
+
+-----------------------------------------------------------------------
+git clone 'https://github.com/zertyz/reactive-mutiny'
+setenv RUSTFLAGS="-C target-cpu=native" ; cargo test --release --no-run
+
+636  4:33    ssh-keygen
+642  4:35    mkdir -p /operations/OgreRobot.com/development/
+643  4:35    cd /operations/OgreRobot.com/development/ ; git clone --recurse-submodules 'ssh://mutuatec@mutuatech.com/home/mutuatec/git/development/backend/OgreRobot.com'
+
