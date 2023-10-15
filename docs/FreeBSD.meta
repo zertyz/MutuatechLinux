@@ -53,17 +53,20 @@ vfs.zfs.vdev.async_write_active_max_dirty_percent=98
 performance_cpu_freq="HIGH"
 nfs_client_enable="YES"
 
-8) Update the system: freebsd-update fetch ; freebsd-update install ; pkg update ; pkg upgrade ; pkg clean
+8) Remove unneeded gettys from /etc/ttys
+  - If you need no console access, comment out from ttyv0 to ttyv8 -- the first lines starting with tty
 
-9) Install additional packages: pkg install btop git screen rsync bash vim wine wine-gecko tigervnc-server xorg-vfbserver
+9) Update the system: freebsd-update fetch ; freebsd-update install ; pkg update ; pkg upgrade ; pkg clean
 
-10) Install Rust via rustup
+10) Install additional packages: pkg install btop git screen rsync bash vim wine wine-gecko tigervnc-server xorg-vfbserver
 
-11) Configure /root/bin/PostBoot:
+11) Install Rust via rustup
+
+12) Configure /root/bin/PostBoot:
 service sendmail stop ; service getty stop ; service syslogd stop ; service devd stop ; service cron stop
 mount -t nfs -o noatime 192.168.1.5:/srv/nfs /mnt/nfs
 
-12) In case tunning for Ogre Robot operations:
+13) In case tunning for Ogre Robot operations:
 rsync -Pa --exclude=backend/target /mnt/nfs/data/binded_operations/OgreRobot.com/bin /operations/OgreRobot.com/
 setenv RUSTFLAGS "-C target-cpu=native" ; cd /operations/OgreRobot.com/development/backend ; cargo test --release --no-run ; cargo build --release -p archive-converter ; touch target/release/archive-converter -r /mnt/nfs/data/binded_operations/OgreRobot.com/datasets/B3/trades/README ; ls -l target/release/ ; cp -av target/release/archive-converter /operations/OgreRobot.com/bin
 
