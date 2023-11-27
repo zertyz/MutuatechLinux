@@ -8,6 +8,12 @@ url="https://github.com/zertyz/MutuatechLinux"
 # inspect the explicitly installed packages with:
 # echo `pacman -Qen | sed 's| .*||'`
 # echo `pacman -Qe --foreign | sed 's| .*||'`
+#
+# Some useful scripts:
+# 1) Inspect what explicitly installed local packages are not listed here:
+# eval $(echo -en "installed=(" `pacman -Qen | sed 's| .*||'`; echo -en `pacman -Qe --foreign | sed 's| .*||'` ")"); source PKGBUILD; echo -en "Locally instaled packages NOT WANTED: "; for installed_package in "${installed[@]}"; do for wanted_package in "${depends[@]}"; do found=0; if [ "$wanted_package" == "$installed_package" ]; then found=1; break; fi; done; if [ $found -eq 0 ]; then echo -en "$installed_package "; fi; done; echo
+# 2) The oposite: what wanted packages are not yet installed locally:
+# echo -en "Wanted packages NOT INSTALLED: "; for wanted_package in "${depends[@]}"; do found=0; for installed_package in "${installed[@]}"; do if [ "$wanted_package" == "$installed_package" ]; then found=1; break; fi; done; if [ $found -eq 0 ]; then echo -en "$wanted_package "; fi; done; echo
 depends=(
 
 'mutuatechlinux-general'
@@ -15,28 +21,89 @@ depends=(
 # cli
 ######
 
-android-tools
-ffmpeg-full
-gnuplot
-hugo
+# sys admin
+htop
+btop
 i7z
 ddrescue
 fdkaac
 fdupes
+compsize
+dmidecode
+dosfstools
+e2fsprogs
+exfatprogs
+f2fs-tools
+fatresize 
+jfsutils
+memtest86+
+mlocate 
+mtools
+nilfs-utils
+pciutils
+ntfs-3g
+nvme-cli 
+powertop
+reiserfsprogs
+rsync
+screen
+squashfs-tools
+sshfs
+strace
+testdisk
+
+# network & security
 hashcat
+arp-scan
+gnu-netcat
+nmap
+tigervnc
+wireless_tools
+ethtool
+net-tools
+nfs-utils
+lighttpd
+
+# general programming tools
+base-devel
+android-tools
+gnuplot
+hugo
 jq
+git
+m4
+time
+
+# archives
+lhasa
+lzip
+lzop
+p7zip
+unace
+unarchiver
+unarj
+unrar
+unzip
+
+# audio
 sox
+
+# image
 xdot
 
+# video
+#ffmpeg-full
+ffmpeg-amd-full
+yt-dlp
+mpv
 
 # libs & frameworks
-###################
-
 aspell-en
 aspell-pt
 hunspell-en_us
 hunspell-pt-br
 rlottie-git
+wine
 
 
 # hardware support
@@ -46,18 +113,10 @@ rlottie-git
 #displaylink
 #nvidia-dkms
 #nvidia-settings
+#garuda-optimus-manager-config
 printer-support
 epsonscan2
 epsonscan2-non-free-plugin
-
-# games
-#######
-
-openarena
-supertux
-supertuxkart
-hedgewars
-minetest
 
 
 # desktop environment
@@ -68,71 +127,115 @@ skypeforlinux-stable-bin
 hamsket-bin
 zoom
 kazam
+#telegram-desktop
+#discord
 
 # utilities
 scrot
-
-cpupower-gui
-freeplane
-gcompris-qt
-gephi
-gimp
-google-chrome
-inkscape
-scribus
 speedcrunch
-stellarium
-transmission-remote-gtk
-gvim
-virtualbox
-icaclient
-google-earth-pro
-deadbeef
-bitwig-studio
-skypeforlinux-stable-bin
-audacity
-blender
 calibre
-darktable
 flameshot
 geeqie
-ghidra
+
+# sys admin
 gkrellm
 gparted
 gsmartcontrol
-handbrake
-krita
-openshot
-qcad
-rawtherapee
+fancontrol-gui-git
+cpupower-gui
 rdesktop
 wireshark-qt
 xarchiver
 xdiskusage
-fotoxx
 freefilesync-bin
 gdmap
+transmission-remote-gtk
+gvim
+virtualbox
+icaclient
+guiscrcpy
+wmctrl
+
+# GPU utils
+clpeak
+glmark2
+vkmark
+
+# browsers
+google-chrome
+google-earth-pro
+
+# design
+gephi
+gimp
+inkscape
+scribus
+fotoxx
+krita
+blender
+rawtherapee
+darktable
+
+# video
+handbrake
+openshot
+vlc
+obs-studio
+
+# music playing & creation
+deadbeef
+tuxguitar
+ardour
+audacity
+reaper
+bitwig-studio
 
 # office
 libreoffice-fresh
-
-# music making
-tuxguitar
-ardour
+freeplane
+thunderbird
 
 # architecture
+qcad
 sweethome3d-furniture-library
 
 # advanced
 pavucontrol
 xmacro
 
-# amusements
-celestia
-
 # fonts
 ttf-mac-fonts
 ttf-ms-win10-auto
+ephifonts
+ttf-funfonts
+noto-fonts
+noto-fonts-cjk
+noto-fonts-emoji
+
+# games
+gcompris-qt
+celestia
+stellarium
+openarena
+supertux
+supertuxkart
+hedgewars
+minetest
+gnuchess
+boxtron proton-ge-custom protontricks-git steam
+itch
+unigine-heaven
+unigine-sanctuary
+unigine-superposition
+unigine-tropics
+unigine-valley
+waydroid waydroid-image-gapps
+
+# additional window managers & lightweight tools
+jwm
+hyprland
+l3afpad
+mupdf
 
 
 # development
@@ -156,7 +259,12 @@ rustrover
 evcxr_repl
 
 # java
+#jdk
 #intellij-idea-ultimate-edition
+#jdk-mission-control-bin
+
+# reverse engineering
+ghidra
 
 # web ui
 angular-cli
@@ -212,6 +320,7 @@ fluxctl
 kubectl
 redis
 kafka
+prometheus
 
 # amusements
 gource
