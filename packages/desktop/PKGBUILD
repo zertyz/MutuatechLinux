@@ -5,18 +5,50 @@ pkgdesc="Desktop part of the MutuaTech Linux packages"
 arch=('x86_64')
 url="https://github.com/zertyz/MutuatechLinux"
 
+# inspect the explicitly installed packages with:
+# echo `pacman -Qen | sed 's| .*||'`
+# echo `pacman -Qe --foreign | sed 's| .*||'`
 depends=(
 
 'mutuatechlinux-general'
 
-cpupower-gui docker ffmpeg-full fluxctl freeplane gcompris-qt gephi gimp gnuplot google-chrome hugo i7z inkscape intellij-idea-ultimate-edition
-jdk libreoffice-fresh pavucontrol rlottie-git rustup scribus smartgit speedcrunch stellarium transmission-remote-gtk valgrind gvim virtualbox zoom  sublime-text-4 icaclient
-hunspell-pt-br google-earth-pro genymotion evdi displaylink deadbeef bitwig-studio skypeforlinux-stable-bin visual-studio-code-bin  android-tools ardour aspell-en
-aspell-pt audacity blender calibre darktable dbeaver ddrescue electron fdkaac fdupes flameshot geeqie ghidra gkrellm gparted gsmartcontrol handbrake hashcat hunspell-en_us jq
-kazam krita kubectl nvidia-dkms nvidia-settings openshot qcad qtcreator rawtherapee rdesktop redis scrot sox wireshark-qt xarchiver xdiskusage xdot printer-support gource gperf
-grpc-cli nvidia-dkms nvidia-settings obsidian ttf-mac-fonts angular-cli celestia dbvis evcxr_repl ganttproject hamsket-bin jdk11 jre11 kafka presto-cli projectlibre pulse-secure
-xmacro astah-uml ddd dia-git editix-free epsonscan2 epsonscan2-non-free-plugin fotoxx freefilesync-bin gdmap httpstat-go jmeter modelio-bin proguard rstudio-desktop-bin
-skypeforlinux-stable-bin soapui sweethome3d-furniture-library treesheets-git ttf-ms-win10-auto tuxguitar tuxguitar-common visual-studio-code-bin xxdiff yed astah-uml kafka
+# cli
+######
+
+android-tools
+ffmpeg-full
+gnuplot
+hugo
+i7z
+ddrescue
+fdkaac
+fdupes
+hashcat
+jq
+sox
+xdot
+
+
+# libs & frameworks
+###################
+
+aspell-en
+aspell-pt
+hunspell-en_us
+hunspell-pt-br
+rlottie-git
+
+
+# hardware support
+##################
+
+#evdi
+#displaylink
+#nvidia-dkms
+#nvidia-settings
+printer-support
+epsonscan2
+epsonscan2-non-free-plugin
 
 # games
 #######
@@ -24,13 +56,140 @@ skypeforlinux-stable-bin soapui sweethome3d-furniture-library treesheets-git ttf
 openarena
 supertux
 supertuxkart
-warmux
+hedgewars
+minetest
+
+
+# desktop environment
+#####################
+
+# comms
+skypeforlinux-stable-bin
+hamsket-bin
+zoom
+kazam
+
+# utilities
+scrot
+
+cpupower-gui
+freeplane
+gcompris-qt
+gephi
+gimp
+google-chrome
+inkscape
+scribus
+speedcrunch
+stellarium
+transmission-remote-gtk
+gvim
+virtualbox
+icaclient
+google-earth-pro
+deadbeef
+bitwig-studio
+skypeforlinux-stable-bin
+audacity
+blender
+calibre
+darktable
+flameshot
+geeqie
+ghidra
+gkrellm
+gparted
+gsmartcontrol
+handbrake
+krita
+openshot
+qcad
+rawtherapee
+rdesktop
+wireshark-qt
+xarchiver
+xdiskusage
+fotoxx
+freefilesync-bin
+gdmap
+
+# office
+libreoffice-fresh
+
+# music making
+tuxguitar
+ardour
+
+# architecture
+sweethome3d-furniture-library
+
+# advanced
+pavucontrol
+xmacro
+
+# amusements
+celestia
+
+# fonts
+ttf-mac-fonts
+ttf-ms-win10-auto
 
 
 # development
 #############
 
+# management & architecture
+ganttproject
+projectlibre
+astah-uml
+dia-git
+editix-free
+soapui
+yed
+astah-uml
+treesheets-git
+obsidian
+
+# rust
+rustup
+rustrover
+evcxr_repl
+
+# java
+#intellij-idea-ultimate-edition
+
+# web ui
+angular-cli
+electron
+
+# general editors & IDEs & tools
+sublime-text-4
+qtcreator
+modelio-bin proguard rstudio-desktop-bin
+visual-studio-code-bin
+xxdiff
+ddd
+httpstat-go
+
+# version control
+smartgit
+
+# data base clients
+dbeaver
+dbvis
+#presto-cli
+
+# other clients
+grpc-cli
+# pulse-secure
+
+# profiling
+valgrind
+jmeter
+gperf
+
 # android
+genymotion
 android-ndk
 android-platform-25
 android-sdk
@@ -40,6 +199,23 @@ android-sdk-platform-tools
 android-tools
 android-udev
 android-studio
+
+# Raspberry Pi Cross Compilation
+arm-linux-gnueabihf-gcc
+arm-none-eabi-binutils
+arm-none-eabi-gcc
+arm-none-eabi-newlib
+
+# cloud
+docker
+fluxctl
+kubectl
+redis
+kafka
+
+# amusements
+gource
+
 
 )
 
