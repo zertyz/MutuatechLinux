@@ -6,6 +6,7 @@ arch=('x86_64')
 url="https://github.com/zertyz/MutuatechLinux"
 depends=(
 
+rar
 arp-scan base-devel ddrescue clang cmake compsize iotop jwm screen testdisk tigervnc time xterm l3afpad lighttpd
 mupdf squashfs-tools strace tlp wmctrl yt-dlp fbset
 

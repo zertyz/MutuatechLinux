@@ -233,10 +233,11 @@ waydroid waydroid-image-gapps
 
 # additional window managers & lightweight tools
 jwm
-hyprland
 l3afpad
 mupdf
-
+hyprland-git hyprpicker-git xdg-desktop-portal-hyprland-git waybar foot network-manager-applet thunar wpaperd slurp mako copyq wofi nwg-drawer swaylock grim swayidle nwg-launchers
+# also work this out:
+# scp -pr luiz@192.168.1.30:~/.config/hypr /home/luiz/.config/; scp -pr luiz@192.168.1.30:~/.local/bin /home/luiz/.local/; scp -pr luiz@192.168.1.30:~/.config/waybar /home/luiz/.config/
 
 # development
 #############
