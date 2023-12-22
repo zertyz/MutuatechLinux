@@ -4,14 +4,63 @@ pkgrel=1
 pkgdesc="Generic part (shared between 'server' and 'desktop') of the MutuaTech Linux packages"
 arch=('x86_64')
 url="https://github.com/zertyz/MutuatechLinux"
+
+# inspect the explicitly installed packages with:
+# echo `pacman -Qen | sed 's| .*||'`
+# echo `pacman -Qe --foreign | sed 's| .*||'`
+#
+# Some useful scripts:
+# 1) Inspect what explicitly installed local packages are not listed here:
+# eval $(echo -en "installed=( `pacman -Qen | sed 's| .*||'` `pacman -Qe --foreign | sed 's| .*||'` )"); . ./PKGBUILD; echo -en "Locally instaled packages NOT WANTED: "; for installed_package in "${installed[@]}"; do for wanted_package in "${depends[@]}"; do found=0; if [ "$wanted_package" == "$installed_package" ]; then found=1; break; fi; done; if [ $found -eq 0 ]; then echo -en "$installed_package "; fi; done; echo
+# 2) The oposite: what wanted packages are not yet installed locally:
+# eval $(echo -en "installed=( `pacman -Qn | sed 's| .*||'` `pacman -Q --foreign | sed 's| .*||'` )"); echo -en "Wanted packages NOT INSTALLED: "; . ./PKGBUILD; for wanted_package in "${depends[@]}"; do found=0; for installed_package in "${installed[@]}"; do if [ "$wanted_package" == "$installed_package" ]; then found=1; break; fi; done; if [ $found -eq 0 ]; then echo -en "$wanted_package "; fi; done; echo
 depends=(
 
+# base CLI
+base-devel
+clang cmake
+time
+strace
+tlp
+fbset
+
+# base UI
+wmctrl
+xdotool
+mupdf
+xmacro
+zenity
+
+# base media
+#ffmpeg-full
+#ffmpeg-intel-full
+ffmpeg-amd-full
+yt-dlp
+
+# operations
+screen 
+compsize
+iotop
+btop
+httpstat-go
+
+# network
+arp-scan
+
+# data access
 rar
-arp-scan base-devel ddrescue clang cmake compsize iotop jwm screen testdisk tigervnc time xterm l3afpad lighttpd
-mupdf squashfs-tools strace tlp wmctrl yt-dlp fbset
+zip unzip
+squashfs-tools
+ddrescue
+testdisk
+
+# remote access
+tigervnc jwm xterm l3afpad
 
 # OgreCI building
-discount graphviz
+discount
+graphviz
+angular-cli
 
 )
 source=()

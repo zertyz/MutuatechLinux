@@ -92,9 +92,6 @@ sox
 xdot
 
 # video
-#ffmpeg-full
-ffmpeg-amd-full
-yt-dlp
 mpv
 
 # libs & frameworks
@@ -258,6 +255,7 @@ obsidian
 rustup
 rustrover
 evcxr_repl
+exercism-bin
 
 # java
 #jdk
@@ -274,11 +272,13 @@ electron
 # general editors & IDEs & tools
 sublime-text-4
 qtcreator
-modelio-bin proguard rstudio-desktop-bin
+geany
+rstudio-desktop-bin
 visual-studio-code-bin
+modelio-bin
 xxdiff
 ddd
-httpstat-go
+proguard
 
 # version control
 smartgit
@@ -291,6 +291,7 @@ dbvis
 # other clients
 grpc-cli
 # pulse-secure
+# citrix
 
 # profiling
 valgrind
