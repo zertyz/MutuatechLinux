@@ -40,3 +40,31 @@ for i in {1..10}; do swap=swap${i}; while date; do swapoff /$swap; rm /$swap; to
 
 # (preliminarly setup the machine after boot -- before the mutua packages are installed)
 cd /proc/sys/vm/; echo 1 >swappiness; echo 95 >dirty_ratio; echo 60 >dirty_background_ratio; echo 60000 >dirty_writeback_centisecs; echo 60000 >dirty_expire_centisecs; echo 8 >page-cluster; echo 1 >/proc/sys/kernel/sysrq ; echo performance >/sys/module/pcie_aspm/parameters/policy; for p in /sys/devices/system/cpu/cpu[0-9]*/power/energy_perf_bias; do echo 0 >"$p"; done; for p in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/scaling_governor; do echo performance >"$p"; done; for p in /sys/devices/system/cpu/cpu[0-9]*; do CPU=`basename $p`; MAX=`cat /sys/devices/system/cpu/$CPU/cpufreq/cpuinfo_max_freq`; echo $MAX >/sys/devices/systemcpu/$CPU/cpufreq/scaling_max_freq; done; # swapoff /dev/zram0 ; rmmod zram; swapon /swap1 /swap2 /swap3 /swap4 /swap5 /swap6 /swap7 /swap8 /swap9 /swap10; swapon -s
+
+
+-----------------------------------------------------------------------
+
+TO BE TURNED INTO A SCRIPT -- Make a bootable pendrive out of the current system:
+================================================================================
+
+1) Partition the pendrive and copy the EFI and Boot partitions
+   DEV1=/dev/sdX3; DEV2=/dev/sdY
+2) Format, create sub volumes, mount, add extra pendrive devices and balance
+   umount /tmp/pen; mkdir -p /tmp/pen; mkfs.btrfs $DEV1 -f && mount -o noatime,compress=zstd:15,commit=600 $DEV1 /tmp/pen && for s in @{,home,root,srv,cache,log,tmp}; do btrfs subvolume create /tmp/pen/$s; done btrfs device add $DEV2 /tmp/pen; btrfs -v balance start /tmp/pen
+3) Swap off any files (that would prevent creating read-only snapshots):
+   swapoff -a
+4) Prepare the snapshots to send to the pendrive -- removing any unwanted files
+   btrfs -v subvolume snapshot / /.snapshots/to_send; rm -fr /.snapshots/to_send/root; rmdir /.snapshots/to_send{/home,/root,/srv,/var/cache,/var/log,/var/tmp}; for d in /{home,root,srv}; do btrfs -v subvolume snapshot ${d} /.snapshots/to_send/; done; for d in /var/{cache,log,tmp}; do btrfs -v subvolume snapshot ${d} /.snapshots/to_send/var/; done; rm -fr /.snapshots/to_send/{swap*,home/ana/,home/sfs,home/luiz/{.cargo,.rustup,tmp/images/,.local/share/waydroid*,Downloads/*},home/common/{.cargo,.rustup}} /.snapshots/to_send/usr/{lib/jvm/{java-8-openjdk,java-17-openjdk,java-21-openjdk},share/{waydroid-extra,supertuxkart}} /.snapshots/to_send/opt/{android-studio,ghidra,Citrix} /.snapshots/to_send/var/{lib/{waydroid,systemd/coredump/*},cache/pkgfile/*}; for d in /.snapshots/to_send{/home,/root,/srv,/var/{cache,log,tmp},}; do btrfs property set -ts ${d} ro true; done
+6) Verify the required size is compatible with the pendrive:
+   compsize -x /.snapshots/to_send/
+7) Copy:
+   for s in {cache,log,tmp}/; do btrfs -v send -e --compressed-data /.snapshots/to_send/var/${s} | dd bs=$((4096*4096)) status=progress | btrfs -v receive /tmp/pen/; done; for s in {root,srv,home}/; do btrfs -v send -e --compressed-data /.snapshots/to_send/${s} | dd bs=$((4096*4096)) status=progress | btrfs -v receive /tmp/pen/; done; btrfs -v send -e --compressed-data /.snapshots/to_send/ | dd bs=$((4096*4096)) status=progress | btrfs -v receive /tmp/pen/
+8) Remove the created snapshots (you may have to run it more than once):
+   for d in /.snapshots/to_send{/home,/root,/srv,/var/{cache,log,tmp},}; do btrfs property set -ts ${d} ro false; btrfs -v subvolume delete ${d}; done
+9) Make the pendrive's subvolumes writable:
+   for d in /tmp/pen/*; do btrfs property set -f -ts $d ro false; done
+10) Rename the pendrive's subvolumes
+   for s in {home,root,srv,cache,log,tmp}; do mv /tmp/pen/$s /tmp/pen/@$s; done; mv /tmp/pen/to_send /tmp/pen/@
+11) Adjust the UUID -- either by reusing the same UUID as the source filesystem or by editing /boot/grub/grub.cfg and /etc/fstab
+12) Adjust the Host name and, possibly, change the local machine's ssh keygen
+13) Done. Don't forget to umount and restore swap
