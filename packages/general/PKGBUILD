@@ -40,19 +40,23 @@ yt-dlp
 # operations
 screen 
 compsize
+rsync
 iotop
 btop
 httpstat-go
+dmidecode
+memtest86+
 
 # network
 arp-scan
 
-# data access
+# data management
 rar
 zip unzip
 squashfs-tools
 ddrescue
 testdisk
+fdupes
 
 # remote access
 tigervnc jwm xterm l3afpad

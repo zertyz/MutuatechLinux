@@ -22,21 +22,14 @@ depends=(
 ######
 
 # sys admin
-htop
-btop
 i7z
-ddrescue
 fdkaac
-fdupes
-compsize
-dmidecode
 dosfstools
 e2fsprogs
 exfatprogs
 f2fs-tools
 fatresize 
 jfsutils
-memtest86+
 mlocate 
 mtools
 nilfs-utils
@@ -45,12 +38,7 @@ ntfs-3g
 nvme-cli 
 powertop
 reiserfsprogs
-rsync
-screen
-squashfs-tools
 sshfs
-strace
-testdisk
 
 # network & security
 hashcat
@@ -62,7 +50,6 @@ wireless_tools
 ethtool
 net-tools
 nfs-utils
-lighttpd
 
 # general programming tools
 base-devel
