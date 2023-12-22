@@ -9,11 +9,7 @@ url="https://github.com/zertyz/MutuatechLinux"
 # echo `pacman -Qen | sed 's| .*||'`
 # echo `pacman -Qe --foreign | sed 's| .*||'`
 #
-# Some useful scripts:
-# 1) Inspect what explicitly installed local packages are not listed here:
-# eval $(echo -en "installed=( `pacman -Qen | sed 's| .*||'` `pacman -Qe --foreign | sed 's| .*||'` )"); . ./PKGBUILD; echo -en "Locally instaled packages NOT WANTED: "; for installed_package in "${installed[@]}"; do for wanted_package in "${depends[@]}"; do found=0; if [ "$wanted_package" == "$installed_package" ]; then found=1; break; fi; done; if [ $found -eq 0 ]; then echo -en "$installed_package "; fi; done; echo
-# 2) The oposite: what wanted packages are not yet installed locally:
-# eval $(echo -en "installed=( `pacman -Qn | sed 's| .*||'` `pacman -Q --foreign | sed 's| .*||'` )"); echo -en "Wanted packages NOT INSTALLED: "; . ./PKGBUILD; for wanted_package in "${depends[@]}"; do found=0; for installed_package in "${installed[@]}"; do if [ "$wanted_package" == "$installed_package" ]; then found=1; break; fi; done; if [ $found -eq 0 ]; then echo -en "$wanted_package "; fi; done; echo
+# ==> Go see some useful scripts in the server or desktop packages
 depends=(
 
 # additional kernel modules
@@ -27,7 +23,9 @@ strace
 tlp
 fbset
 android-tools
-# zenmonitor3-git
+nvtop
+# intel-gpu-tools
+# zenmonitor3-git amdctl radeontop
 
 # base UI
 wmctrl
@@ -35,14 +33,12 @@ xdotool
 mupdf
 xmacro
 zenity
-nvtop
-# amdctl radeontop
 
 # base media
-#ffmpeg-full
-#ffmpeg-intel-full
-ffmpeg-amd-full
 yt-dlp
+# ffmpeg-full
+# ffmpeg-intel-full
+# ffmpeg-amd-full
 
 # operations
 screen 
@@ -70,7 +66,7 @@ tigervnc jwm xterm l3afpad
 
 # OpenCL / Vulkan
 clinfo clpeak
-# intel-opencl-sdk
+# intel-opencl-sdk intel-compute-runtime
 # opencl-amd amdvlk amf-amdgpu-pro
 
 # OgreCI building
