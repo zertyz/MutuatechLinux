@@ -11,9 +11,9 @@ url="https://github.com/zertyz/MutuatechLinux"
 #
 # Some useful scripts:
 # 1) Inspect what explicitly installed local packages are not listed here:
-# eval $(echo -en "installed=(" `pacman -Qen | sed 's| .*||'`; echo -en `pacman -Qe --foreign | sed 's| .*||'` ")"); source PKGBUILD; echo -en "Locally instaled packages NOT WANTED: "; for installed_package in "${installed[@]}"; do for wanted_package in "${depends[@]}"; do found=0; if [ "$wanted_package" == "$installed_package" ]; then found=1; break; fi; done; if [ $found -eq 0 ]; then echo -en "$installed_package "; fi; done; echo
+# eval $(echo -en "installed=( `pacman -Qen | sed 's| .*||'` `pacman -Qe --foreign | sed 's| .*||'` )"); . ./PKGBUILD; echo -en "Locally instaled packages NOT WANTED: "; for installed_package in "${installed[@]}"; do for wanted_package in "${depends[@]}"; do found=0; if [ "$wanted_package" == "$installed_package" ]; then found=1; break; fi; done; if [ $found -eq 0 ]; then echo -en "$installed_package "; fi; done; echo
 # 2) The oposite: what wanted packages are not yet installed locally:
-# echo -en "Wanted packages NOT INSTALLED: "; for wanted_package in "${depends[@]}"; do found=0; for installed_package in "${installed[@]}"; do if [ "$wanted_package" == "$installed_package" ]; then found=1; break; fi; done; if [ $found -eq 0 ]; then echo -en "$wanted_package "; fi; done; echo
+# eval $(echo -en "installed=( `pacman -Qn | sed 's| .*||'` `pacman -Q --foreign | sed 's| .*||'` )"); echo -en "Wanted packages NOT INSTALLED: "; . ./PKGBUILD; for wanted_package in "${depends[@]}"; do found=0; for installed_package in "${installed[@]}"; do if [ "$wanted_package" == "$installed_package" ]; then found=1; break; fi; done; if [ $found -eq 0 ]; then echo -en "$wanted_package "; fi; done; echo
 depends=(
 
 'mutuatechlinux-general'
