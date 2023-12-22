@@ -22,9 +22,21 @@ a. If swap is not not on its own partition, a replacement for zram (RAM only) ca
 
 # Server:
 
-To be used with Garuda i3WM Edition. Do as for Desktop installation, with the following exceptions:
+To be used with Garuda Hyprland Edition. Do as for Desktop installation, with the following exceptions:
 
 3. zstd:15
 4. pacman -S --needed  yt-dlp arp-scan base-devel clang cmake compsize iotop jwm rust screen testdisk tigervnc time xterm l3afpad lighttpd mupdf squashfs-tools strace wmctrl yt-dlp  vbetool minidlna transmission-cli fbset
 5. paru -S --needed angular-cli xmacro httpstat-go wine-x64
 9. restore home / mutua / ogre directories (including /operations)
+
+
+-----------------------------------------------------------------------
+
+Some useful commands for day-to-day operation:
+=============================================
+
+# Create some swap files in a BTRFS filesystem
+for i in {1..10}; do swap=swap${i}; while date; do swapoff /$swap; rm /$swap; touch /$swap; chattr +C /$swap; fallocate -l $((1024*1024*512)) /$swap; chmod 600 /$swap; mkswap /$swap; swapon /$swap && break; sleep 1; done; done
+
+# (preliminarly setup the machine after boot -- before the mutua packages are installed)
+cd /proc/sys/vm/; echo 1 >swappiness; echo 95 >dirty_ratio; echo 60 >dirty_background_ratio; echo 60000 >dirty_writeback_centisecs; echo 60000 >dirty_expire_centisecs; echo 8 >page-cluster; echo 1 >/proc/sys/kernel/sysrq ; echo performance >/sys/module/pcie_aspm/parameters/policy; for p in /sys/devices/system/cpu/cpu[0-9]*/power/energy_perf_bias; do echo 0 >"$p"; done; for p in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/scaling_governor; do echo performance >"$p"; done; for p in /sys/devices/system/cpu/cpu[0-9]*; do CPU=`basename $p`; MAX=`cat /sys/devices/system/cpu/$CPU/cpufreq/cpuinfo_max_freq`; echo $MAX >/sys/devices/systemcpu/$CPU/cpufreq/scaling_max_freq; done; # swapoff /dev/zram0 ; rmmod zram; swapon /swap1 /swap2 /swap3 /swap4 /swap5 /swap6 /swap7 /swap8 /swap9 /swap10; swapon -s

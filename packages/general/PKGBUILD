@@ -16,6 +16,9 @@ url="https://github.com/zertyz/MutuatechLinux"
 # eval $(echo -en "installed=( `pacman -Qn | sed 's| .*||'` `pacman -Q --foreign | sed 's| .*||'` )"); echo -en "Wanted packages NOT INSTALLED: "; . ./PKGBUILD; for wanted_package in "${depends[@]}"; do found=0; for installed_package in "${installed[@]}"; do if [ "$wanted_package" == "$installed_package" ]; then found=1; break; fi; done; if [ $found -eq 0 ]; then echo -en "$wanted_package "; fi; done; echo
 depends=(
 
+# additional kernel modules
+# zenpower3-dkms 
+
 # base CLI
 base-devel
 clang cmake
@@ -23,6 +26,8 @@ time
 strace
 tlp
 fbset
+android-tools
+# zenmonitor3-git
 
 # base UI
 wmctrl
@@ -30,6 +35,8 @@ xdotool
 mupdf
 xmacro
 zenity
+nvtop
+# amdctl radeontop
 
 # base media
 #ffmpeg-full
@@ -60,6 +67,11 @@ fdupes
 
 # remote access
 tigervnc jwm xterm l3afpad
+
+# OpenCL / Vulkan
+clinfo clpeak
+# intel-opencl-sdk
+# opencl-amd amdvlk amf-amdgpu-pro
 
 # OgreCI building
 discount

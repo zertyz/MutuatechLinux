@@ -1,6 +1,5 @@
 # tune for minimum latency
 /root/bin/Performance
-echo 1 >/sys/devices/system/cpu/intel_pstate/no_turbo
 
 # turn off timers that could run during operation -- taken from systemctl list-timers --all
 for timer in logrotate.timer shadow.timer updatedb.timer man-db.timer snapper-cleanup.timer systemd-tmpfiles-clean.timer archlinux-keyring-wkd-sync.timer btrfs-balance.timer btrfs-defrag.timer btrfs-scrub.timer btrfs-trim.timer pamac-cleancache.timer; do

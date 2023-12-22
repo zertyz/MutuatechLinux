@@ -242,7 +242,8 @@ obsidian
 rustup
 rustrover
 evcxr_repl
-exercism-bin
+# exercism-bin
+# diesel-cli
 
 # java
 #jdk
@@ -304,7 +305,7 @@ arm-none-eabi-gcc
 arm-none-eabi-newlib
 
 # cloud
-docker
+docker # docker-compose
 fluxctl
 kubectl
 redis

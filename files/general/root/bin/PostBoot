@@ -155,6 +155,8 @@ if ((DESKTOP_MODE>0)); then
 	# nfs client, if we're @ home
 	mount -t nfs -o noatime,nolock 192.168.1.5:/srv/nfs                     /mnt/nfs
 	mount -t nfs -o noatime,nolock 192.168.1.5:/srv/nfs/hd/media/dlna/music /mnt/nfs/hd/media/dlna/music
+	# mount -t nfs -o noatime,nolock 192.168.1.5:/srv/nfs/hd/media/dlna/clips /mnt/nfs/hd/media/dlna/clips
+	# for dev in 1TiB5HD 2TiBHD 320GiBHD 32GiBPen; do sudo mount -t nfs -o noatime,nolock 192.168.1.5:/srv/nfs/$dev /mnt/nfs/$dev; done
 	ls -l /mnt/nfs/{,data,media,mutuatech,hd,hd/media/dlna/music}            # making the first access here prevents udev from starting later
 fi
 

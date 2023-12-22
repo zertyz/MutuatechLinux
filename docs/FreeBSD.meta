@@ -79,3 +79,18 @@ setenv RUSTFLAGS="-C target-cpu=native" ; cargo test --release --no-run
 642  4:35    mkdir -p /operations/OgreRobot.com/development/
 643  4:35    cd /operations/OgreRobot.com/development/ ; git clone --recurse-submodules 'ssh://mutuatec@mutuatech.com/home/mutuatec/git/development/backend/OgreRobot.com'
 
+
+-----------------------------------------------------------------------
+
+Some useful commands for day-to-day operation:
+=============================================
+
+# After boot setup
+/root/bin/PostBoot; sleep 5; exec top -o size -s 20 -w
+
+# Measure the temperature
+sysctl hw.acpi.thermal.tz0.temperature
+
+# Upgrading BSD + Packages:
+df / ; zpool add zroot /dev/mmcsd0 ; df / ; freebsd-update fetch ; freebsd-update install ; df / ; zpool remove zroot /dev/mmcsd0 ; df / ; zpool status zroot ; df /; read l; zpool add zroot /dev/mmcsd0 ; pkg update ; pkg upgrade ; pkg clean -a
+
