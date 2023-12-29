@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-desktop
-pkgver=0.1.7
+pkgver=0.1.9
 pkgrel=1
 pkgdesc="Desktop part of the MutuaTech Linux packages"
 arch=('x86_64')
@@ -189,6 +189,7 @@ xmacro
 
 # fonts
 ttf-mac-fonts
+ttf-ms-fonts-2.0-10-any
 ttf-ms-win10-auto
 ephifonts
 ttf-funfonts
@@ -306,7 +307,7 @@ arm-none-eabi-newlib
 
 # cloud
 docker # docker-compose
-fluxctl
+fluxctl-bin
 kubectl
 redis
 kafka

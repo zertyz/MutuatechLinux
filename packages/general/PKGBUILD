@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-general
-pkgver=0.1.7
+pkgver=0.1.9
 pkgrel=1
 pkgdesc="Generic part (shared between 'server' and 'desktop') of the MutuaTech Linux packages"
 arch=('x86_64')
@@ -37,7 +37,7 @@ zenity
 # base media
 yt-dlp
 # ffmpeg-full
-# ffmpeg-intel-full
+# ffmpeg-intel-full-git
 # ffmpeg-amd-full
 
 # operations
