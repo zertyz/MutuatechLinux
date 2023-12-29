@@ -9,8 +9,8 @@ find . -type f | while read f; do
 done
 cd -
 
-# desktop
-cd desktop
+# server
+cd server
 find . -type f | while read f; do
     sudo cp -av "/$f" "$f" && sudo chown $USER "$f"
 done

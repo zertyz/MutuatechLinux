@@ -1,5 +1,11 @@
 # put on PostBoot.local any modules or other fine-tuning for your hardware
 
-# some systems required that udevd is not masked to boot
+# some systems requires that udevd is not masked to boot
 # (and requires it to be running to mount temporary storage)
 systemctl unmask systemd-udevd
+
+swapoff /dev/zram0
+rmmod zram
+
+# for the desktop, zswap is OK
+echo Y >/sys/module/zswap/parameters/enabled; echo 80 >/sys/module/zswap/parameters/max_pool_percent
