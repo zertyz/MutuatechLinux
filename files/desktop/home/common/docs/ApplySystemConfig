@@ -1,0 +1,13 @@
+#! /bin/bash
+
+echo "ENABLING ADDITIONAL SERVICES"
+echo
+
+systemctl enable mutuatech_back_from_suspension
+
+echo "EDITING CONFIG FILES:"
+echo
+
+echo -en "'sudoers' file -- wheel group members will use without a password"
+sed -i 's|^\(root ALL=.*\)|# \1| ; s|^# \(%wheel.*NOPASSWD.*\)|\1| ; s|^\(@include.*\)|#\1|' /etc/sudoers
+

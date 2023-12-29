@@ -1,0 +1,2 @@
+Set shared user permissions:
+for d in .cargo/ .rustup/; do echo "chmoding ${d}..."; chmod -fR g+rw "$d"; echo "chowning ${d}..."; chown -fR luiz:users "$d"; echo "setting the sticky bit ${d} (really slow operation)..."; find $d -type d -exec chmod g+s {} \; ; done
