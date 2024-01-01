@@ -47,6 +47,7 @@ echo 1 >/proc/sys/vm/swappiness
 echo N >/sys/module/zswap/parameters/enabled
 
 echo "`date`: Starting metatraders on behalf of '${USER}'"
+sudo -u ${USER} bash -c "rm /home/${USER}/.Xauthority"
 # xvfb (oldie: sudo -u ${USER} xvfb-run ${X_START_SCRIPT} &>/dev/null &)
 sudo -u ${USER} bash -c "export DISPLAY=:99; Xvfb \${DISPLAY} -screen 0 640x480x16 -nolisten tcp & sleep 5; exec '${X_START_SCRIPT}'" &>/dev/null &
 # vnc (oldie: sudo -u luiz vncserver :1 &>/dev/null &)
