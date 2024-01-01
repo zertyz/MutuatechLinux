@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-server
-pkgver=0.1.11
+pkgver=0.1.13
 pkgrel=1
 pkgdesc="Server part of the MutuaTech Linux packages"
 arch=('x86_64')
@@ -21,6 +21,9 @@ depends=(
 vbetool
 ntp
 hdparm
+
+# network
+dhcpcd
 
 # MT5
 wine
