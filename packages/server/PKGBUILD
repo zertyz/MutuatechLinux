@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-server
-pkgver=0.1.9
+pkgver=0.1.11
 pkgrel=1
 pkgdesc="Server part of the MutuaTech Linux packages"
 arch=('x86_64')
@@ -23,7 +23,7 @@ ntp
 hdparm
 
 # MT5
-wine-x64
+wine
 
 # Media
 minidlna
