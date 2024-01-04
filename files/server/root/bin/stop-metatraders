@@ -37,9 +37,11 @@ echo -en "`date`: Running local script '${local_script}', if present..."
 for mt_instance_num in `seq 0 $((${#METATRADER_INSTANCE_NAMES[@]}-1))`; do
 	mt_instance_name="${METATRADER_INSTANCE_NAMES[$mt_instance_num]}"
 	mt_dir="${METATRADER_BASE_DIR}/${mt_instance_name}"
+	compressed_log_name="${METATRADER_LOG_NAME}.`date +%Y-%m-%d`.xz"
 	echo "`date`: Processing logs in '${mt_dir}'"
 	cd "${mt_dir}"
-	sed 's|\] <[^>]*>:|] |' "${METATRADER_LOG_NAME}" | chrt -i 0 nice -n 20 xz -9ecv >"${METATRADER_LOG_NAME}.`date +%Y-%m-%d`.xz" && rm "${METATRADER_LOG_NAME}"
+	mv "$compressed_log_name" "${compressed_log_name}~" &>/dev/null		# stupid safeguard against double-run
+	sed 's|\] <[^>]*>:|] |' "${METATRADER_LOG_NAME}" | chrt -i 0 nice -n 20 xz -9ecv >"$compressed_log_name" && rm "${METATRADER_LOG_NAME}"
 done
 
 echo "`date`: DONE."
