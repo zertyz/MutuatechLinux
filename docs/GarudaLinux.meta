@@ -56,7 +56,7 @@ TO BE TURNED INTO A SCRIPT -- Make a bootable pendrive out of the current system
 4) Prepare the snapshots to send to the pendrive -- removing any unwanted files
    btrfs -v subvolume snapshot / /.snapshots/to_send; rm -fr /.snapshots/to_send/root; rmdir /.snapshots/to_send{/home,/root,/srv,/var/cache,/var/log,/var/tmp}; for d in /{home,root,srv}; do btrfs -v subvolume snapshot ${d} /.snapshots/to_send/; done; for d in /var/{cache,log,tmp}; do btrfs -v subvolume snapshot ${d} /.snapshots/to_send/var/; done; rm -fr /.snapshots/to_send/{swap*,home/ana/,home/sfs,home/luiz/{.cargo,.rustup,tmp/images/,.local/share/waydroid*,Downloads/*},home/common/{.cargo,.rustup}} /.snapshots/to_send/usr/{lib/jvm/{java-8-openjdk,java-17-openjdk,java-21-openjdk},share/{waydroid-extra,supertuxkart}} /.snapshots/to_send/opt/{android-studio,ghidra,Citrix} /.snapshots/to_send/var/{lib/{waydroid,systemd/coredump/*},cache/pkgfile/*}; for d in /.snapshots/to_send{/home,/root,/srv,/var/{cache,log,tmp},}; do btrfs property set -ts ${d} ro true; done
 6) Verify the required size is compatible with the pendrive:
-   compsize -x /.snapshots/to_send/
+   compsize -x /.snapshots/to_send/*
 7) Copy:
    for s in {cache,log,tmp}/; do btrfs -v send -e --compressed-data /.snapshots/to_send/var/${s} | dd bs=$((4096*4096)) status=progress | btrfs -v receive /tmp/pen/; done; for s in {root,srv,home}/; do btrfs -v send -e --compressed-data /.snapshots/to_send/${s} | dd bs=$((4096*4096)) status=progress | btrfs -v receive /tmp/pen/; done; btrfs -v send -e --compressed-data /.snapshots/to_send/ | dd bs=$((4096*4096)) status=progress | btrfs -v receive /tmp/pen/
 8) Remove the created snapshots (you may have to run it more than once):
