@@ -244,6 +244,7 @@ rustrover
 evcxr_repl
 # exercism-bin
 # diesel-cli
+pandoc-cli
 
 # java
 #jdk
