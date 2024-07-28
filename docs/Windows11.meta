@@ -1,0 +1,4 @@
+choco install choco-cleaner transmission-remote  chocolateygui  libreoffice-fresh vscode rust git freeplane angular-cli ffmpeg-full google-earth-pro inkscape scribus handbrake vlc reaper gcimpris celestia openarena hedgewars yed obsidian sublime-text-4 smartgit gcompris googleearthpro smartgit mingw rustrover 
+choco upgrade all; choco-cleaner
+compact /CompactOS:always
+compact /C /S:"C:\Windows" /A /I /Q /EXE:LZX
