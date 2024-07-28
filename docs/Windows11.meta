@@ -4,3 +4,4 @@ compact /CompactOS:always
 compact /C /S:"C:\Windows" /A /I /Q /EXE:LZX
 install msys2 -- git findmnt lsblk pkgfile netcat
 store -- opera gx, whatsapp, outlook, slack, netflix, spotfy, telegram, prime video, windows notepad, epison print and scan, reddit, instagram, tiktok, 
+         candy crush saga, candy crush soda saga, candy crush gelly saga, sherlock: apure casos ocultos, homescapes, gardenscapes, angry birds friends, dragon mania
