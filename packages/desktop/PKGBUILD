@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-desktop
-pkgver=0.1.13
+pkgver=0.1.21
 pkgrel=1
 pkgdesc="Desktop part of the MutuaTech Linux packages"
 arch=('x86_64')
@@ -93,11 +93,13 @@ wine
 # hardware support
 ##################
 
+# nvidia
 #evdi
 #displaylink
 #nvidia-dkms
 #nvidia-settings
 #garuda-optimus-manager-config
+
 printer-support
 epsonscan2
 epsonscan2-non-free-plugin
@@ -107,8 +109,8 @@ epsonscan2-non-free-plugin
 #####################
 
 # comms
-skypeforlinux-stable-bin
-hamsket-bin
+skypeforlinux-bin
+hamsket
 zoom
 kazam
 #telegram-desktop
@@ -132,12 +134,12 @@ wireshark-qt
 xarchiver
 xdiskusage
 freefilesync-bin
-gdmap
+#gdmap		# not compilable -- 2024-29-07
 transmission-remote-gtk
 gvim
 virtualbox
 icaclient
-guiscrcpy
+# guiscrcpy	# not compilable -- 2024-29-07
 wmctrl
 
 # GPU utils
@@ -154,7 +156,7 @@ gephi
 gimp
 inkscape
 scribus
-fotoxx
+#fotoxx		# no longer available in the repos -- 2024-29-07
 krita
 blender
 rawtherapee
@@ -189,7 +191,7 @@ xmacro
 
 # fonts
 ttf-mac-fonts
-ttf-ms-fonts-2.0-10-any
+#ttf-ms-fonts-2.0-10-any	# conflicts with ttf-ms-win10-auto as of 2024-07-29
 ttf-ms-win10-auto
 ephifonts
 ttf-funfonts
@@ -220,14 +222,14 @@ waydroid waydroid-image-gapps
 jwm
 l3afpad
 mupdf
-hyprland-git hyprpicker-git xdg-desktop-portal-hyprland-git waybar foot network-manager-applet thunar wpaperd slurp mako copyq wofi nwg-drawer swaylock grim swayidle nwg-launchers
+hyprland xdg-desktop-portal-hyprland waybar foot network-manager-applet thunar wpaperd slurp mako wofi nwg-drawer swaylock grim swayidle nwg-launchers
 # also don´t  forget to apply the following for all users: ~common/{config/{hypr,waybar},local/bin}
 
 # development
 #############
 
 # management & architecture
-ganttproject
+#ganttproject		# not compilable 2024-07-29
 projectlibre
 astah-uml
 dia-git
@@ -242,8 +244,8 @@ obsidian
 rustup
 rustrover
 evcxr_repl
-# exercism-bin
-# diesel-cli
+#exercism-bin
+#diesel-cli
 pandoc-cli
 
 # java
@@ -279,8 +281,8 @@ dbvis
 
 # other clients
 grpc-cli
-# pulse-secure
-# citrix
+#pulse-secure
+#citrix
 
 # profiling
 valgrind
@@ -290,9 +292,9 @@ gperf
 # android
 genymotion
 android-ndk
-android-platform-25
+android-platform-26
 android-sdk
-android-sdk-build-tools-25
+android-sdk-build-tools-26
 android-sdk-cmdline-tools-latest
 android-sdk-platform-tools
 android-tools
