@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-desktop
-pkgver=0.1.21
+pkgver=0.1.22
 pkgrel=1
 pkgdesc="Desktop part of the MutuaTech Linux packages"
 arch=('x86_64')
@@ -45,7 +45,7 @@ hashcat
 arp-scan
 gnu-netcat
 nmap
-tigervnc
+tigervnc nomachine-enterprise-client
 wireless_tools
 ethtool
 net-tools
@@ -93,6 +93,12 @@ wine
 # hardware support
 ##################
 
+mesa-utils
+
+# AMD/Radeon
+#amdvlk
+radeontop
+
 # nvidia
 #evdi
 #displaylink
@@ -103,6 +109,8 @@ wine
 printer-support
 epsonscan2
 epsonscan2-non-free-plugin
+epson-inkjet-printer-escpr
+posterazor
 
 
 # desktop environment
@@ -113,8 +121,8 @@ skypeforlinux-bin
 hamsket
 zoom
 kazam
-#telegram-desktop
-#discord
+telegram-desktop
+discord
 
 # utilities
 scrot
@@ -200,6 +208,7 @@ noto-fonts-cjk
 noto-fonts-emoji
 
 # games
+0ad
 gcompris-qt
 celestia
 stellarium
@@ -207,16 +216,15 @@ openarena
 supertux
 supertuxkart
 hedgewars
+teeworlds
+pioneer-bin
+sdlpop
 minetest
 gnuchess
 boxtron proton-ge-custom protontricks-git steam
 itch
-unigine-heaven
-unigine-sanctuary
-unigine-superposition
-unigine-tropics
-unigine-valley
-waydroid waydroid-image-gapps
+unigine-heaven unigine-sanctuary unigine-superposition unigine-tropics unigine-valley
+#waydroid waydroid-image-gapps
 
 # additional window managers & lightweight tools
 jwm
@@ -244,9 +252,11 @@ obsidian
 rustup
 rustrover
 evcxr_repl
+cargo-depgraph cargo-modules
 #exercism-bin
 #diesel-cli
 pandoc-cli
+grcov 
 
 # java
 #jdk
@@ -308,12 +318,13 @@ arm-none-eabi-gcc
 arm-none-eabi-newlib
 
 # cloud
-docker # docker-compose
+docker docker-compose
 fluxctl-bin
 kubectl
 redis
 kafka
 prometheus
+azure-cli aws-cli-v2-bin google-cloud-cli
 
 # amusements
 gource

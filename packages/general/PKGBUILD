@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-general
-pkgver=0.1.21
+pkgver=0.1.22
 pkgrel=1
 pkgdesc="Generic part (shared between 'server' and 'desktop') of the MutuaTech Linux packages"
 arch=('x86_64')
@@ -16,16 +16,15 @@ depends=(
 # zenpower3-dkms 
 
 # base CLI
-base-devel
+base base-devel
 clang cmake
 time
 strace
 tlp
 fbset
 android-tools
-nvtop
 # intel-gpu-tools
-# zenmonitor3-git amdctl radeontop
+# zenmonitor3-git amdctl radeontop ryzen-controller
 
 # base UI
 wmctrl
@@ -33,6 +32,7 @@ xdotool
 mupdf
 xmacro
 zenity
+dialog
 
 # base media
 yt-dlp
@@ -45,7 +45,7 @@ screen
 compsize
 rsync
 iotop
-btop
+htop btop nvtop
 httpstat-go
 dmidecode
 memtest86+
@@ -55,6 +55,7 @@ arp-scan
 
 # data management
 rar
+arj
 zip unzip
 squashfs-tools
 ddrescue
@@ -66,6 +67,7 @@ tigervnc jwm xterm l3afpad
 
 # OpenCL / Vulkan
 clinfo clpeak
+vulkan-extra-tools
 # intel-opencl-sdk intel-compute-runtime
 # opencl-amd amdvlk amf-amdgpu-pro
 
