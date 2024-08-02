@@ -2,12 +2,11 @@
 store -- opera gx, whatsapp, outlook, slack, netflix, spotfy, telegram, prime video, windows notepad, epison print and scan, reddit, instagram, tiktok, 
          candy crush saga, candy crush soda saga, candy crush gelly saga, sherlock: apure casos ocultos, homescapes, gardenscapes, angry birds friends, dragon mania
 install msys2 -- git findmnt lsblk pkgfile netcat
-choco install choco-cleaner transmission-remote chocolateygui libreoffice-fresh vscode rust git freeplane angular-cli ffmpeg-full google-earth-pro
-              7zip adb adobereader advanced-codecs graphviz musicbee projectlibre.portable putty sysinternals treesizefree yed sysinternals
-              gimp inkscape scribus handbrake vlc reaper celestia openarena hedgewars yed obsidian sublime-text-4 smartgit gcompris googleearthpro
-              smartgit mingw rustrover
-# Maintenance
-choco upgrade all; choco-cleaner
+choco install choco-cleaner chocolateygui 7zip adb putty sysinternals treesizefree
+              libreoffice-fresh freeplane ganttproject projectlibre.portable obsidian adobereader
+              ffmpeg-full gimp inkscape scribus advanced-codecs musicbee vlc reaper handbrake transgui
+              yed graphviz sublime-text-4 git smartgit mingw vscode rustrover visualstudio2022community rust # better to install via rustup instead
+              celestia hedgewars gcompris googleearthpro heaven-benchmark superposition-benchmark valley-benchmark
 
 # Compression
 compact /CompactOS:always
@@ -18,3 +17,11 @@ compact /C /S:"C:\" /A /I /Q /EXE:LZX         # applies extra compression to fil
 1) Open "Task Manager" and disable unwanted "Startup" application
 2) For laptops, enable write cache: right click on C:\->Properties->Hardware->Change Settings->Policies and mark "enable cache writes" and "disable buffer flishes"
 3) Inspect the task manager and spot bloatware. Then go to "services.msc" and set them to "manual".
+
+# Maintenance
+update windows & store
+msys2: pacman -Syyu & pacman -Scc         # may need to run this twice
+choco upgrade all; choco-cleaner
+run Disk Cleanup as Administrator
+DISM.exe /Online /Cleanup-Image /AnalyzeComponentStore; DISM.exe /Online /Cleanup-Image /StartComponentCleanup; DISM.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
+compact /C /S:"C:\" /A /I /Q /EXE:LZX
