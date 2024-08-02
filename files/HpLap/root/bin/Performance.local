@@ -1,0 +1,20 @@
+# put the AMD/Radeon Barcelo GPU in the Performance settings
+echo "manual" > /sys/class/drm/card0/device/power_dpm_force_performance_level
+echo "5" > /sys/class/drm/card0/device/pp_power_profile_mode			# "Compute" profile
+echo performance >/sys/class/drm/card0/device/power_dpm_state
+echo auto >/sys/class/drm/card0/device/power_dpm_force_performance_level
+
+## As of 2023-04-24, the GPU causes the system to hang like it was 25 years ago (in a horrible manner) -- by simply restarting, by freezing...
+## Sometimes an artifact could be seen on the screen prior to the hanging, meaning a driver doing bad on voltages & clocks or even a mem bug are most likely.
+## The error happened more consistently while encoding a video in HEVC, using ffmpeg and AMD acceleration, but also happened while testing a simple 1995 "Pitfall, the Myan adventure" game.
+## For the time being, these settings (taken from the PowerSave.local script) seems to put the bug to rest.
+## PS: converting the same video in Windows using hardware acceleration wen't without issues, although 30x CPU was used (40% of total available)
+
+## put the AMD/Radeon Barcelo GPU on low power settings
+#echo "manual" > /sys/class/drm/card0/device/power_dpm_force_performance_level
+#echo "5" > /sys/class/drm/card0/device/pp_power_profile_mode			# "Compute" profile
+#echo battery >/sys/class/drm/card0/device/power_dpm_state
+#echo low >/sys/class/drm/card0/device/power_dpm_force_performance_level
+
+# Power up the Wifi to the max
+iwconfig wlo1 txpower 27
