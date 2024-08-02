@@ -1,0 +1,84 @@
+#! /bin/bash
+
+# Generates docs & graphs for the project structure and package dependencies
+
+if [ $# -eq 0 ]; then
+    echo "Usage: call \"$0 <package>\" inside a Rust project directory"
+    echo "       where <package> is a workspace member or the project name"
+    echo
+    echo "Project Data:"
+    echo "    Project Name: $(basename `pwd`)"
+    echo "         Members: "
+    cargo metadata --no-deps --format-version 1 | jq -r '.packages[].name'
+
+    exit 1
+fi
+
+# settings
+layout="dot"
+out_dir="target/doc"
+package="$1"
+artifact='--lib'
+
+# docs & project crates dependencies
+cargo doc --workspace --no-deps --document-private-items
+cargo depgraph | dot -x -Tsvg -o target/doc/dependencies.svg
+
+
+# definitions
+name="modules.definitions"; svg_name="${package}.${name}.svg"; pdf_name="${svg_name/.svg/.pdf}"
+cargo modules dependencies --no-uses --no-externs --no-sysroot --no-types --no-traits --no-fns --package "${package}" ${artifact} --layout "$layout" | sed 's/label="uses"\|label="owns"/label=""/g; s|splines="line"|splines=true|g' | sed "s|\"${package}::|\"|g; s|^\(\s*\)label=\"\([^\"]*\)\",|\1label=\"\2 -- ${name}\",|" | dot -x -Tsvg -o ${out_dir}/${svg_name}
+inkscape ${out_dir}/${svg_name} --export-type=pdf --export-dpi=1200 -o ${out_dir}/${pdf_name}
+pdfposter -m a4 -s 0.51 ${out_dir}/${pdf_name} ${out_dir}/${pdf_name/.pdf/.posterized.pdf}
+echo "`date`: done with '$name' graph generation"
+
+name="types.definitions"; svg_name="${package}.${name}.svg"; pdf_name="${svg_name/.svg/.pdf}"
+cargo modules dependencies --no-uses --no-externs --no-sysroot --no-fns --package "${package}" ${artifact} --layout "$layout" | sed 's/label="uses"\|label="owns"/label=""/g; s|splines="line"|splines=true|g' | sed "s|\"${package}::|\"|g; s|^\(\s*\)label=\"\([^\"]*\)\",|\1label=\"\2 -- ${name}\",|" | dot -x -Tsvg -o ${out_dir}/${svg_name}
+inkscape ${out_dir}/${svg_name} --export-type=pdf --export-dpi=1200 -o ${out_dir}/${pdf_name}
+pdfposter -m a4 -s 0.58 ${out_dir}/${pdf_name} ${out_dir}/${pdf_name/.pdf/.posterized.pdf}
+echo "`date`: done with '$name' graph generation"
+
+name="function.definitions"; svg_name="${package}.${name}.svg"; pdf_name="${svg_name/.svg/.pdf}"
+cargo modules dependencies --no-uses --no-externs --no-sysroot --package "${package}" ${artifact} --layout "$layout" | sed 's/label="uses"\|label="owns"/label=""/g; s|splines="line"|splines=true|g' | sed "s|\"${package}::|\"|g; s|^\(\s*\)label=\"\([^\"]*\)\",|\1label=\"\2 -- ${name}\",|" | dot -x -Tsvg -o ${out_dir}/${svg_name}
+inkscape ${out_dir}/${svg_name} --export-type=pdf --export-dpi=1200 -o ${out_dir}/${pdf_name}
+pdfposter -m a4 -s 0.51 ${out_dir}/${pdf_name} ${out_dir}/${pdf_name/.pdf/.posterized.pdf}
+echo "`date`: done with '$name' graph generation"
+
+
+# uses
+name="modules.uses"; svg_name="${package}.${name}.svg"; pdf_name="${svg_name/.svg/.pdf}"
+cargo modules dependencies --no-externs --no-sysroot --no-types --no-traits --no-fns --package "${package}" ${artifact} --layout "$layout" | sed 's/label="uses"\|label="owns"/label=""/g; s|splines="line"|splines=true|g' | sed "s|\"${package}::|\"|g; s|^\(\s*\)label=\"\([^\"]*\)\",|\1label=\"\2 -- ${name}\",|" >${name}.dot
+grep -v ' // "owns" edge' "${name}.dot" >"_${name}.dot"
+mv "_${name}.dot" "${name}.dot"
+grep -vF " \"${package//-/_}\" " ${name}.dot | sed 's|\[constraint=false\]|[constraint=true]|' | dot -x -Tsvg -o ${out_dir}/${svg_name}
+gv2gml -o ${out_dir}/${name}.gml ${name}.dot
+mv "${name}.dot" ${out_dir}/"${name}.dot"
+inkscape ${out_dir}/${svg_name} --export-type=pdf --export-dpi=1200 -o ${out_dir}/${pdf_name}
+pdfposter -m a4 -s 0.51 ${out_dir}/${pdf_name} ${out_dir}/${pdf_name/.pdf/.posterized.pdf}
+echo "`date`: done with '$name' graph generation"
+
+name="types.uses"; svg_name="${package}.${name}.svg"; pdf_name="${svg_name/.svg/.pdf}"
+cargo modules dependencies --no-sysroot --no-externs --no-modules --no-fns --package "${package}" ${artifact} --layout "$layout" | sed 's/label="uses"\|label="owns"/label=""/g; s|splines="line"|splines=true|g' | sed "s|\"${package}::|\"|g; s|^\(\s*\)label=\"\([^\"]*\)\",|\1label=\"\2 -- ${name}\",|" >${name}.dot
+grep -v ' // "owns" edge' "${name}.dot" >"_${name}.dot"
+mv "_${name}.dot" "${name}.dot"
+grep -vF " \"${package//-/_}\" " ${name}.dot | sed 's|\[constraint=false\]|[constraint=true]|' | dot -x -Tsvg -o ${out_dir}/${svg_name}
+gv2gml -o ${out_dir}/${name}.gml ${name}.dot
+mv "${name}.dot" ${out_dir}/"${name}.dot"
+inkscape ${out_dir}/${svg_name} --export-type=pdf --export-dpi=1200 -o ${out_dir}/${pdf_name}
+pdfposter -m a4 -s 0.51 ${out_dir}/${pdf_name} ${out_dir}/${pdf_name/.pdf/.posterized.pdf}
+echo "`date`: done with '$name' graph generation"
+
+#name="functions.uses"; svg_name="${package}.${name}.svg"; pdf_name="${svg_name/.svg/.pdf}"
+#cargo modules dependencies --no-sysroot --no-externs --no-types --no-traits --no-modules --package "${package}" ${artifact} --layout "$layout" | sed 's/label="uses"\|label="owns"/label=""/g; s|splines="line"|splines=true|g' | sed "s|\"${package}::|\"|g; s|^\(\s*\)label=\"\([^\"]*\)\",|\1label=\"\2 -- ${name}\",|" >${name}.dot
+#grep -v ' // "owns" edge' "${name}.dot" >"_${name}.dot"
+#mv "_${name}.dot" "${name}.dot"
+#grep -vF " \"${package//-/_}\" " ${name}.dot | sed 's|\[constraint=false\]|[constraint=true]|' | dot -x -Tsvg -o ${out_dir}/${svg_name}
+#gv2gml -o ${out_dir}/${name}.gml ${name}.dot
+#mv "${name}.dot" ${out_dir}/"${name}.dot"
+#inkscape ${out_dir}/${svg_name} --export-type=pdf --export-dpi=1200 -o ${out_dir}/${pdf_name}
+#pdfposter -m a4 -s 0.51 ${out_dir}/${pdf_name} ${out_dir}/${pdf_name/.pdf/.posterized.pdf}
+#echo "`date`: done with '$name' graph generation"
+
+echo
+echo "Please find the .svg & pdf diagrams in '${out_dir}' -- you may print the *.posterized.pdf versions on A4"
+echo "Aditionally, you may run 'cargo modules structure | less -r# 1' for a textual view of the project structure"
