@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-desktop
-pkgver=0.1.22
+pkgver=0.1.23
 pkgrel=1
 pkgdesc="Desktop part of the MutuaTech Linux packages"
 arch=('x86_64')

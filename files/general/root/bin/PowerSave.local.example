@@ -1,0 +1,2 @@
+# Power down Wifi (in steps, so we can -- at least -- decrease a little bit of power
+for step in 10 8 6 5; do iwconfig $WLAN txpower $step; sleep 1; done
