@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-general
-pkgver=0.1.23
+pkgver=0.1.24
 pkgrel=1
 pkgdesc="Generic part (shared between 'server' and 'desktop') of the MutuaTech Linux packages"
 arch=('x86_64')
@@ -52,6 +52,10 @@ memtest86+
 
 # network
 arp-scan
+
+# system benchmarks
+perf 
+sysbench
 
 # data management
 rar

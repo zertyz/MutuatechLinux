@@ -9,9 +9,14 @@ Pre and post install instructions of the base Garuda Linux are also available.
 
 1. Read xxx before installing Garuda
 2. Read xxx after installing Garuda
-3. Install the appropriate packages in `packages`. For example, for a desktop:
+3. Generate the packages:
 ```
-    paru -U mutuatechlinux-general-0.1.0-1-x86_64.pkg.tar.zst mutuatechlinux-desktop-0.1.0-1-x86_64.pkg.tar.zst
+    . ./publish 
+ 
+```
+3. Install the appropriate packages. For example, for a desktop:
+```
+    paru -U packages/general/*.pkg.tar* packages/desktop/*.pkg.tar*
 ```
 4. Enable the services. Some examples:
 ```

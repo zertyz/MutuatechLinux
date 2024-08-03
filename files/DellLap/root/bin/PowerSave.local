@@ -1,4 +1,4 @@
-# Turn off ethernet
+# # Turn off ethernet
 ifconfig $ETH down
 
 # Power down Wifi (in steps, so we can -- at least -- decrease a little bit of power
@@ -10,3 +10,5 @@ systemctl stop preload
 # Set the Intel GPU performance
 intel_gpu_frequency --min
 
+# Turn off NVMe?
+nvme set-feature /dev/nvme0 -f 2 -v 0
