@@ -27,11 +27,25 @@ sysctl --system &>/dev/null			# restore writeback settings that powertop messes 
 echo 600 >/proc/sys/vm/laptop_mode
 echo powersupersave >/sys/module/pcie_aspm/parameters/policy
 
+# io
+find /sys -name '*link_power_management_policy*' | while read p; do echo 'min_power' >"$p"; done
+
 # cpu
 for p in /sys/devices/system/cpu/cpu[0-9]*/power/energy_perf_bias; do echo 15 >"$p"; done
-for p in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/energy_performance_preference; do echo power >"$p"; done
-
+for p in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/energy_performance_preference; do echo power >"$p"; done	# deprecated?
+for p in /sys/devices/system/cpu/cpufreq/policy*/energy_performance_preference; do echo power >"$p"; done	# deprecated as well?
 for p in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/scaling_governor; do echo powersave >"$p"; done
+# set the CPU freq to 60% top -- a sane default
+# to override it, use/create the `PowerSave.local` script
+for p in /sys/devices/system/cpu/cpu[0-9]*; do
+	CPU=`basename $p`;
+	MAX=`cat /sys/devices/system/cpu/$CPU/cpufreq/cpuinfo_max_freq`;
+	echo $((MAX*60/100)) >/sys/devices/system/cpu/$CPU/cpufreq/scaling_max_freq;
+done
+
+# AMD gpus
+for p in /sys/class/drm/card*/device/power_dpm_force_performance_level; do echo low >"$p"; done
+for p in /sys/class/drm/card0/device/power_dpm_state; do echo battery >"$p"; done
 
 local_script="${script_base_dir}/${script_base_name}.local"
 echo -en "`date`: Running local script '${local_script}', if present..."

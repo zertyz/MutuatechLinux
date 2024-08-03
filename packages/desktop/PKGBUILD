@@ -252,11 +252,11 @@ obsidian
 rustup
 rustrover
 evcxr_repl
-cargo-depgraph cargo-modules
+cargo-depgraph cargo-modules cargo-udeps
+grcov 
 #exercism-bin
 #diesel-cli
 pandoc-cli
-grcov 
 
 # java
 #jdk
