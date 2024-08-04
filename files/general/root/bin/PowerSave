@@ -45,7 +45,7 @@ done
 
 # AMD gpus
 for p in /sys/class/drm/card*/device/power_dpm_force_performance_level; do echo low >"$p"; done
-for p in /sys/class/drm/card0/device/power_dpm_state; do echo battery >"$p"; done
+for p in /sys/class/drm/card*/device/power_dpm_state; do echo battery >"$p"; done
 
 local_script="${script_base_dir}/${script_base_name}.local"
 echo -en "`date`: Running local script '${local_script}', if present..."

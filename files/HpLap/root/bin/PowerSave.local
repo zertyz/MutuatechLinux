@@ -1,13 +1,15 @@
 # put the AMD/Radeon Barcelo GPU on low power settings
-
-echo "manual" > /sys/class/drm/card?/device/power_dpm_force_performance_level
-echo "5" > /sys/class/drm/card?/device/pp_power_profile_mode			# "Compute" profile
-echo battery >/sys/class/drm/card?/device/power_dpm_state
-echo low >/sys/class/drm/card?/device/power_dpm_force_performance_level
+for p in /sys/class/drm/card*/device/power_dpm_force_performance_level; do echo "manual" > "$p"; done
+for p in /sys/class/drm/card*/device/pp_power_profile_mode; do echo "5" >"$p"; done		# "Compute" profile
+for p in /sys/class/drm/card*/device/power_dpm_state; do echo "battery" >"$p"; done
+for p in /sys/class/drm/card*/device/power_dpm_force_performance_level; do echo "low" >"$p"; done
 
 # Power down Wifi
 iwconfig wlo1 txpower 10
 iwconfig wlo1 txpower 5
+
+# Turn off ethernet
+ifconfig $ETH down
 
 # Cut the maximum frequency for every CPU
 for p in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/scaling_max_freq; do echo 1600000 >"$p"; done
