@@ -6,5 +6,5 @@ systemctl unmask systemd-udevd
 
 # Optimized swapping -- oflloading ZRAM to the disk
 # To enable, provide the PARTITION_UUID, review the ZRAM parameters, and uncomment bellow
-# PARTUUID="..."; swapon -s; swapoff /dev/zram0; rmmod zram; sleep 1; modprobe zram; echo 1 >/sys/block/zram0/reset; sleep 1; echo /dev/disk/by-partuuid/$PARTUUID >/sys/block/zram0/backing_dev; echo zstd >/sys/block/zram0/comp_algorithm; echo 32g >/sys/block/zram0/disksize; echo 14g >/sys/block/zram0/mem_limit; mkswap /dev/zram0; swapon /dev/zram0; swapon -s
-# /root/bin/zram_writeback_daemon
+# PARTUUID="..."; swapon -s; swapoff /dev/zram0 /dev/disk/by-partuuid/${PARTUUID}; rmmod zram; sleep 1; modprobe zram; echo 1 >/sys/block/zram0/reset; sleep 1; echo /dev/disk/by-partuuid/$PARTUUID >/sys/block/zram0/backing_dev; echo zstd >/sys/block/zram0/comp_algorithm; echo 32g >/sys/block/zram0/disksize; echo 14g >/sys/block/zram0/mem_limit; mkswap /dev/zram0; swapon /dev/zram0; swapon -s
+# /root/bin/zram_writeback_daemon &
