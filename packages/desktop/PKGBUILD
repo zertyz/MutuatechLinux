@@ -252,7 +252,7 @@ obsidian
 rustup
 rustrover
 evcxr_repl
-cargo-depgraph cargo-modules cargo-udeps
+cargo-depgraph cargo-modules cargo-udeps cargo-sweep
 grcov 
 #exercism-bin
 #diesel-cli
