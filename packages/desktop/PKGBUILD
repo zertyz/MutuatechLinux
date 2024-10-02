@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-desktop
-pkgver=0.1.26
+pkgver=0.1.28
 pkgrel=1
 pkgdesc="Desktop part of the MutuaTech Linux packages"
 arch=('x86_64')
@@ -302,9 +302,9 @@ gperf
 # android
 genymotion
 android-ndk
-android-platform-26
+android-platform-34
 android-sdk
-android-sdk-build-tools-26
+android-sdk-build-tools
 android-sdk-cmdline-tools-latest
 android-sdk-platform-tools
 android-tools

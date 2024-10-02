@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-general
-pkgver=0.1.26
+pkgver=0.1.28
 pkgrel=1
 pkgdesc="Generic part (shared between 'server' and 'desktop') of the MutuaTech Linux packages"
 arch=('x86_64')
