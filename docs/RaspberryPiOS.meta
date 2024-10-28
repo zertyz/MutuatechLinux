@@ -1,6 +1,7 @@
 apt install vim htop screen fbset fbi netsurf-fb lxde sddm jwm retroarch vlc pcmanfm lxterminal l3afpad lxde-icon-theme libreoffice falkon iotop btrfs-compsize rsync
 wget 'https://github.com/jichu4n/jfbview/releases/download/0.6.0/jfbview_0.6.0.buster_arm64.deb'
 apt install libncursesw5 && dpkg --install jfbview_0.6.0.buster_arm64.deb
+apt install gcompris-qt hedgewars tuxpaint scratch kturtle geogebra openarena minetest supertux freeplane stellarium astro-simulation unknown-horizons armagetronad 0ad warzone2100 astromenace alien-arena torcs wesnoth freeciv assaultcube cube2 redeclipse colobot runescape supertuxkart cataclysm-dda-sdl openttd openrct2 teeworlds && apt-get install apt-file && apt-file update
 apt update && apt upgrade && apt dist-upgrade && apt autoremove && apt clean
 
 
