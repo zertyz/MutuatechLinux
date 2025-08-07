@@ -23,5 +23,4 @@ update windows & store
 msys2: pacman -Syyu & pacman -Scc         # may need to run this twice
 choco upgrade all; choco-cleaner
 run Disk Cleanup as Administrator
-DISM.exe /Online /Cleanup-Image /AnalyzeComponentStore; DISM.exe /Online /Cleanup-Image /StartComponentCleanup; DISM.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
-compact /C /S:"C:\" /A /I /Q /EXE:LZX
+DISM.exe /Online /Cleanup-Image /AnalyzeComponentStore; DISM.exe /Online /Cleanup-Image /StartComponentCleanup; DISM.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase; compact /CompactOS:always; compact /C /S:"C:\" /A /I /Q; compact /C /S:"C:\" /A /I /Q /EXE:LZX
