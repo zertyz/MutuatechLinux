@@ -15,9 +15,11 @@ The following instructions apply to KDE Dr460nized Gaming edition:
 8. Tweak other /etc files based on Mutuatech linux files to sync, giving special attention to /etc/groups (add the user to cups, vboxusers, wireshark, docker). Visudo to enable sudo without a password. Printer (copy /etc/cups/{ppd,printers.conf}). /etc/ssh/sshd_config: uncomment PermitRootLogin. Reboot.
 9. Restore home directories
 10. Install auto-boot scripts
+11. Remove the, now wasteful, profile sync daemon service: pacman -Rdd profile-sync-daemon
 
 Additionals:
 a. If swap is not not on its own partition, a replacement for zram (RAM only) can be created with 'swapoff /swap; rm /swap; touch /swap; chattr +C /swap; fallocate -l $((1024*1024*512)) /swap; chmod 600 /swap; mkswap /swap; swapon /swap'.
+b. Or simply use our latest & greatest `zram_writeback_daemon` for an optimized swapping experience. See /root/bin/PostBoot.local.example
 
 
 # Server:
