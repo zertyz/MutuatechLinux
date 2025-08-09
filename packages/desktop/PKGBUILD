@@ -140,12 +140,12 @@ wireshark-qt
 xarchiver
 xdiskusage
 freefilesync-bin
-#gdmap		# not compilable -- 2024-29-07
+gdmap
 transmission-remote-gtk
 gvim
 virtualbox
 icaclient
-# guiscrcpy	# not compilable -- 2024-29-07
+# guiscrcpy	# not compilable -- 2024-07-29
 wmctrl
 
 # GPU utils
@@ -162,7 +162,7 @@ gephi
 gimp
 inkscape
 scribus
-#fotoxx		# no longer available in the repos -- 2024-29-07
+#fotoxx		# no longer available in the repos -- 2024-07-29
 krita
 blender
 rawtherapee
@@ -224,6 +224,9 @@ itch
 unigine-heaven unigine-sanctuary unigine-superposition unigine-tropics unigine-valley
 #waydroid waydroid-image-gapps
 
+# additional apps
+# kde-applications # if you are on the kde environment...
+
 # additional window managers & lightweight tools
 jwm
 l3afpad
@@ -236,7 +239,7 @@ hyprland xdg-desktop-portal-hyprland waybar foot network-manager-applet thunar w
 #############
 
 # management & architecture
-#ganttproject		# not compilable 2024-07-29
+ganttproject
 projectlibre
 astah-uml
 dia-git
