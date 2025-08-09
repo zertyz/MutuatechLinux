@@ -1,5 +1,8 @@
 # Power up the Wifi to the max (in steps, so we can -- at least -- increase a little bit of power
 for step in 22 25 27; do iwconfig $WLAN txpower $step; sleep 1; done
 
+# Stop the preload daemon
+systemctl stop preload
+
 # Set the Intel GPU performance
 intel_gpu_frequency -d

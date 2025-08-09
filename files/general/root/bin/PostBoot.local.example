@@ -3,6 +3,8 @@
 # some systems required that udevd is not masked to boot
 # (and requires it to be running to mount temporary storage)
 systemctl unmask systemd-udevd
+# or do it without immediately restarting udevd:
+# rm /etc/systemd/system/systemd-udevd
 
 # Optimized swapping -- oflloading ZRAM to the disk
 # To enable, provide the PARTITION_UUID, review the ZRAM parameters, and uncomment bellow

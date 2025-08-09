@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-desktop
-pkgver=0.1.28
+pkgver=10.1.34
 pkgrel=1
 pkgdesc="Desktop part of the MutuaTech Linux packages"
 arch=('x86_64')
@@ -22,7 +22,6 @@ depends=(
 ######
 
 # sys admin
-i7z
 fdkaac
 dosfstools
 e2fsprogs
@@ -45,7 +44,7 @@ hashcat
 arp-scan
 gnu-netcat
 nmap
-tigervnc nomachine-enterprise-client
+tigervnc
 wireless_tools
 ethtool
 net-tools
@@ -86,7 +85,7 @@ aspell-en
 aspell-pt
 hunspell-en_us
 hunspell-pt-br
-rlottie-git
+rlottie
 wine
 
 
@@ -117,7 +116,6 @@ posterazor
 #####################
 
 # comms
-skypeforlinux-bin
 hamsket
 zoom
 kazam
@@ -135,8 +133,8 @@ geeqie
 gkrellm
 gparted
 gsmartcontrol
-fancontrol-gui-git
-cpupower-gui
+fancontrol-gui
+turbostat cpupower-gui
 rdesktop
 wireshark-qt
 xarchiver
@@ -303,7 +301,7 @@ gperf
 # android
 genymotion
 android-ndk
-android-platform-34
+android-platform
 android-sdk
 android-sdk-build-tools
 android-sdk-cmdline-tools-latest
@@ -325,7 +323,7 @@ kubectl
 redis
 kafka
 prometheus
-azure-cli aws-cli-v2-bin google-cloud-cli
+azure-cli aws-cli-bin google-cloud-cli
 
 # amusements
 gource
