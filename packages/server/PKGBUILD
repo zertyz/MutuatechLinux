@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-server
-pkgver=110.1.34
+pkgver=1110.1.34
 pkgrel=1
 pkgdesc="Server part of the MutuaTech Linux packages"
 arch=('x86_64')
