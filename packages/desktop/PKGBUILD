@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-desktop
-pkgver=10.1.34
+pkgver=110.1.34
 pkgrel=1
 pkgdesc="Desktop part of the MutuaTech Linux packages"
 arch=('x86_64')
@@ -42,7 +42,6 @@ sshfs
 # network & security
 hashcat
 arp-scan
-gnu-netcat
 nmap
 tigervnc
 wireless_tools
