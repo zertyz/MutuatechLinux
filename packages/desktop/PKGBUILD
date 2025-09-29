@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-desktop
-pkgver=1110.1.34
+pkgver=1.1.36
 pkgrel=1
 pkgdesc="Desktop part of the MutuaTech Linux packages"
 arch=('x86_64')
@@ -37,7 +37,11 @@ ntfs-3g
 nvme-cli 
 powertop
 reiserfsprogs
+
+# interoperability
 sshfs
+ifuse
+ventoy-bin
 
 # network & security
 hashcat
@@ -120,6 +124,7 @@ zoom
 kazam
 telegram-desktop
 discord
+bluez-obex
 
 # utilities
 scrot
@@ -127,6 +132,7 @@ speedcrunch
 calibre
 flameshot
 geeqie
+czkawka-gui dupeguru
 
 # sys admin
 gkrellm
@@ -139,7 +145,7 @@ wireshark-qt
 xarchiver
 xdiskusage
 freefilesync-bin
-gdmap
+gdmap baobab
 transmission-remote-gtk
 gvim
 virtualbox
@@ -193,6 +199,7 @@ sweethome3d-furniture-library
 # advanced
 pavucontrol
 xmacro
+kooha
 
 # fonts
 ttf-mac-fonts
@@ -251,10 +258,10 @@ obsidian
 
 # rust
 rustup
-rustrover
+rustrover rustrover-jre
 evcxr_repl
 cargo-depgraph cargo-modules cargo-udeps cargo-sweep
-grcov 
+grcov cargo-llvm-cov
 #exercism-bin
 #diesel-cli
 pandoc-cli
@@ -278,7 +285,7 @@ geany
 rstudio-desktop-bin
 visual-studio-code-bin
 modelio-bin
-xxdiff
+xxdiff diffuse
 ddd
 proguard
 
