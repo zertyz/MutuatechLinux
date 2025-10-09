@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-desktop
-pkgver=1.1.36
+pkgver=1.1.37
 pkgrel=1
 pkgdesc="Desktop part of the MutuaTech Linux packages"
 arch=('x86_64')
@@ -82,6 +82,13 @@ xdot
 
 # video
 mpv
+yt-dlp
+# ffmpeg-full
+# ffmpeg-intel-full
+# ffmpeg-amd-full
+
+# interoperability & integration
+android-tools
 
 # libs & frameworks
 aspell-en
@@ -117,6 +124,14 @@ posterazor
 
 # desktop environment
 #####################
+
+# base UI
+wmctrl
+xdotool
+mupdf
+xmacro
+zenity
+dialog
 
 # comms
 hamsket
@@ -198,7 +213,6 @@ sweethome3d-furniture-library
 
 # advanced
 pavucontrol
-xmacro
 kooha
 
 # fonts

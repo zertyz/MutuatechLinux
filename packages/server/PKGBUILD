@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-server
-pkgver=1.1.36
+pkgver=1.1.37
 pkgrel=1
 pkgdesc="Server part of the MutuaTech Linux packages"
 arch=('x86_64')
@@ -19,7 +19,8 @@ depends=(
 
 # base
 vbetool
-ntp
+tlp
+fbset
 hdparm
 
 # network
@@ -31,12 +32,22 @@ wine
 # Media
 minidlna
 transmission-cli
+yt-dlp
+
+# Interoperability & Integration
+android-tools
 
 # Remote Control
 wakeonlan
 
+# Remote access
+tigervnc jwm xterm l3afpad
+
 # OgreCI building
 rust
+discount
+graphviz
+angular-cli
 
 )
 

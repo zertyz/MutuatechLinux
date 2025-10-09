@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-general
-pkgver=1.1.36
+pkgver=1.1.37
 pkgrel=1
 pkgdesc="Generic part (shared between 'server' and 'desktop') of the MutuaTech Linux packages"
 arch=('x86_64')
@@ -20,25 +20,8 @@ base base-devel
 clang cmake
 time
 strace
-tlp
-fbset
-android-tools
 # intel-gpu-tools
 # zenmonitor3-git amdctl radeontop ryzen-controller
-
-# base UI
-wmctrl
-xdotool
-mupdf
-xmacro
-zenity
-dialog
-
-# base media
-yt-dlp
-# ffmpeg-full
-# ffmpeg-intel-full-git
-# ffmpeg-amd-full
 
 # operations
 screen 
@@ -52,6 +35,7 @@ memtest86+
 
 # network
 arp-scan
+ethtool
 
 # system benchmarks
 perf 
@@ -66,19 +50,11 @@ ddrescue
 testdisk
 fdupes
 
-# remote access
-tigervnc jwm xterm l3afpad
-
 # OpenCL / Vulkan
 clinfo clpeak
 vulkan-extra-tools
 # intel-opencl-sdk intel-compute-runtime
 # opencl-amd amdvlk amf-amdgpu-pro
-
-# OgreCI building
-discount
-graphviz
-angular-cli
 
 )
 source=('zram_writeback_daemon.c')
