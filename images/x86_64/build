@@ -1,0 +1,21 @@
+#! /bin/bash
+
+AUR_PACKAGES=(
+httpstat-go
+rar
+)
+
+ONLINE_PACKAGES=(
+'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
+'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+../mutuatechlinux-general-*.pkg.tar.zst
+)
+
+sudo rm -fr cache/ img_root/
+sudo mkdir -p cache img_root
+
+paru -S --needed --skipreview --batchinstall --noconfirm "${AUR_PACKAGES[@]}" &&
+find ~/.cache/paru/clone/ -iname '*.pkg.tar*' | grep -v -- '-debug-' |
+        while read pkg; do sudo ln "$pkg" cache/; done &&
+sudo pacstrap -c -M -P img_root/ base linux linux-firmware btrfs-progs grub efibootmgr openssh sudo paru &&
+sudo pacstrap -c -M -P -U img_root/ cache/*.pkg.tar* "${ONLINE_PACKAGES[@]}"
