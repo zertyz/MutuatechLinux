@@ -1,0 +1,35 @@
+pkgname=mutuatechlinux-general-x86_64
+pkgver=1.1.40
+pkgrel=1
+pkgdesc="Generic part (shared between 'server' and 'desktop') of the MutuaTech Linux packages -- with specific dependencies for x86_64"
+arch=('x86_64')
+url="https://github.com/zertyz/MutuatechLinux"
+
+# inspect the explicitly installed packages with:
+# echo `pacman -Qen | sed 's| .*||'`
+# echo `pacman -Qe --foreign | sed 's| .*||'`
+#
+# ==> Go see some useful scripts in the server or desktop packages
+depends=(
+
+mutuatechlinux-general-multiarch
+# additional kernel modules
+# zenpower3-dkms 
+
+# base CLI
+# intel-gpu-tools
+# zenmonitor3-git amdctl radeontop ryzen-controller
+
+# operations
+nvtop
+httpstat-go
+memtest86+
+
+# data management
+rar
+
+# OpenCL / Vulkan
+# intel-opencl-sdk intel-compute-runtime
+# opencl-amd amdvlk amf-amdgpu-pro
+
+)

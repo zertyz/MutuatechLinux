@@ -1,0 +1,56 @@
+pkgname=mutuatechlinux-general-multiarch
+pkgver=1.1.40
+pkgrel=1
+pkgdesc="Generic part (shared between 'server' and 'desktop') of the MutuaTech Linux packages -- with dependencies that support multi-architecture"
+arch=('x86_64' 'aarch64')
+url="https://github.com/zertyz/MutuatechLinux"
+
+# inspect the explicitly installed packages with:
+# echo `pacman -Qen | sed 's| .*||'`
+# echo `pacman -Qe --foreign | sed 's| .*||'`
+#
+# ==> Go see some useful scripts in the server or desktop packages
+depends=(
+
+# base CLI
+base base-devel
+clang cmake
+time
+strace
+
+# operations
+screen 
+compsize
+rsync
+iotop
+htop btop
+dmidecode
+
+# network
+arp-scan
+ethtool
+
+# system benchmarks
+perf 
+sysbench
+
+# data management
+arj
+zip unzip
+squashfs-tools
+ddrescue
+testdisk
+fdupes
+
+# OpenCL / Vulkan
+clinfo clpeak
+vulkan-extra-tools
+
+)
+source=('zram_writeback_daemon.c')
+sha512sums=(SKIP)
+
+package() {
+    cp -a ../../../files/general/* "${pkgdir}"
+    gcc -o "${pkgdir}"/root/bin/zram_writeback_daemon zram_writeback_daemon.c -O3 -s
+}

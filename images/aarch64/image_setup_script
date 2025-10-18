@@ -1,0 +1,7 @@
+umount -l /tmp &>/dev/null
+pacman-key --init &&
+pacman-key --populate archlinux &&
+pacman-key --populate archlinuxarm &&
+pacman -S --noconfirm --needed wget sudo base-devel git vim &&
+cd /tmp && paru -U --noconfirm --needed *.pkg.tar* && rm /tmp/*.pkg.tar* &&
+pacman -Scc --noconfirm
