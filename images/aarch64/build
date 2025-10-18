@@ -7,7 +7,7 @@ sudo rm -fr "${ROOT}"
 sudo mkdir "${ROOT}"
 
 echo "1) Downloading the cached packages"
-mkdir cache &&
+mkdir -p cache &&
 cd cache &&
 wget -c http://mutuatech.com/MutuatechLinux/cache/aarch64/{mutuatechlinux-general-multiarch-1.1.41-1-aarch64.pkg.tar.xz,paru-bin-2.1.0-1-aarch64.pkg.tar.xz}
 cd .. 
@@ -34,4 +34,4 @@ echo "4) Packaging"
 
 # NOTES
 # 1) To update the cache, chroot into the image and update the packages, then scp -pr cache/* mutuatec@mutuatech.com:~/public_html/MutuatechLinux/cache/aarch64/
-# 2) After updating the cache, update the package names above in this script
+# 2) After updating the cache, update the package names being fetched to the cache above in this script

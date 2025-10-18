@@ -1,21 +1,36 @@
 #! /bin/bash
 
-AUR_PACKAGES=(
-httpstat-go
-rar
-)
+ROOT="img_root/"
+INNER_SCRIPT="to-do"
+
+sudo rm -fr "${ROOT}"
+sudo mkdir "${ROOT}"
 
 ONLINE_PACKAGES=(
 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
-../mutuatechlinux-general-*.pkg.tar.zst
 )
 
-sudo rm -fr cache/ img_root/
-sudo mkdir -p cache img_root
+echo "1) Downloading the cached packages"
+mkdir -p cache &&
+cd cache &&
+wget -c http://mutuatech.com/MutuatechLinux/cache/x86_64/{mutuatechlinux-general-multiarch-1.1.40-1-x86_64.pkg.tar.zst,mutuatechlinux-general-x86_64-1.1.40-1-x86_64.pkg.tar.zst,httpstat-go-1.1.0-1-x86_64.pkg.tar.zst,rar-7.12-1-x86_64.pkg.tar.zst}
+cd .. 
 
-paru -S --needed --skipreview --batchinstall --noconfirm "${AUR_PACKAGES[@]}" &&
-find ~/.cache/paru/clone/ -iname '*.pkg.tar*' | grep -v -- '-debug-' |
-        while read pkg; do sudo ln "$pkg" cache/; done &&
-sudo pacstrap -c -M -P img_root/ base linux linux-firmware btrfs-progs grub efibootmgr openssh sudo paru &&
-sudo pacstrap -c -M -P -U img_root/ cache/*.pkg.tar* "${ONLINE_PACKAGES[@]}"
+sudo pacstrap -c -M -P "${ROOT}" base linux linux-firmware btrfs-progs grub efibootmgr openssh sudo rust paru &&
+sudo pacstrap -c -M -P -U "${ROOT}" cache/*.pkg.tar* "${ONLINE_PACKAGES[@]}"
+
+
+# NOTES:
+#
+# 1) To build the cache
+# AUR_PACKAGES=(
+# httpstat-go
+# rar
+# )
+# paru -S --needed --skipreview --batchinstall --noconfirm "${AUR_PACKAGES[@]}" &&
+# find ~/.cache/paru/clone/ -iname '*.pkg.tar*' | grep -v -- '-debug-' |
+#        while read pkg; do sudo ln "$pkg" cache/; done &&
+# scp -pr cache/* mutuatec@mutuatech.com:~/public_html/MutuatechLinux/cache/x86_64/
+# 
+# 2) After updating the cache, update the package names being fetched to the cache above in this script
