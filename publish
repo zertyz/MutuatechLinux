@@ -12,7 +12,8 @@ for p in packages/*; do
 	echo -en "$p: from ${UNPUBLISHED_VERSION} to ${NEXT_VERSION}...";
 	sed -i "s|pkgver=${UNPUBLISHED_VERSION}|pkgver=${NEXT_VERSION}|" $F && echo "OK" || echo " FAILED"
 
-	rm *.pkg.tar*
-	makepkg -sdf
+	rm -f *.pkg.tar*
+	makepkg -df
+        rm -f *debug*.pkg.tar*
 	cd -
 done

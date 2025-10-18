@@ -1,95 +1,37 @@
 #! /bin/bash
 
-# --- CONFIGURATION ---
-TARGET_ARCH="aarch64"
-IMG_ROOT="img_root_aarch64"
-QEMU_BIN="/usr/bin/qemu-${TARGET_ARCH}-static"
+ROOT="img_root_bootstrap/";
+INNER_SCRIPT="image_setup_script";
 
-AUR_PACKAGES=(
-httpstat-go
-rar
-)
+sudo rm -fr "${ROOT}"
+sudo mkdir "${ROOT}"
 
-ONLINE_PACKAGES=(
-'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
-'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
-../mutuatechlinux-general-*.pkg.tar.zst
-)
+echo "1) Downloading the cached packages"
+mkdir cache &&
+cd cache &&
+wget -c http://mutuatech.com/MutuatechLinux/cache/aarch64/{mutuatechlinux-general-multiarch-1.1.41-1-aarch64.pkg.tar.xz,paru-bin-2.1.0-1-aarch64.pkg.tar.xz}
+cd .. 
 
-# --- CLEANUP AND SETUP ---
-sudo rm -fr cache/ "${IMG_ROOT}"
-sudo mkdir -p cache "${IMG_ROOT}"
+echo "2) Building the image"
+sudo pacstrap -C ./alarm-pacman.conf -M -G -K "${ROOT}" base linux-aarch64 linux-firmware btrfs-progs openssh sudo archlinux-keyring archlinuxarm-keyring &&
 
-# --- STEP 1: DOWNLOAD AArch64 ROOTFS AND QEMU SETUP ---
-echo "--- Setting up AArch64 base system ---"
+sudo cp -a "${INNER_SCRIPT}" "${ROOT}/root" &&
+sudo cp -a cache/* "${ROOT}/tmp/" &&
+sudo mkdir -p img_root/ &&
+echo "|||| ABOUT TO MOUNT" &&
+echo sudo mount --bind "${ROOT}" img_root/ &&
+sudo mount --bind "${ROOT}" img_root/ &&
+echo "|||| ABOUT TO CHROOT" &&
+sudo arch-chroot img_root/ /bin/bash -c ". /root/${INNER_SCRIPT} && rm /root/${INNER_SCRIPT} || echo '** FAILED EXECUTING INNER SCRIPT (see above logs)'" &&
+echo "## DONE" || echo "## FAILED (see above logs)"
 
-# 1. Download the official Archlinux AArch64 base image
-curl -L 'https://archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz' | sudo tar xz -C "${IMG_ROOT}/"
+echo "3) Cleaning building left-overs"
+sudo umount img_root/ &&
+sudo rmdir img_root/ &&
+echo "## CLEANED" || echo "## FAILED CLEANING (see above logs)"
 
-# 2. Copy QEMU binary into the new root for emulation
-sudo cp -a "$QEMU_BIN" "${IMG_ROOT}/usr/bin/"
+echo "4) Packaging"
 
-# 3. Copy the mutuatech package
-sudo cp -a ../mutuatechlinux-general-*.pkg.tar.zst "${IMG_ROOT}"/tmp
-
-# --- STEP 2: INSTALL AUR DEPENDENCIES (ON HOST) ---
-# NOTE: We skip AUR installation *inside* the script since we need to enter chroot
-# for the package management, which is not easily scriptable in this flow.
-#
-# Instead, we will perform AUR preparation on the host machine to get PKGBUILDs.
-echo "--- Cloning AUR packages on host ---"
-paru -G "${AUR_PACKAGES[@]}"
-
-# If you need to build the custom packages for aarch64, you must do it manually:
-# cd ~/.cache/paru/clone/httpstat-go
-# EXTRA_CFLAGS="-march=armv8-a" makepkg --skipinteg
-
-# --- STEP 3: PERFORM INITIAL PACSTRAP (AArch64 repos) ---
-# Use pacstrap for installing core packages. This now installs AArch64 packages
-# because the IMG_ROOT is initialized with the AArch64 keyring/mirrorlist.
-echo "--- Installing base packages using AArch64 repositories ---"
-sudo pacstrap -G -M "${IMG_ROOT}/" base linux linux-aarch64 linux-firmware btrfs-progs grub efibootmgr openssh sudo paru
-
-# --- STEP 4: CUSTOM PACKAGE INSTALLATION VIA CHROOT ---
-echo "--- Installing AUR and Custom packages inside AArch64 chroot ---"
-
-# This command executes the installation within the AArch64 environment
-sudo arch-chroot "${IMG_ROOT}" /bin/bash -c "
-    # 1. Update keyring/mirrorlist inside chroot (optional but safe)
-    # pacman -Syu --noconfirm
-
-    # 2. Navigate to a working directory
-    cd /tmp
-
-    # 3. Create a clean environment for paru/AUR builds
-    # mkdir build_aur
-    # cd build_aur
-
-    # 4. Use paru to install all AUR packages (now runs correctly under QEMU)
-    # WARNING: This requires paru to be configured inside the chroot.
-    # It will be much easier if you manually chroot and run the commands.
-
-    # FOR SIMPLICITY, LET'S STICK TO MANUAL CHROOTING FOR AUR:
-    echo 'Manual chrooting is required for AUR/paru steps for aarch64 cross-building.'
-"
-
-# --- STEP 5: MANUAL CHROOT (The reliable way for AUR/Paru) ---
-echo "
-
-=======================================================
-!!! MANUAL STEP REQUIRED !!!
-Please perform the following steps:
-1. Copy the custom packages (mutuatechlinux-general-*.pkg.tar.zst) into ${IMG_ROOT}/tmp.
-2. Manually run the AArch64 environment:
-   sudo arch-chroot ${IMG_ROOT}
-
-   Once inside the AArch64 chroot, run:
-   # paru -S --needed --skipreview --batchinstall --noconfirm "${AUR_PACKAGES[@]}"
-   # pacman -U /tmp/mutuatechlinux-general-*.pkg.tar.zst ${ONLINE_PACKAGES[@]}
-   # exit
-=======================================================
-"
-
-# --- STEP 6: CLEANUP ---
-# Optional: Remove the QEMU binary after installation
-# sudo rm "${IMG_ROOT}/usr/bin/qemu-${TARGET_ARCH}-static"
+# NOTES
+# 1) To update the cache, chroot into the image and update the packages, then scp -pr cache/* mutuatec@mutuatech.com:~/public_html/MutuatechLinux/cache/aarch64/
+# 2) After updating the cache, update the package names above in this script

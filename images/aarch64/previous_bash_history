@@ -1,9 +1,9 @@
 # in the host
 ./build
-sudo mount --bind img_root_aarch64/ img_root/
-sudo arch-chroot img_root
+mkdir -p img_root; sudo mount --bind img_root_aarch64/ img_root/; sudo arch-chroot img_root; sudo umount img_root/
 
 # in the chroot env
 
 # drop chaotic as they don't provide aarch64 binaries -- umount tmp; pacman-key --init; pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com; pacman-key --lsign-key 3056513887B78AEB; pacman -U "https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst" "https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst"; pacman -Syyu; pacman -S wget
-umount tmp; pacman-key --init; pacman-key --populate; pacman -Syy; pacman -S archlinux-keyring; pacman -Syyu; pacman -S wget
+umount tmp; pacman-key --init; pacman-key --populate; pacman -Syy; pacman -S archlinux-keyring; pacman -Syyu; pacman -S wget sudo base-devel git
+cd tmp; get 'https://aur.archlinux.org/cgit/aur.git/snapshot/paru-bin.tar.gz'; tar -xvzf paru-bin.tar.gz; cd paru-bin; chmod 777 .; sudo -u alarm makepkg -s; pacman -U paru-bin-[^d]*.pkg.tar*
