@@ -1,0 +1,168 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# --- Tunables ---
+IMG="${IMG:-mutuatechlinux-general-x86_64.img}"
+IMG_SIZE="${IMG_SIZE:-8G}"          # initial size
+ESP_SIZE="${ESP_SIZE:-512MiB}"
+SWAP_SIZE="${SWAP_SIZE:-2GiB}"
+HOST_AUTH_KEYS="${HOST_AUTH_KEYS:-$HOME/.ssh/authorized_keys}"  # copied to root
+HOSTNAME="${HOSTNAME:-MutuatechLinux}"
+FS_LABEL="${FS_LABEL:-mtl_root}"
+ROOT_PW="${ROOT_PW:-mutuatechlinux}"              # optional; if empty, root password stays locked
+DEF_USER="${DEF_USER:-}"            # e.g. 'arch'
+DEF_USER_PW="${DEF_USER_PW:-}"      # optional
+TIMEZONE="${TIMEZONE:-UTC}"
+
+# Minimal set; you can add 'rust paru' here if desired:
+BASE_PKGS=(base base-devel linux linux-firmware intel-ucode amd-ucode btrfs-progs grub efibootmgr openssh vim sudo rust paru)
+
+# Your original cache setup (kept)
+ONLINE_PACKAGES=(
+  'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
+  'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
+)
+
+[ "$EUID" -ne 0 ] && { echo "Please run this as root: sudo $0" >&2; exit 1; }
+
+CACHE_DIR="cache"
+mkdir -p "$CACHE_DIR"
+if ! ls "$CACHE_DIR"/*.pkg.tar.* >/dev/null 2>&1; then
+  echo "Fetching example cache pkgs (adjust as you already do)..."
+  ( cd "$CACHE_DIR"
+    wget -c \
+      http://mutuatech.com/MutuatechLinux/cache/x86_64/{mutuatechlinux-general-multiarch-1.1.40-1-x86_64.pkg.tar.zst,mutuatechlinux-general-x86_64-1.1.40-1-x86_64.pkg.tar.zst,httpstat-go-1.1.0-1-x86_64.pkg.tar.zst,rar-7.12-1-x86_64.pkg.tar.zst}
+  )
+fi
+
+require() { command -v "$1" >/dev/null || { echo "Missing: $1"; exit 1; }; }
+for bin in sgdisk losetup mkfs.fat mkswap mkfs.btrfs pacstrap arch-chroot genfstab grub-install grub-mkconfig partprobe; do # taken out of the list: 'qemu-img'
+  require "$bin"
+done
+
+cleanup() {
+  set +e
+  if mountpoint -q "$MNT/boot/efi"; then umount -l "$MNT/boot/efi"; fi
+  if mountpoint -q "$MNT"; then umount -l "$MNT"; fi
+  if [[ -n "${LOOPDEV:-}" ]]; then losetup -d "$LOOPDEV"; fi
+  [[ -d "${MNT:-}" ]] && rmdir "$MNT"
+}
+trap cleanup EXIT
+
+# 1) Create sparse raw file
+echo ">> Creating image file: $IMG ($IMG_SIZE)"
+rm -f "$IMG"
+truncate -s "$IMG_SIZE" "$IMG"
+
+# 2) GPT layout: 1=ESP, 2=swap, 3=root
+echo ">> Partitioning GPT (ESP ${ESP_SIZE}, swap ${SWAP_SIZE}, root=rest)"
+sgdisk -Z "$IMG"
+sgdisk -n 1:0:+"$ESP_SIZE" -t 1:EF00 -c 1:"EFI System" "$IMG"
+sgdisk -n 2:0:+"$SWAP_SIZE" -t 2:8200 -c 2:"swap" "$IMG"
+sgdisk -n 3:0:0        -t 3:8300 -c 3:"${FS_LABEL}" "$IMG"
+sgdisk -p "$IMG"
+
+# 3) Map loop device with partitions
+LOOPDEV="$(losetup --find --show -P "$IMG")"
+echo ">> Loop device to be used: $LOOPDEV"
+partprobe "$LOOPDEV"
+
+P1="${LOOPDEV}p1"
+P2="${LOOPDEV}p2"
+P3="${LOOPDEV}p3"
+
+# 4) Filesystems
+echo ">> mkfs ESP FAT32"
+mkfs.fat -F32 -n EFI "$P1"
+echo ">> mkswap"
+mkswap -L swap "$P2"
+echo ">> mkfs Btrfs root"
+mkfs.btrfs -f -L "${FS_LABEL}" "$P3"
+
+# 5) Mount with max zstd and sane opts
+MNT="$(mktemp -d)"
+echo ">> Mounting root at $MNT"
+mount -o compress-force=zstd:15,space_cache=v2,noatime "$P3" "$MNT"
+mkdir -p "$MNT/boot/efi"
+mount "$P1" "$MNT/boot/efi"
+
+# 6) Bootstrap Arch
+echo ">> pacstrap base + tools"
+pacstrap -M -c -P "$MNT" "${BASE_PKGS[@]}"
+pacstrap -M -c -P -U "$MNT" "$CACHE_DIR"/*.pkg.tar* "${ONLINE_PACKAGES[@]}"
+
+# 7) fstab with Btrfs opts (by PARTUUID)
+genfstab -t PARTUUID "$MNT" >> "$MNT/etc/fstab"
+# Harden Btrfs mount options for root
+sed -i 's|\(\s/\s*btrfs\s*\)\S*|\1rw,noatime,compress=zstd:15|' "$MNT/etc/fstab"
+
+# 8) Basic system config
+arch-chroot "$MNT" bash -eux <<'CHROOT_EOF'
+ln -sf /usr/share/zoneinfo/UTC /etc/localtime
+hwclock --systohc || true
+sed -i 's/^#\(en_US\.UTF-8 UTF-8\)/\1/' /etc/locale.gen
+locale-gen
+echo 'LANG=en_US.UTF-8' > /etc/locale.conf
+echo 'mutuatechlinux' > /etc/hostname
+
+# systemd-networkd (DHCP on any "en*" NIC), resolved
+mkdir -p /etc/systemd/network
+cat >/etc/systemd/network/20-dhcp.network <<NET
+[Match]
+Name=en*
+
+[Network]
+DHCP=yes
+NET
+
+systemctl enable systemd-networkd systemd-resolved sshd
+
+# resolv.conf -> systemd-resolved
+#ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+
+# GRUB (UEFI)
+sed -i 's|^#\(.*\.br/.*\)|\1|' /etc/pacman.d/mirrorlist
+pacman -S --noconfirm linux
+rm -fr /var/cache/pacman/pkg/*
+mv /boot/initramfs-linux-fallback.img /boot/initramfs-linux.img
+grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=MutuatechLinux --recheck --no-nvram --removable
+grub-mkconfig -o /boot/grub/grub.cfg
+grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=MutuatechLinux --recheck --no-nvram --removable
+CHROOT_EOF
+
+echo "NOW IN THE CHROOT ENV. PRESS CTRL-D WHEN DONE"
+arch-chroot "$MNT"
+
+# 9) SSH keys & users
+if [[ -f "$HOST_AUTH_KEYS" ]]; then
+  echo ">> Installing root authorized_keys from $HOST_AUTH_KEYS"
+  install -d -m 700 "$MNT/root/.ssh"
+  install -m 600 "$HOST_AUTH_KEYS" "$MNT/root/.ssh/authorized_keys"
+  # Key-only root by default
+  sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin prohibit-password/' "$MNT/etc/ssh/sshd_config"
+  sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/' "$MNT/etc/ssh/sshd_config"
+fi
+
+if [[ -n "$DEF_USER" ]]; then
+  echo ">> Creating user: $DEF_USER"
+  arch-chroot "$MNT" useradd -m -G wheel -s /bin/bash "$DEF_USER"
+  if [[ -n "$DEF_USER_PW" ]]; then
+    echo "${DEF_USER}:${DEF_USER_PW}" | arch-chroot "$MNT" chpasswd
+  else
+    echo "User created without password; SSH keys recommended."
+  fi
+  # sudo: passwordless wheel (adjust to taste)
+  echo '%wheel ALL=(ALL) NOPASSWD: ALL' > "$MNT/etc/sudoers.d/01-wheel-nopasswd"
+  chmod 440 "$MNT/etc/sudoers.d/01-wheel-nopasswd"
+fi
+
+if [[ -n "$ROOT_PW" ]]; then
+  echo ">> Setting root password"
+  echo "root:${ROOT_PW}" | arch-chroot "$MNT" chpasswd
+else
+  echo ">> Root password locked (use SSH keys)"
+  arch-chroot "$MNT" passwd -l root || true
+fi
+
+echo ">> Image ready: $IMG"
+
