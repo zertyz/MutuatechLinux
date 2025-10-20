@@ -4,8 +4,8 @@ set -euo pipefail
 # --- Tunables ---
 IMG="${IMG:-mutuatechlinux-general-x86_64.img}"
 IMG_SIZE="${IMG_SIZE:-8G}"          # initial size
-ESP_SIZE="${ESP_SIZE:-512MiB}"
-SWAP_SIZE="${SWAP_SIZE:-2GiB}"
+ESP_SIZE="${ESP_SIZE:-4MiB}"
+SWAP_SIZE="${SWAP_SIZE:-1GiB}"
 HOST_AUTH_KEYS="${HOST_AUTH_KEYS:-$HOME/.ssh/authorized_keys}"  # copied to root
 HOSTNAME="${HOSTNAME:-MutuatechLinux}"
 FS_LABEL="${FS_LABEL:-mtl_root}"
@@ -73,7 +73,7 @@ P3="${LOOPDEV}p3"
 
 # 4) Filesystems
 echo ">> mkfs ESP FAT32"
-mkfs.fat -F32 -n EFI "$P1"
+mkfs.fat -F12 -n EFI "$P1"
 echo ">> mkswap"
 mkswap -L swap "$P2"
 echo ">> mkfs Btrfs root"
@@ -130,8 +130,8 @@ grub-mkconfig -o /boot/grub/grub.cfg
 grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=MutuatechLinux --recheck --no-nvram --removable
 CHROOT_EOF
 
-echo "NOW IN THE CHROOT ENV. PRESS CTRL-D WHEN DONE"
-arch-chroot "$MNT"
+# echo "NOW IN THE CHROOT ENV. PRESS CTRL-D WHEN DONE"
+# arch-chroot "$MNT"
 
 # 9) SSH keys & users
 if [[ -f "$HOST_AUTH_KEYS" ]]; then
