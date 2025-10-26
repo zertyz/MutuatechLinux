@@ -1,30 +1,24 @@
 #! /bin/bash
 
-# OVMF files come from the `edk2-ovmf` package
-OVMF_CODE="/usr/share/edk2/x64/OVMF_CODE.4m.fd"
-OVMF_VARS_TEMPLATE="/usr/share/edk2/x64/OVMF_VARS.4m.fd"
-NVRAM_FILE="/tmp/mutuatechlinux_nvram.fd"
+# remove the commants to enable UEFI booting
 
-cp "${OVMF_VARS_TEMPLATE}" "${NVRAM_FILE}"
+# # OVMF files come from the `edk2-ovmf` package
+# OVMF_CODE="/usr/share/edk2/x64/OVMF_CODE.4m.fd"
+# OVMF_VARS_TEMPLATE="/usr/share/edk2/x64/OVMF_VARS.4m.fd"
+# NVRAM_FILE="/tmp/mutuatechlinux_nvram.fd"
+
+# cp "${OVMF_VARS_TEMPLATE}" "${NVRAM_FILE}"
 
 qemu-system-x86_64 \
     -enable-kvm \
     -m 1024m \
-    -smp 2 \
+    -smp 1 \
     -cpu host \
-    -drive if=none,file=mutuatechlinux-general-x86_64.img,format=raw,id=disk0 \
-    -drive if=pflash,format=raw,readonly=on,file="${OVMF_CODE}" \
-    -drive if=pflash,format=raw,file="${NVRAM_FILE}" \
+    -drive if=none,file=artifacts/mutuatechlinux-general-x86_64.img,format=raw,id=disk0 \
     -device virtio-rng-pci \
     -device virtio-blk-pci,drive=disk0,bootindex=0 \
     -device virtio-net-pci,netdev=n0 -netdev user,id=n0,hostfwd=tcp::2222-:22 \
     -boot order=c,menu=on \
-    -nographic
-    # -serial mon:stdio # -nographic
-
-# old options
-#    -drive file=mutuatechlinux-general-x86_64.img,format=raw,if=virtio \
-#    -net nic,model=virtio -net user,hostfwd=tcp::2222-:22 \
-    # Use a graphical display
-#    -vga std \
-#    -display gtk
+    -nographic # \
+#    -drive if=pflash,format=raw,readonly=on,file="${OVMF_CODE}" \
+#    -drive if=pflash,format=raw,file="${NVRAM_FILE}"

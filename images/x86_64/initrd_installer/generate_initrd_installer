@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ---- host machine vars ----
+IMG="${IMG:-../artifacts/mutuatechlinux-general-x86_64.img}"
+INITRD_SCRIPTS="initcpio/"
+ARTIFACTS="artifacts/"
+
+# ---- VM vars
+KERNEL_PRESET="${KERNEL_PRESET:-linux}"
+INSTALL_INITRAMFS="/root/initcpio/initramfs-${KERNEL_PRESET}.img"
+
+[ "$EUID" -ne 0 ] && { echo "Please run this as root: sudo $0" >&2; exit 1; }
+
+require() { command -v "$1" >/dev/null || { echo "Missing: $1"; exit 1; }; }
+for b in losetup partprobe mount arch-chroot umount mktemp; do require "$b"; done
+
+MNT="$(mktemp -d)"
+cleanup() {
+  sync
+  rm -fr "$MNT/root/initcpio" "$MNT/etc/initcpio/hooks/*/run-once"
+  umount -l "$MNT/boot/efi"
+  umount -l "$MNT"
+  losetup -d "$LOOPDEV"
+  rmdir "$MNT"
+}
+trap cleanup EXIT
+
+echo ">> Attaching image"
+LOOPDEV="$(losetup --find --show -P "$IMG")"
+partprobe "$LOOPDEV"
+P1="${LOOPDEV}p1"   # ESP
+P3="${LOOPDEV}p3"   # root (btrfs)
+
+mount -o compress-force=zstd:15,noatime "$P3" "$MNT"
+mkdir -p "$MNT/boot/efi"
+mount "$P1" "$MNT/boot/efi"
+
+# --- drop one-time unit & scripts into the target root ---
+echo ">> Installing initramfs one-time unit & scripts"
+cp -a initcpio "$MNT/root/"
+cp -a initcpio/{hooks,install} "$MNT/etc/initcpio/"
+
+# Build our initramfs installer
+arch-chroot "$MNT" bash -eux <<'CHROOT'
+KERNEL_VER=`pacman -Q linux | sed 's|.* ||; s|\.arch|-arch|'`
+mkinitcpio -k $KERNEL_VER -c /root/initcpio/once-mkinitcpio.conf -S autodetect -g /root/initcpio/initramfs-linux.img || :
+CHROOT
+
+echo "Installer ramdisk was created. Copying to the artifacts directory"
+cp -a "$MNT/boot/vmlinuz-linux" artifacts/
+cp -a "$MNT/root/initcpio/initramfs-linux.img" artifacts/
+chmod 644 artifacts/*
+ls -l artifacts/
+
+echo "Done."
+echo
+echo "To have it install MutuatechLinux into a running Linux, replace the equivalent /boot files for the ones present in the artifacts/ directory."
+echo "Remember you need to preserve the target machine's /boot file names: just rewrite the existing ones with our provided contents."
+echo
+echo "You can follow the README to test it locally."

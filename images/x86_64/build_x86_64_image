@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # --- Tunables ---
-IMG="${IMG:-mutuatechlinux-general-x86_64.img}"
-IMG_SIZE="${IMG_SIZE:-8G}"          # initial size
+IMG="${IMG:-artifacts/mutuatechlinux-general-x86_64.img}"
+IMG_SIZE="${IMG_SIZE:-4G}"
 ESP_SIZE="${ESP_SIZE:-4MiB}"
 SWAP_SIZE="${SWAP_SIZE:-1GiB}"
 HOST_AUTH_KEYS="${HOST_AUTH_KEYS:-$HOME/.ssh/authorized_keys}"  # copied to root
@@ -15,7 +15,7 @@ DEF_USER_PW="${DEF_USER_PW:-}"      # optional
 TIMEZONE="${TIMEZONE:-UTC}"
 
 # Minimal set; you can add 'rust paru' here if desired:
-BASE_PKGS=(base base-devel linux linux-firmware intel-ucode amd-ucode btrfs-progs grub efibootmgr openssh vim sudo rust paru)
+BASE_PKGS=(base base-devel linux linux-firmware intel-ucode amd-ucode btrfs-progs compsize gptfdisk parted cloud-guest-utils wget grub efibootmgr net-tools dhclient openssh vim sudo rust paru)
 
 # Your original cache setup (kept)
 ONLINE_PACKAGES=(
@@ -36,7 +36,7 @@ if ! ls "$CACHE_DIR"/*.pkg.tar.* >/dev/null 2>&1; then
 fi
 
 require() { command -v "$1" >/dev/null || { echo "Missing: $1"; exit 1; }; }
-for bin in sgdisk losetup mkfs.fat mkswap mkfs.btrfs pacstrap arch-chroot genfstab grub-install grub-mkconfig partprobe; do # taken out of the list: 'qemu-img'
+for bin in sgdisk sfdisk losetup mkfs.fat mkswap mkfs.btrfs pacstrap arch-chroot genfstab grub-install grub-mkconfig partprobe; do # taken out of the list: 'qemu-img'
   require "$bin"
 done
 
@@ -54,13 +54,28 @@ echo ">> Creating image file: $IMG ($IMG_SIZE)"
 rm -f "$IMG"
 truncate -s "$IMG_SIZE" "$IMG"
 
-# 2) GPT layout: 1=ESP, 2=swap, 3=root
-echo ">> Partitioning GPT (ESP ${ESP_SIZE}, swap ${SWAP_SIZE}, root=rest)"
-sgdisk -Z "$IMG"
-sgdisk -n 1:0:+"$ESP_SIZE" -t 1:EF00 -c 1:"EFI System" "$IMG"
-sgdisk -n 2:0:+"$SWAP_SIZE" -t 2:8200 -c 2:"swap" "$IMG"
-sgdisk -n 3:0:0        -t 3:8300 -c 3:"${FS_LABEL}" "$IMG"
-sgdisk -p "$IMG"
+## 2) GPT layout: 1=ESP, 2=swap, 3=root
+#echo ">> Partitioning GPT (ESP ${ESP_SIZE}, swap ${SWAP_SIZE}, root=rest)"
+#sgdisk -Z "$IMG"
+#sgdisk -n 1:0:+"$ESP_SIZE" -t 1:EF00 -c 1:"EFI System" "$IMG"
+#sgdisk -n 2:0:+"$SWAP_SIZE" -t 2:8200 -c 2:"swap" "$IMG"
+#sgdisk -n 3:0:0        -t 3:8300 -c 3:"${FS_LABEL}" "$IMG"
+#sgdisk -p "$IMG"
+
+# 2) MBR/DOS layout: 1=ESP, 2=swap, 3=root
+echo ">> Partitioning MBR/DOS (ESP ${ESP_SIZE}, swap ${SWAP_SIZE}, root=rest)"
+sfdisk "$IMG" <<EOF
+label: dos
+
+# p1: ESP (FAT32), bootable
+start=1MiB, size=${ESP_SIZE}, type=ef, bootable
+
+# p2: swap
+size=${SWAP_SIZE}, type=82
+
+# p3: root (rest of disk)
+type=83
+EOF
 
 # 3) Map loop device with partitions
 LOOPDEV="$(losetup --find --show -P "$IMG")"
@@ -92,9 +107,18 @@ pacstrap -M -c -P "$MNT" "${BASE_PKGS[@]}"
 pacstrap -M -c -P -U "$MNT" "$CACHE_DIR"/*.pkg.tar* "${ONLINE_PACKAGES[@]}"
 
 # 7) fstab with Btrfs opts (by PARTUUID)
-genfstab -t PARTUUID "$MNT" >> "$MNT/etc/fstab"
+genfstab -t UUID -U "$MNT" >> "$MNT/etc/fstab"
 # Harden Btrfs mount options for root
 sed -i 's|\(\s/\s*btrfs\s*\)\S*|\1rw,noatime,compress=zstd:15|' "$MNT/etc/fstab"
+
+# genfstab works badly inside AWS and GCE (at least) -- it uses the /dev/ entries instead of the UUID. The bellow fixes that
+# (harmless if no /dev/* entries are in use)
+cat "$MNT/etc/fstab" | grep -v '#' | grep '/dev/' | while read md; do
+	echo $md | sed 's| .*||' | while read ld; do
+		UUID=`blkid | grep "$ld" | sed 's|.* \(UUID="[^"]*"\).*|\1|'`; 
+		sed -i "s|^$ld|$UUID|g" "$MNT/etc/fstab";
+	done;
+done
 
 # 8) Basic system config
 arch-chroot "$MNT" bash -eux <<'CHROOT_EOF'
@@ -122,13 +146,18 @@ systemctl enable systemd-networkd systemd-resolved sshd
 
 # GRUB (UEFI)
 sed -i 's|^#\(.*\.br/.*\)|\1|' /etc/pacman.d/mirrorlist
-pacman -S --noconfirm linux
+yes | pacman -S --noconfirm linux
 rm -fr /var/cache/pacman/pkg/*
 mv /boot/initramfs-linux-fallback.img /boot/initramfs-linux.img
 grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=MutuatechLinux --recheck --no-nvram --removable
 grub-mkconfig -o /boot/grub/grub.cfg
-grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=MutuatechLinux --recheck --no-nvram --removable
+grub-install --target=i386-pc --boot-directory=/boot --recheck "$(grub-probe -t disk /)"    # also support MBR booting
 CHROOT_EOF
+
+# activate ttys & uses UUID to boot (just in case...)
+sed -i 's| quiet$| console=ttyS0,115200|g' "$MNT/boot/grub/grub.cfg"
+ROOT_UUID=`blkid | grep "$P3" | sed 's|.* \(UUID="[^"]*"\).*|\1|'` 
+sed -i "s| root=$P3| root=$ROOT_UUID|g" "$MNT/boot/grub/grub.cfg"
 
 # echo "NOW IN THE CHROOT ENV. PRESS CTRL-D WHEN DONE"
 # arch-chroot "$MNT"
@@ -164,5 +193,21 @@ else
   arch-chroot "$MNT" passwd -l root || true
 fi
 
-echo ">> Image ready: $IMG"
+# 10) Preparing for shipping
+echo ">> Zeroing the non-used bits of the final image -- for better publishing compression"
+arch-chroot "$MNT" bash -eux <<'CHROOT_EOF'
+>/fill
+chattr +Cm /fill
+dd if=/dev/zero of=/fill bs=$((4096*4096)) oflag=sync,append conv=notrunc status=progress || :
+rm /fill
+sync
+CHROOT_EOF
 
+echo ">> Image ready: $IMG"
+echo
+echo ">> For publishing:"
+echo ">> Compress with: 'xz -T1 -1kv $IMG'"
+echo ">> Publish with: 'scp -pr ${IMG}.xz mutuatec@mutuatech.com:~/public_html/MutuatechLinux/images/x86_64/'"
+echo ">> Build & publish the initrd installation artifacts: 'cd initrd_installer; sudo ./build_initrd_installer; cd ..'"
+echo
+echo ">> Test with ./test_image"
