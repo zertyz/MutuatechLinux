@@ -2,7 +2,7 @@
 
 # Settings
 ARCH=`uname -m`
-IMAGE_URL="http://mutuatech.com/MutuatechLinux/images/$ARCH/mutuatechlinux-general-x86_64.img.xz"
+IMAGE_URL="http://mutuatech.com/MutuatechLinux/images/$ARCH/mutuatechlinux-general-${ARCH}.img.xz"
 IMAGE_ROOT_PARTITION_N=3
 
 
