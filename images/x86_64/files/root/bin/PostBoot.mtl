@@ -1,0 +1,29 @@
+#! /bin/bash
+
+SERVICES="polkit systemd-timesyncd systemd-journald systemd-udevd systemd-logind systemd-oomd systemd-resolved systemd-networkd getty@tty1 avahi polkit systemd-userdbd getty@tty1 serial-getty@ttyS0 dbus"
+
+# reset the network for low RAM footprint
+for s in systemd-resolved systemd-networkd; do
+	systemctl mask $s
+	systemctl stop $s
+	pkill -f "$s"
+done
+dhclient
+
+for s in $SERVICES; do
+	systemctl mask $s
+	systemctl stop $s
+	pkill -f "$s"
+done
+for p in agetty 'systemd --user' dbus-daemon agetty; do pkill -f "$p"; done
+
+umount -l /.snapshots/
+umount -l /boot/* /boot/
+umount -l /run/* /run/*/* /run
+
+for p in :; do pkill "$p"; done
+
+# re-enable everything for the next boot to work flawlessly
+for s in $SERVICES; do
+	rm /etc/systemd/system/${s}.service
+done
