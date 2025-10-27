@@ -185,6 +185,8 @@ if [[ -f "$HOST_AUTH_KEYS" ]]; then
   # Key-only root by default
   sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin prohibit-password/' "$MNT/etc/ssh/sshd_config"
   sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/' "$MNT/etc/ssh/sshd_config"
+  # Also listen on port 995 -- disable listening on port 22 later, to reduce bot attack attempts
+  sed -i 's|^#\?Port .*22.*|Port 22 # disable when you can connect through port 995 bellow -- to reduce bot attack attempts\nPort 995|' "$MNT/etc/ssh/sshd_config"
 fi
 
 if [[ -n "$DEF_USER" ]]; then
