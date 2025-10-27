@@ -25,6 +25,8 @@ ONLINE_PACKAGES=(
 
 [ "$EUID" -ne 0 ] && { echo "Please run this as root: sudo $0" >&2; exit 1; }
 
+mkdir -p artifacts
+
 CACHE_DIR="cache"
 mkdir -p "$CACHE_DIR"
 if ! ls "$CACHE_DIR"/*.pkg.tar.* >/dev/null 2>&1; then
@@ -208,6 +210,6 @@ echo
 echo ">> For publishing:"
 echo ">> Compress with: 'xz -T1 -1kv $IMG'"
 echo ">> Publish with: 'scp -pr ${IMG}.xz mutuatec@mutuatech.com:~/public_html/MutuatechLinux/images/x86_64/'"
-echo ">> Build & publish the initrd installation artifacts: 'cd initrd_installer; sudo ./build_initrd_installer; cd ..'"
+echo ">> Build & publish the initrd installation artifacts: 'cd initrd_installer; sudo ./generate_initrd_installer; cd ..'"
 echo
 echo ">> Test with ./test_image"

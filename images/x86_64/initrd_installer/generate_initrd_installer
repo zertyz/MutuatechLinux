@@ -12,6 +12,8 @@ INSTALL_INITRAMFS="/root/initcpio/initramfs-${KERNEL_PRESET}.img"
 
 [ "$EUID" -ne 0 ] && { echo "Please run this as root: sudo $0" >&2; exit 1; }
 
+mkdir -p artifacts
+
 require() { command -v "$1" >/dev/null || { echo "Missing: $1"; exit 1; }; }
 for b in losetup partprobe mount arch-chroot umount mktemp; do require "$b"; done
 
