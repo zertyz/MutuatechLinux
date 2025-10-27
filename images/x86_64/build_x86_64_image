@@ -15,7 +15,7 @@ DEF_USER_PW="${DEF_USER_PW:-}"      # optional
 TIMEZONE="${TIMEZONE:-UTC}"
 
 # Minimal set; you can add 'rust paru' here if desired:
-BASE_PKGS=(base base-devel linux linux-firmware intel-ucode amd-ucode btrfs-progs compsize gptfdisk parted cloud-guest-utils wget grub efibootmgr net-tools dhclient openssh vim sudo rust paru)
+BASE_PKGS=(base base-devel linux linux-firmware intel-ucode amd-ucode btrfs-progs compsize gptfdisk parted cloud-guest-utils wget grub efibootmgr net-tools dhclient openssh openbsd-netcat vim sudo rust paru)
 
 # Your original cache setup (kept)
 ONLINE_PACKAGES=(
@@ -99,7 +99,7 @@ mkfs.btrfs -f -L "${FS_LABEL}" "$P3"
 # 5) Mount with max zstd and sane opts
 MNT="$(mktemp -d)"
 echo ">> Mounting root at $MNT"
-mount -o compress-force=zstd:15,space_cache=v2,noatime "$P3" "$MNT"
+mount -o defaults,compress-force=zstd:15,noatime,commit=600 "$P3" "$MNT"
 mkdir -p "$MNT/boot/efi"
 mount "$P1" "$MNT/boot/efi"
 
@@ -111,7 +111,7 @@ pacstrap -M -c -P -U "$MNT" "$CACHE_DIR"/*.pkg.tar* "${ONLINE_PACKAGES[@]}"
 # 7) fstab with Btrfs opts (by PARTUUID)
 genfstab -t UUID -U "$MNT" >> "$MNT/etc/fstab"
 # Harden Btrfs mount options for root
-sed -i 's|\(\s/\s*btrfs\s*\)\S*|\1rw,noatime,compress=zstd:15|' "$MNT/etc/fstab"
+sed -i 's|\(\s/\s*btrfs\s*\)\S*|\1defaults,noatime,compress=zstd:15,commit=600|' "$MNT/etc/fstab"
 
 # genfstab works badly inside AWS and GCE (at least) -- it uses the /dev/ entries instead of the UUID. The bellow fixes that
 # (harmless if no /dev/* entries are in use)
@@ -125,7 +125,7 @@ done
 # 8) Basic system config
 arch-chroot "$MNT" bash -eux <<'CHROOT_EOF'
 ln -sf /usr/share/zoneinfo/UTC /etc/localtime
-hwclock --systohc || true
+# hwclock --systohc || true
 sed -i 's/^#\(en_US\.UTF-8 UTF-8\)/\1/' /etc/locale.gen
 locale-gen
 echo 'LANG=en_US.UTF-8' > /etc/locale.conf
@@ -146,6 +146,10 @@ systemctl enable systemd-networkd systemd-resolved sshd
 # resolv.conf -> systemd-resolved
 #ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 
+systemctl mask tmp.mount
+swap_UUID=`blkid | grep 'LABEL="swap"' | grep loop | tail -n 1 | sed 's|.* UUID="\([^"]*\)".*|\1|'`
+sed -i "s|^[^ ]*\( *.*swap.*\)|UUID=$swap_UUID\1|" /etc/fstab
+
 # GRUB (UEFI)
 sed -i 's|^#\(.*\.br/.*\)|\1|' /etc/pacman.d/mirrorlist
 yes | pacman -S --noconfirm linux
@@ -160,6 +164,15 @@ CHROOT_EOF
 sed -i 's| quiet$| console=ttyS0,115200|g' "$MNT/boot/grub/grub.cfg"
 ROOT_UUID=`blkid | grep "$P3" | sed 's|.* \(UUID="[^"]*"\).*|\1|'` 
 sed -i "s| root=$P3| root=$ROOT_UUID|g" "$MNT/boot/grub/grub.cfg"
+
+# 9) Copy files to the image
+echo ">> Copying files to the image"
+cd files
+for f in *; do
+	cp -av "$f" "$MNT/"
+	chown -fR root:root "$MNT/$f"
+done
+cd ..
 
 # echo "NOW IN THE CHROOT ENV. PRESS CTRL-D WHEN DONE"
 # arch-chroot "$MNT"
