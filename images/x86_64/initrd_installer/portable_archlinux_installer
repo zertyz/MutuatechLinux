@@ -1,0 +1,311 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+# Detect kernel + initrd used to boot the current system.
+# Output:
+#   KERNEL_PATH=<path or EFI path> # [verified|unverified]
+#   INITRD_PATHS=<space-separated paths> # [verified|unverified]
+#   INITRD_EMBEDDED=yes|no
+#   DETECTION_KERNEL=cmdline|bootctl|heuristic
+#   DETECTION_INITRD=cmdline|bootctl|heuristic|embedded|unknown
+
+uname_r="$(uname -r)"
+
+# ---------- helpers ----------
+
+trim() { sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' ; }
+
+# Return candidate EFI mount points (usually vfat)
+efi_mounts() {
+  awk '$3=="vfat"{print $2}' /proc/mounts
+  # Some systems mount ESP on /boot (also vfat) or have /efi
+  # The vfat filter above already catches those.
+}
+
+# Normalize a BOOT_IMAGE/initrd token to a Unix-ish path
+normalize_token_path() {
+  local p="$1"
+  # Strip GRUB device prefix like "(hd0,gpt1)"
+  if [[ "$p" == \(*\)/* ]]; then
+    p="${p#*)}"
+  fi
+  # Backslashes (UEFI paths) -> forward slashes
+  p="${p//\\//}"
+  echo "$p"
+}
+
+# Try to resolve a displayed path to a real file on disk.
+# Prints the best guess and sets exit code 0 if verified, 1 if not found.
+resolve_on_disk() {
+  local raw="$1"
+  local p="$raw"
+
+  # If it's clearly an EFI path (/EFI/...), check ESP mount points.
+  if [[ "$p" =~ ^/([Ee][Ff][Ii])/ ]]; then
+    while IFS= read -r mp; do
+      if [[ -e "$mp$p" ]]; then
+        echo "$mp$p"
+        return 0
+      fi
+    done < <(efi_mounts)
+    # Common fallback mountpoints in case /proc/mounts filtering missed:
+    for mp in /boot /boot/efi /efi; do
+      if [[ -e "$mp$p" ]]; then
+        echo "$mp$p"
+        return 0
+      fi
+    done
+    # Not found on disk; return the raw EFI path
+    echo "$p"
+    return 1
+  fi
+
+  # Absolute non-EFI path
+  if [[ "$p" == /* ]]; then
+    if [[ -e "$p" ]]; then
+      echo "$p"; return 0
+    fi
+    # Sometimes bootloaders pass "/vmlinuz-…" (ESP-rooted in systemd-boot).
+    # Try ESP mountpoints as a prefix.
+    while IFS= read -r mp; do
+      if [[ -e "$mp$p" ]]; then
+        echo "$mp$p"; return 0
+      fi
+    done < <(efi_mounts)
+    # Also try /boot as a prefix
+    if [[ -e "/boot$p" ]]; then
+      echo "/boot$p"; return 0
+    fi
+    echo "$p"; return 1
+  fi
+
+  # Relative name like "vmlinuz-<ver>" or "initramfs-linux.img"
+  if [[ -e "/boot/$p" ]]; then echo "/boot/$p"; return 0; fi
+  if [[ -e "/$p" ]]; then echo "/$p"; return 0; fi
+  # Some systemd-boot setups store these on ESP root
+  while IFS= read -r mp; do
+    if [[ -e "$mp/$p" ]]; then
+      echo "$mp/$p"; return 0
+    fi
+  done < <(efi_mounts)
+
+  echo "$p"; return 1
+}
+
+# Grep all tokens like name=value from /proc/cmdline into an assoc array-ish
+declare -A CMDLINE_KV
+parse_cmdline() {
+  local t
+  for t in $(cat /proc/cmdline); do
+    case "$t" in
+      *=*)
+        CMDLINE_KV["${t%%=*}"]="${t#*=}"
+        ;;
+    esac
+  done
+}
+parse_cmdline
+
+verified_tag() { [[ "$1" -eq 0 ]] && echo "verified" || echo "unverified"; }
+
+# ---------- detect kernel (preferred: /proc/cmdline BOOT_IMAGE= ) ----------
+
+kernel_src="heuristic"
+kernel_embedded="no"
+kernel_raw=""
+kernel_path=""
+kernel_verified=1
+
+if [[ -n "${CMDLINE_KV[BOOT_IMAGE]+x}" ]]; then
+  kernel_src="cmdline"
+  kernel_raw="$(normalize_token_path "${CMDLINE_KV[BOOT_IMAGE]}")"
+  readarray -t _tmp < <(resolve_on_disk "$kernel_raw"; echo $?)
+  kernel_path="${_tmp[0]}"
+  kernel_verified="${_tmp[1]:-1}"
+fi
+
+# If BOOT_IMAGE was missing or looked bogus, try bootctl (systemd-boot/BLS)
+if [[ -z "$kernel_path" ]] && command -v bootctl >/dev/null 2>&1; then
+  status="$(LC_ALL=C bootctl status 2>/dev/null || true)"
+  if [[ -n "$status" ]]; then
+    kernel_src="bootctl"
+    selected_block="$(awk '
+      /^Selected Boot Loader Entry:/ {sel=1; next}
+      sel && NF==0 {exit}
+      sel {print}
+    ' <<<"$status")"
+    if [[ -z "$selected_block" ]]; then
+      # Older variants label it differently; fall back to the last shown Kernel:
+      selected_block="$status"
+    fi
+    kline="$(awk '/^[[:space:]]*Kernel:/{print $2; last=$2} END{if(!last) exit 1}' <<<"$selected_block" || true)"
+    if [[ -n "$kline" ]]; then
+      kernel_raw="$(normalize_token_path "$kline")"
+      readarray -t _tmp < <(resolve_on_disk "$kernel_raw"; echo $?)
+      kernel_path="${_tmp[0]}"
+      kernel_verified="${_tmp[1]:-1}"
+    fi
+  fi
+fi
+
+# Heuristic fallback for kernel if still unknown
+if [[ -z "$kernel_path" ]]; then
+  kernel_src="heuristic"
+  for cand in \
+      "/boot/vmlinuz-${uname_r}" \
+      "/boot/bzImage-${uname_r}" \
+      "/boot/vmlinuz" "/vmlinuz" \
+      "/boot/vmlinuz-linux" \
+      "/boot/EFI/Linux/*${uname_r}*.efi" \
+      "/EFI/Linux/*${uname_r}*.efi";
+  do
+    for f in $cand; do 2>/dev/null
+      if [[ -e "$f" ]]; then kernel_path="$f"; kernel_verified=0; break 2; fi
+    done
+  done
+fi
+
+# Consider UKI if kernel looks like a PE/EFI image on ESP (ends with .efi or lives under /EFI/)
+if [[ "$kernel_path" =~ \.efi$ || "$kernel_path" =~ /[Ee][Ff][Ii]/ ]]; then
+  kernel_embedded="maybe"  # very likely embedded initramfs (UKI)
+fi
+
+# ---------- detect initrd ----------
+
+initrd_src="unknown"
+initrd_embedded="no"
+initrd_paths=()
+initrd_verified_all=1
+
+# 1) From cmdline: initrd=... (rare, but appears on some setups)
+if grep -q '\binitrd=' /proc/cmdline; then
+  initrd_src="cmdline"
+  # There can be multiple initrd= tokens
+  while read -r tok; do
+    val="${tok#initrd=}"
+    norm="$(normalize_token_path "$val")"
+    readarray -t _t < <(resolve_on_disk "$norm"; echo $?)
+    initrd_paths+=("${_t[0]}")
+    (( initrd_verified_all &= (_t[1] == 0 ? 1 : 0) ))
+  done < <(tr ' ' '\n' </proc/cmdline | grep '^initrd=')
+fi
+
+# 2) From bootctl Selected Entry (systemd-boot / BLS)
+if [[ ${#initrd_paths[@]} -eq 0 && "$kernel_src" != "heuristic" ]] && command -v bootctl &>/dev/null; then
+  status="${status:-$(LC_ALL=C bootctl status 2>/dev/null || true)}"
+  if [[ -n "$status" ]]; then
+    selected_block="$(awk '
+      /^Selected Boot Loader Entry:/ {sel=1; next}
+      sel && NF==0 {exit}
+      sel {print}
+    ' <<<"$status")"
+    # Fallback: some builds print "Current Boot Loader Entry"
+    if [[ -z "$selected_block" ]]; then
+      selected_block="$(awk '
+        /^Current Boot Loader Entry:/ {sel=1; next}
+        sel && NF==0 {exit}
+        sel {print}
+      ' <<<"$status")"
+    fi
+    mapfile -t initrd_list < <(awk '/^[[:space:]]*Initrd:/{print $2}' <<<"$selected_block")
+    if [[ ${#initrd_list[@]} -gt 0 ]]; then
+      initrd_src="bootctl"
+      for p in "${initrd_list[@]}"; do
+        norm="$(normalize_token_path "$p")"
+        readarray -t _t < <(resolve_on_disk "$norm"; echo $?)
+        initrd_paths+=("${_t[0]}")
+        (( initrd_verified_all &= (_t[1] == 0 ? 1 : 0) ))
+      done
+    fi
+  fi
+fi
+
+# 3) If still unknown: heuristics under /boot (and microcode)
+if [[ ${#initrd_paths[@]} -eq 0 ]]; then
+  # If kernel looks like UKI (.efi / /EFI/...), assume embedded
+  if [[ "$kernel_embedded" != "no" ]]; then
+    initrd_src="embedded"
+    initrd_embedded="yes"
+  else
+    initrd_src="heuristic"
+    candidates=(
+      "/boot/initrd.img-${uname_r}"
+      "/boot/initramfs-${uname_r}.img"
+      "/boot/initramfs-${uname_r}.img.gz"
+      "/boot/initramfs-genkernel-${uname_r}"
+      "/boot/initramfs-*${uname_r}*.img"
+      "/boot/initrd-*${uname_r}*"
+      "/boot/initramfs-linux.img"
+      "/boot/initramfs-linux-lts.img"
+      "/boot/initramfs.img"
+    )
+    pick=""
+    newest_mtime=0
+    for pat in "${candidates[@]}"; do
+      for f in $pat; do 2>/dev/null
+        [[ -e "$f" ]] || continue
+        mt=$(stat -c %Y "$f" 2>/dev/null || echo 0)
+        if (( mt > newest_mtime )); then newest_mtime=$mt; pick="$f"; fi
+      done
+    done
+    if [[ -n "$pick" ]]; then
+      initrd_paths+=("$pick")
+    fi
+    # Add CPU microcode images if present
+    for ucode in /boot/*-ucode.img /boot/*-ucode.cpio; do
+      [[ -e "$ucode" ]] && initrd_paths+=("$ucode")
+    done
+    if [[ ${#initrd_paths[@]} -eq 0 ]]; then
+      initrd_src="unknown"
+    fi
+  fi
+fi
+
+# ---------- print results ----------
+
+var=`printf 'KERNEL_PATH=%s # %s\n' "${kernel_path:-unknown}" "$(verified_tag "$kernel_verified")"`
+eval "export $var"
+echo $var
+
+if [[ "$initrd_src" == "embedded" ]]; then
+  printf 'INITRD_PATHS=(embedded in UKI)\n'
+else
+  if [[ ${#initrd_paths[@]} -gt 0 ]]; then
+    # Mark each as verified/unverified independently
+    out=()
+    for p in "${initrd_paths[@]}"; do
+      if [[ -e "$p" ]]; then out+=("$p # verified"); else out+=("$p # unverified"); fi
+    done
+    var=`printf 'INITRD_PATHS=%s\n' "${out[*]}"`
+    eval "export $var"
+    echo $var
+  else
+    printf 'INITRD_PATHS=unknown\n'
+  fi
+fi
+printf 'INITRD_EMBEDDED=%s\n' "${initrd_embedded}"
+printf 'DETECTION_KERNEL=%s\n' "$kernel_src"
+printf 'DETECTION_INITRD=%s\n' "$initrd_src"
+printf '\n'
+echo '------------------------------------'
+ARCH=`uname -m`
+printf 'Working with ARCH=%s, KERNEL=%s, and INITRD=%s\n' "$ARCH" "$KERNEL_PATH" "$INITRD_PATHS"
+printf "which will be backup to '/boot/orig' and replaced by our auto-installation ones\n"
+printf '\n'
+printf 'Please verify and manually apply the following commands to get Mutuatech Linux installed\n'
+printf 'into this instance\n'
+printf '\n'
+printf 'VERY IMPORTANT: all files from local attached media will be lost!\n'
+printf '\n'
+cat <<EOF
+
+sudo mkdir /boot/orig || echo 'FAILED. DO NOT PROCEED'
+sudo mv '$KERNEL_PATH' '$INITRD_PATHS' /boot/orig || echo 'FAILED. DO NOT PROCEED'
+wget -O - -c 'https://mutuatech.com/MutuatechLinux/initrd_installers/$ARCH/vmlinuz-linux.xz' | xz -dcv | sudo dd of='$KERNEL_PATH' || echo 'FAILED. DO NOT PROCEED'
+wget -O - -c 'https://mutuatech.com/MutuatechLinux/initrd_installers/$ARCH/initramfs-linux.img.xz' | xz -dcv | sudo dd of='$INITRD_PATHS' || echo 'FAILED. DO NOT PROCEED'
+echo "Press CTRL-D when you are ready to LOSE ALL YOUR DATA"; cat &>/dev/null; shutdown -r now
+
+EOF
+
+
+
