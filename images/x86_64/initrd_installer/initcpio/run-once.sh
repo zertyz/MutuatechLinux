@@ -116,7 +116,7 @@ install_image() {
     echo ":::::::::: Downloading and installing full HD image to ${root_disk_dev} ::::::::::" &&
 
     wget -O - -c "${IMAGE_URL}" |
-      xz -T1 -dcvvvv |
+      xz -T1 -dc |
       dd of=${root_disk_dev} bs=$((64*1024*1024)) status=progress &&
 
     echo ":::::::::: Growing the rootfs partition to take all the remaining device space in ${root_disk_dev} ::::::::::" &&

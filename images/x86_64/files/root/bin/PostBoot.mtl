@@ -27,3 +27,10 @@ for p in :; do pkill "$p"; done
 for s in $SERVICES; do
 	rm /etc/systemd/system/${s}.service
 done
+
+# experimental ZRAM with backing_dev swapping
+DEV=$(blkid -t TYPE=swap -o device | head -n1); swapon -s; swapoff "$DEV"; modprobe zram; echo 1 >/sys/block/zram0/reset; sleep 1; echo $DEV >/sys/block/zram0/backing_dev; echo zstd >/sys/block/zram0/comp_algorithm; echo 2g >/sys/block/zram0/disksize; echo 1g >/sys/block/zram0/mem_limit; mkswap /dev/zram0; swapon /dev/zram0; swapon -s
+/root/bin/zram_writeback_daemon -p 60 -w 6 &
+
+# # experimental small performance gain
+# echo 0 >/proc/sys/kernel/sched_autogroup_enabled
