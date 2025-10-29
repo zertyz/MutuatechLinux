@@ -8,8 +8,48 @@ IMAGE_ROOT_PARTITION_N=3
 
 setup_network() {
 
+    # wait a little bit for devices to settle
+    sleep 2
+
+    # preferred way of determining the network
     ETH=`ifconfig -a -s | grep '^e' | sed 's| .*||'`
     WLAN=`ifconfig -a -s | grep '^w' | sed 's| .*||'`
+
+    # network device not found? be verbose and try several fallback methods
+    if [[ ! -n "$ETH"  && ! -n "$WLAN" ]]; then
+        echo  "::::::::::     COULDN'T determine the network interfaces using ifconfig. Trying to load common cloud drivers and waiting a little bit for them to settle ::::::::::"
+	modprobe xen_netfront                        # used in AWS, as it seems
+        modprobe virtio_pci; modprobe virtio_net;    # also used in AWS, as it seems
+	sleep 5
+	ip link
+        ETH=`ifconfig -a -s | grep '^e' | sed 's| .*||'`
+        WLAN=`ifconfig -a -s | grep '^w' | sed 's| .*||'`
+        if [[ ! -n "$ETH"  && ! -n "$WLAN" ]]; then
+            echo  "::::::::::     STILL COULDN'T determine the network interfaces using ifconfig. Please inspect the following 'ifconfig -a' dump ::::::::::"
+            ifconfig -a
+            echo  "::::::::::     Trying to get the wired network interface through the alternative /sys method ::::::::::"
+            for p in /sys/class/net/*; do
+                iface=${p##*/};
+                [ "$iface" = lo ] && continue                         # skip loopback
+                [ -e "$p/device" ] || continue                        # must be backed by hardware
+                read type < "$p/type"; [ "$type" -ne 1 ] && continue  # skip ARPHRD_ETHER
+                [ -e "$p/wireless" ] && WLAN="$iface" && continue     # wifi
+                ETH="$iface"                                          # else ethernet
+            done
+            if [[ ! -n "$ETH"  && ! -n "$WLAN" ]]; then
+                echo  "::::::::::     ALTERNATIVE /sys method also COULDN'T determine the network interfaces :( Please inspect the following 'ls -la /sys/class/net/' dump ::::::::::"
+                ls -l /sys/class/net/
+                echo  "::::::::::     ... and the 'lsmod' dump ::::::::::"
+		lsmod
+                echo  "::::::::::     ... and the 'ip -o link show' dump ::::::::::"
+		ip -o link show
+                echo  "::::::::::     Desperate last attempt using 'ipconfig -t 20 -c dhcp all' ::::::::::"
+		ipconfig -t 20 -c dhcp all || /usr/lib/initcpio/ipconfig -t 20 -c dhcp all
+                ETH=`ifconfig -a -s | grep '^e' | sed 's| .*||'`
+                WLAN=`ifconfig -a -s | grep '^w' | sed 's| .*||'`
+            fi
+        fi
+    fi
 
     ifconfig ${ETH} up
     sleep 1

@@ -15,7 +15,7 @@ DEF_USER_PW="${DEF_USER_PW:-}"      # optional
 TIMEZONE="${TIMEZONE:-UTC}"
 
 # Minimal set; you can add 'rust paru' here if desired:
-BASE_PKGS=(base base-devel linux linux-firmware intel-ucode amd-ucode btrfs-progs compsize gptfdisk parted cloud-guest-utils wget grub efibootmgr net-tools dhclient openssh openbsd-netcat vim sudo rust paru)
+BASE_PKGS=(base base-devel linux linux-firmware intel-ucode amd-ucode btrfs-progs compsize gptfdisk parted qemu-system-x86-firmware mkinitcpio-nfs-utils cloud-guest-utils wget grub efibootmgr net-tools dhclient openssh openbsd-netcat vim sudo rust paru)
 
 # Your original cache setup (kept)
 ONLINE_PACKAGES=(

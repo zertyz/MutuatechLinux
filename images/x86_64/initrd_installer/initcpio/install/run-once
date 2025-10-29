@@ -6,7 +6,8 @@ build() {
 
     map add_file "/etc/wpa_supplicant/wpa_supplicant.conf" "/etc/resolv.conf" "/root/initcpio/run-once.sh"
 
-    map add_binary /usr/bin/{bash,btrfs,uname,date,ifconfig,dhclient*,ip,chown,wpa_supplicant,pkill,wget,dd,xz,grep,sed,blkid,readlink,findmnt,lsblk,sort,head,growpart,sfdisk,sgdisk,flock,partprobe,mktemp,rmdir,mount,umount,reboot}
+    map add_binary /usr/bin/{bash,btrfs,uname,date,ifconfig,dhclient*,ip,lsmod,chown,wpa_supplicant,pkill,wget,dd,xz,grep,sed,blkid,readlink,findmnt,lsblk,sort,head,growpart,sfdisk,sgdisk,flock,partprobe,mktemp,rmdir,mount,umount,reboot}
+    map add_binary /usr/lib/initcpio/ipconfig
 
 }
 

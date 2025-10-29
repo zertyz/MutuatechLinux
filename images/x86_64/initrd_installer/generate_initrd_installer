@@ -63,5 +63,5 @@ echo
 echo "You can follow the README to test it locally."
 echo
 echo "When ready, publish with:"
-echo "rm artifacts/*.xz && xz -T1 -9kv artifacts/{vmlinuz-linux,initramfs-linux.img}"
+echo "rm -f artifacts/*.xz && xz -T1 -9kv artifacts/{vmlinuz-linux,initramfs-linux.img}"
 echo "scp -pr artifacts/*.xz mutuatec@mutuatech.com:~/public_html/MutuatechLinux/initrd_installers/x86_64/"
