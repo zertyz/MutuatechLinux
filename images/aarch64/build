@@ -1,7 +1,7 @@
 #! /bin/bash
 
 ROOT="img_root_bootstrap/";
-INNER_SCRIPT="image_setup_script";
+INNER_SCRIPT="image_setup_inner_script";
 
 sudo rm -fr "${ROOT}"
 sudo mkdir "${ROOT}"
