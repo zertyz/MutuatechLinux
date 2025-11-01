@@ -1,0 +1,254 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+[ "$EUID" -ne 0 ] && { echo "Please run this as root: sudo $0" >&2; exit 1; }
+
+
+# Ensures the cache directory contains all files specified by the URLs passaed as arguments to this function
+#
+# Defines the following global variables:
+#  - CACHE_DIR: where the externally fetched packages were downloaded
+fetch_custom_pkgs_cache() {
+    CACHE_DIR="cache"
+    mkdir -p "$CACHE_DIR"
+    if ! ls "$CACHE_DIR"/*.pkg.tar.* &>/dev/null; then
+        echo ">> Fetching custom packages and putting them into the local cache..."
+        cd "$CACHE_DIR"
+        wget -c "$@"
+        cd ..
+    fi
+}
+
+# Ensures all the commands passed in as parameter do exist on the system -- exit otherwise
+require_commands() {
+    for bin in "$@"; do
+        command -v "$bin" >/dev/null || { echo "Missing: $bin"; exit 1; };
+    done
+}
+
+mkdir -p artifacts
+
+# function to execute when the script ends
+cleanup() {
+  set +e
+  if mountpoint -q "$MNT/boot/efi"; then umount -l "$MNT/boot/efi"; fi
+  if mountpoint -q "$MNT"; then umount -l "$MNT"; fi
+  if [[ -n "${LOOPDEV:-}" ]]; then losetup -d "$LOOPDEV"; fi
+  [[ -d "${MNT:-}" ]] && rmdir "$MNT"
+}
+trap cleanup EXIT
+
+# Creates a sparse image file representing the raw disk contents
+# and also partition it in the DOS/MBR format with the following layout:
+# MBR/DOS layout: 1=ESP, 2=swap, 3=root
+#
+# Uses the following global variables:
+#  - IMG: path to the target system image to be generated
+#  - IMG_SIZE: predefined size the above file will have
+#  - ESP_SIZE: the size for the EFI/ESP partition
+#  - SWAP_SIZE: the size for the swap partition
+# The root partition will take the reminder of the space
+create_and_partition_image() {
+
+    echo ">> Creating image file: $IMG ($IMG_SIZE)"
+    >"$IMG"
+    chattr +Cm "$IMG" || :         # if on BTRFS, do not compress nor COW the file
+    truncate -s "$IMG_SIZE" "$IMG"
+
+    ## 2) GPT layout: 1=ESP, 2=swap, 3=root
+    #echo ">> Partitioning GPT (ESP ${ESP_SIZE}, swap ${SWAP_SIZE}, root=rest)"
+    #sgdisk -Z "$IMG"
+    #sgdisk -n 1:0:+"$ESP_SIZE" -t 1:EF00 -c 1:"EFI System" "$IMG"
+    #sgdisk -n 2:0:+"$SWAP_SIZE" -t 2:8200 -c 2:"swap" "$IMG"
+    #sgdisk -n 3:0:0        -t 3:8300 -c 3:"${FS_LABEL}" "$IMG"
+    #sgdisk -p "$IMG"
+
+    # 2) MBR/DOS layout: 1=ESP, 2=swap, 3=root
+    echo ">> Partitioning MBR/DOS (ESP ${ESP_SIZE}, swap ${SWAP_SIZE}, root=rest)"
+    sfdisk "$IMG" <<EOF
+label: dos
+
+# p1: ESP (FAT32), bootable
+start=1MiB, size=${ESP_SIZE}, type=ef, bootable
+
+# p2: swap
+size=${SWAP_SIZE}, type=82
+
+# p3: root (rest of disk)
+type=83
+EOF
+
+}
+
+# Mounts the raw image file using a loop device,
+# pre-formatting them before that.
+#
+# The root uses a BTRFS compressed filesystem.
+#
+# Uses the following global variables:
+#  - IMG: path to the target system image
+#  - FS_LABEL: the label for the root (BTRFS) filesystem
+#
+# Defines the following global variables:
+#  - LOOPDEV: the loop device reserved for mapping the IMG file
+#  - P1, P2 and P3: the device for each of the image partitions:
+#    - P1: ESP/EFI
+#    - P2: swap
+#    - P3: root
+#  - MNT: a temporary directory where the root partition is mounted
+format_and_mount_partitions() {
+
+    # Map loop device with partitions
+    LOOPDEV="$(losetup --find --show -P "$IMG")"
+    echo ">> Loop device to be used: $LOOPDEV"
+    partprobe "$LOOPDEV"
+
+    P1="${LOOPDEV}p1"
+    P2="${LOOPDEV}p2"
+    P3="${LOOPDEV}p3"
+
+    # Make the filesystems
+    echo ">> mkfs ESP FAT32"
+    mkfs.fat -F12 -n EFI "$P1"
+    echo ">> mkswap"
+    mkswap -L swap "$P2"
+    echo ">> mkfs Btrfs root"
+    mkfs.btrfs -f -L "${FS_LABEL}" "$P3"
+
+    # Mount with max zstd and sane opts
+    MNT="$(mktemp -d)"
+    echo ">> Mounting root at $MNT"
+    mount -o defaults,compress-force=zstd:15,noatime,commit=600 "$P3" "$MNT"
+    mkdir -p "$MNT/boot/efi"
+    mount "$P1" "$MNT/boot/efi"
+}
+
+# Bootstrap the new Archlinux into the image
+# provided you are running on the same architecture
+# as the image you are building.
+#
+# Uses the following global variables:
+#  - BASE_PKGS: the list of packages to install (that are present on the official repos)
+#  - ONLINE_PACKAGES: the list of URLs for packages that will be fetched on-the-fly by pacman
+#  - MNT: the temporary directory where the root partition is mounted
+#  - CACHE_DIR: where the externally fetched packages were downloaded
+bootstrap_native() {
+    echo ">> pacstrap base + tools for the native platform"
+    pacstrap -M -c -P "$MNT" "${BASE_PKGS[@]}"
+    pacstrap -M -c -P -U "$MNT" "$CACHE_DIR"/*.pkg.tar* "${ONLINE_PACKAGES[@]}"
+}
+
+bootstrap_emulated() {
+# sudo pacstrap -C ./alarm-pacman.conf -M -G -K "${ROOT}" base linux-aarch64 linux-firmware btrfs-progs openssh sudo archlinux-keyring archlinuxarm-keyring &&
+    echo ">> pacstrap base + tools for an alien platform"
+    pacstrap -C ./alarm-pacman.conf -M -G -K "$MNT" "${BASE_PKGS[@]}"
+    pacstrap -C ./alarm-pacman.conf -M -G -K -U "$MNT" "$CACHE_DIR"/*.pkg.tar* "${ONLINE_PACKAGES[@]}"
+}
+
+generate_fstab() {
+
+    echo ">> Generating fstab with Btrfs opts (by UUID)"
+    genfstab -t UUID -U "$MNT" >> "$MNT/etc/fstab"
+    # Harden Btrfs mount options for root
+    sed -i 's|\(\s/\s*btrfs\s*\)\S*|\1defaults,noatime,compress=zstd:15,commit=600|' "$MNT/etc/fstab"
+
+    echo ">>     ... fixing any device resolution mistakes in the fstab file"
+    # genfstab works badly inside AWS and GCE (at least) -- it uses the /dev/ entries instead of the UUID. The bellow fixes that
+    # (harmless if no /dev/* entries are in use)
+    cat "$MNT/etc/fstab" | grep -v '#' | grep '/dev/' | while read md; do
+        echo $md | sed 's| .*||' | while read ld; do
+            UUID=`blkid | grep "$ld" | sed 's|.* \(UUID="[^"]*"\).*|\1|'`
+            sed -i "s|^$ld|$UUID|g" "$MNT/etc/fstab"
+        done
+    done
+}
+
+# Uses the following global variables:
+#  - INNER_SCRIPT: the name of the script to execute on the new image
+execute_inner_script() {
+    echo ">> Executing the inner script (into the new image)"
+    cat "${INNER_SCRIPT}" | arch-chroot "$MNT" bash -eux
+}
+
+adjust_grub() {
+    echo ">> Adjusting GRUB -- to boot from the partition's UUID and to log to the serial console"
+    # activate ttys & uses UUID to boot (just in case...)
+    sed -i 's| quiet$| console=ttyS0,115200|g' "$MNT/boot/grub/grub.cfg"
+    ROOT_UUID=`blkid | grep "$P3" | sed 's|.* \(UUID="[^"]*"\).*|\1|'` 
+    sed -i "s| root=$P3| root=$ROOT_UUID|g" "$MNT/boot/grub/grub.cfg"
+}
+
+copy_image_files() {
+    echo ">> Copying static files to the image"
+    cd files
+    for f in *; do
+        cp -av "$f" "$MNT/"
+        chown -fR root:root "$MNT/$f"
+    done
+    cd ..
+}
+
+debug() {
+    echo "NOW IN THE CHROOT ENV. PRESS CTRL-D WHEN DONE"
+    arch-chroot "$MNT"
+}
+
+setup_sshd_and_keys() {
+    # 9) SSH keys & users
+    if [[ -f "$HOST_AUTH_KEYS" ]]; then
+        echo ">> Installing root authorized_keys from $HOST_AUTH_KEYS"
+        install -d -m 700 "$MNT/root/.ssh"
+        install -m 600 "$HOST_AUTH_KEYS" "$MNT/root/.ssh/authorized_keys"
+        # Key-only root by default
+        sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin prohibit-password/' "$MNT/etc/ssh/sshd_config"
+        sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/' "$MNT/etc/ssh/sshd_config"
+        # Also listen on port 995 -- disable listening on port 22 later, to reduce bot attack attempts
+        sed -i 's|^#\?Port .*22.*|Port 22 # disable when you can connect through port 995 bellow -- to reduce bot attack attempts\nPort 995|' "$MNT/etc/ssh/sshd_config"
+    fi
+}
+
+setup_root_and_users() {
+
+    if [[ -n "$ROOT_PW" ]]; then
+        echo ">> Setting root password"
+        echo "root:${ROOT_PW}" | arch-chroot "$MNT" chpasswd
+    else
+        echo ">> Root password locked (use SSH keys)"
+        arch-chroot "$MNT" passwd -l root || true
+    fi
+
+    if [[ -n "$DEF_USER" ]]; then
+        echo ">> Creating user: $DEF_USER"
+        arch-chroot "$MNT" useradd -m -G wheel -s /bin/bash "$DEF_USER"
+        if [[ -n "$DEF_USER_PW" ]]; then
+            echo "${DEF_USER}:${DEF_USER_PW}" | arch-chroot "$MNT" chpasswd
+        else
+            echo "User created without password; SSH keys recommended."
+        fi
+        # sudo: passwordless wheel
+        echo '%wheel ALL=(ALL) NOPASSWD: ALL' > "$MNT/etc/sudoers.d/01-wheel-nopasswd"
+        chmod 440 "$MNT/etc/sudoers.d/01-wheel-nopasswd"
+    fi
+}
+
+zeroize() {
+    echo ">> Zeroing the non-used bits of the final image -- for better publishing compression"
+    arch-chroot "$MNT" bash -eux <<'CHROOT_EOF'
+>/fill
+chattr +Cm /fill
+dd if=/dev/zero of=/fill bs=$((4096*4096)) oflag=sync,append conv=notrunc status=progress || :
+rm /fill
+sync
+CHROOT_EOF
+}
+
+ready_msg() {
+    echo ">> Image ready: $IMG"
+    echo
+    echo ">> For publishing:"
+    echo ">> Compress with: 'xz -T1 -1kv $IMG'"
+    echo ">> Publish with: 'scp -pr ${IMG}.xz mutuatec@mutuatech.com:~/public_html/MutuatechLinux/images/x86_64/'"
+    echo ">> Build & publish the initrd installation artifacts: 'cd initrd_installer; sudo ./generate_initrd_installer; cd ..'"
+    echo
+    echo ">> Test with ./test_image"
+}

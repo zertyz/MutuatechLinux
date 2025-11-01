@@ -1,0 +1,8 @@
+# To test the installer works
+# (it will reuse the image, grow it a little, and reinstall itself there, boot and see the results -- with logs at /tmp/initramfs_installer.log)
+
+sudo fallocate -l $((8*1024*1024*1024)) ../artifacts/mutuatechlinux-general-x86_64.img
+
+IMG="../artifacts/mutuatechlinux-general-x86_64.img"; LOOPDEV="$(sudo losetup --find --show -P "$IMG")"; sudo partprobe "$LOOPDEV"; P1="${LOOPDEV}p1"; P2="${LOOPDEV}p2"; P3="${LOOPDEV}p3"; MNT="$(mktemp -d)"; sudo mount -o compress-force=zstd:15,space_cache=v2,noatime "$P3" "$MNT"; sudo mkdir -p "$MNT/boot/efi"; sudo mount "$P1" "$MNT/boot/efi"; echo NOT DOING sudo arch-chroot "$MNT"; sudo mkdir "$MNT/boot/orig"; sudo mv $MNT/boot/{initramfs-linux.img,vmlinuz-linux} "$MNT/boot/orig"; sudo cp -a artifacts/* "$MNT/boot"; sudo umount -l "$MNT/boot/efi"; sudo umount -l "$MNT"; sudo losetup -d "$LOOPDEV"; sudo rmdir "$MNT"
+
+sudo qemu-system-x86_64 -m 704m -smp 1 -drive if=none,file=../artifacts/mutuatechlinux-general-x86_64.img,format=raw,id=disk0     -device virtio-rng-pci     -device virtio-blk-pci,drive=disk0,bootindex=0     -device virtio-net-pci,netdev=n0 -netdev user,id=n0,hostfwd=tcp::2222-:22     -boot order=c,menu=on     -nographic 2>&1 | tee /tmp/initramfs_installer.log

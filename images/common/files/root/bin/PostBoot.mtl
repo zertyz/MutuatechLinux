@@ -1,0 +1,36 @@
+#! /bin/bash
+
+SERVICES="polkit systemd-timesyncd systemd-journald systemd-udevd systemd-logind systemd-oomd systemd-resolved systemd-networkd getty@tty1 avahi polkit systemd-userdbd getty@tty1 serial-getty@ttyS0 dbus"
+
+# reset the network for low RAM footprint
+for s in systemd-resolved systemd-networkd; do
+	systemctl mask $s
+	systemctl stop $s
+	pkill -f "$s"
+done
+dhclient
+
+for s in $SERVICES; do
+	systemctl mask $s
+	systemctl stop $s
+	pkill -f "$s"
+done
+for p in agetty 'systemd --user' dbus-daemon agetty; do pkill -f "$p"; done
+
+umount -l /.snapshots/
+umount -l /boot/* /boot/
+umount -l /run/* /run/*/* /run
+
+for p in :; do pkill "$p"; done
+
+# re-enable everything for the next boot to work flawlessly
+for s in $SERVICES; do
+	rm /etc/systemd/system/${s}.service
+done
+
+# experimental ZRAM with backing_dev swapping
+DEV=$(blkid -t TYPE=swap -o device | head -n1); swapon -s; swapoff "$DEV"; modprobe zram; echo 1 >/sys/block/zram0/reset; sleep 1; echo $DEV >/sys/block/zram0/backing_dev; echo zstd >/sys/block/zram0/comp_algorithm; echo 2g >/sys/block/zram0/disksize; echo 1g >/sys/block/zram0/mem_limit; mkswap /dev/zram0; swapon /dev/zram0; swapon -s
+/root/bin/zram_writeback_daemon -p 60 -w 6 &
+
+# # experimental small performance gain
+# echo 0 >/proc/sys/kernel/sched_autogroup_enabled

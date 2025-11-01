@@ -1,0 +1,35 @@
+#!/usr/bin/ash
+
+#run_earlyhook() {
+#    msg  ":::::::::::::::::::::::::::::::::::: HEY, early is here"
+#    sleep 30
+#}
+
+run_hook() {
+    msg  ":::::::::: Installing Mutuatech Linux for `uname -m` ::::::::::"
+    msg  ":::::::::: Current kernel is `uname -a` ::::::::::"
+    /root/initcpio/run-once.sh &&
+    msg  ":::::::::: DONE. Rebooting into the new system ::::::::::" &&
+    sync &&
+    reboot -ndf || {
+        msg  ":::::::::: UNFORTUNATELY something went wrong while installing the new system :( ::::::::::"
+        sleep 60
+    }
+}
+
+run_cleanuphook() {
+    msg  ":::::::::: Something went wrong... attempting to restore the old system ::::::::::"
+    sleep 60
+    root_arg=$(sed -n 's/.*\broot=\([^ ]*\).*/\1/p' /proc/cmdline) &&
+    umount -l /new_root &&
+    mount $root_arg /new_root &&
+    mv /new_root/boot/orig/* /new_root/boot &&
+    rmdir /new_root/boot/orig &&
+    umount -l /new_root &&
+    sync &&
+    reboot -ndf || {
+        msg  ":::::::::: UNFORTUNATELY restoring the old system was not possible :( ::::::::::"
+        umount -l /new_root
+        sleep 60
+    }
+}
