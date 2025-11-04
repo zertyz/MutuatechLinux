@@ -24,8 +24,9 @@ ONLINE_PACKAGES=()
 fetch_custom_pkgs_cache http://mutuatech.com/MutuatechLinux/cache/aarch64/{mutuatechlinux-general-multiarch-1.1.41-1-aarch64.pkg.tar.xz,paru-bin-2.1.0-1-aarch64.pkg.tar.xz}
 create_and_partition_image
 format_and_mount_partitions
+restore_pacman_pkgs
 bootstrap_emulated
-debug # go there and see where the files got downloaded. Bring them to the local cache pacman directory, to be restored after this step
+save_pacman_pkgs
 generate_fstab
 execute_inner_script "./image_setup_inner_script"
 adjust_grub

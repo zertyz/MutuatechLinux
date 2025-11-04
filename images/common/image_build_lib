@@ -18,6 +18,33 @@ fetch_custom_pkgs_cache() {
     fi
 }
 
+# Only useful if building the system with `bootstrap_emulated()`
+# -- in which case you should also use `save_pacman_pkgs()` after bootstrapping.
+# Puts a previously downloaded set of pacman pkgs back into the right place,
+# so subsequent pacstrap calls will not need to download everything again.
+#
+# Uses the following global variables:
+#  - IMG: path to the target system image to be generated
+#  - CACHE_DIR: where the externally fetched packages were downloaded
+restore_pacman_pkgs() {
+    local emulated_pkg_dir="$MNT/var/cache/pacman/pkg"
+    mkdir -p "$emulated_pkg_dir" "$CACHE_DIR"/pacman/
+    rsync -PaS "$CACHE_DIR"/pacman/* "$emulated_pkg_dir"/
+}
+
+# Only useful if building the system with `bootstrap_emulated()`
+# -- in which case you should also use `restore_pacman_pkgs()` before bootstrapping.
+# Copies a previously downloaded set of pacman pkgs to the local cache,
+# so subsequent pacstrap calls will not need to download everything again.
+#
+# Uses the following global variables:
+#  - IMG: path to the target system image to be generated
+#  - CACHE_DIR: where the externally fetched packages were downloaded
+save_pacman_pkgs() {
+    local emulated_pkg_dir="$MNT/var/cache/pacman/pkg"
+    rsync -PaS "$emulated_pkg_dir"/* "$CACHE_DIR"/pacman/
+}
+
 # Ensures all the commands passed in as parameter do exist on the system -- exit otherwise
 require_commands() {
     for bin in "$@"; do
