@@ -29,6 +29,7 @@ fetch_custom_pkgs_cache() {
 restore_pacman_pkgs() {
     local emulated_pkg_dir="$MNT/var/cache/pacman/pkg"
     mkdir -p "$emulated_pkg_dir" "$CACHE_DIR"/pacman/
+    >"$CACHE_DIR"/pacman/dummy
     rsync -PaS "$CACHE_DIR"/pacman/* "$emulated_pkg_dir"/
 }
 

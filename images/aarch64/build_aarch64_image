@@ -1,6 +1,11 @@
 #! /bin/bash
 set -euo pipefail
 
+# pre-requisites: the host must have the following packages installed
+# pacman -S --needed qemu-user-static qemu-user-static-binfmt
+# and must execute this before this script (if the above was installed after the last reboot)
+# sudo /usr/lib/systemd/systemd-binfmt
+
 # --- Default Settings ---
 mkdir -p artifacts
 IMG="${IMG:-artifacts/mutuatechlinux-general-aarch64.img}"
