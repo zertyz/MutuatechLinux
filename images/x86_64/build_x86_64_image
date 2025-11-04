@@ -4,7 +4,7 @@ set -euo pipefail
 # --- Default Settings ---
 mkdir -p artifacts
 IMG="${IMG:-artifacts/mutuatechlinux-general-x86_64.img}"
-IMG_SIZE="${IMG_SIZE:-4G}"
+IMG_SIZE="${IMG_SIZE:-5G}"
 ESP_SIZE="${ESP_SIZE:-4MiB}"
 SWAP_SIZE="${SWAP_SIZE:-1GiB}"
 HOST_AUTH_KEYS="${HOST_AUTH_KEYS:-$HOME/.ssh/authorized_keys}"  # copied to root
