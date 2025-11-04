@@ -3,7 +3,7 @@ set -euo pipefail
 
 # --- Default Settings ---
 mkdir -p artifacts
-IMG="${IMG:-artifacts/mutuatechlinux-general-x86_64.img}"
+IMG="${IMG:-artifacts/mutuatechlinux-general-aarch64.img}"
 IMG_SIZE="${IMG_SIZE:-4G}"
 ESP_SIZE="${ESP_SIZE:-4MiB}"
 SWAP_SIZE="${SWAP_SIZE:-1GiB}"
@@ -18,16 +18,14 @@ DEF_USER_PW="${DEF_USER_PW:-}"        # optional
 require_commands sgdisk sfdisk losetup mkfs.fat mkswap mkfs.btrfs pacstrap arch-chroot genfstab grub-install grub-mkconfig partprobe
 
 
-BASE_PKGS=(base base-devel linux linux-firmware intel-ucode amd-ucode btrfs-progs compsize gptfdisk parted qemu-system-x86-firmware mkinitcpio-nfs-utils cloud-guest-utils wget grub efibootmgr net-tools dhclient openssh openbsd-netcat vim sudo rust paru dosfstools arch-install-scripts)
-ONLINE_PACKAGES=(
-  'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
-  'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
-)
+BASE_PKGS=(base base-devel linux-aarch64 linux-firmware btrfs-progs compsize gptfdisk parted qemu-system-aarch64-firmware mkinitcpio-nfs-utils cloud-guest-utils wget grub efibootmgr net-tools dhclient openssh openbsd-netcat vim sudo rust archlinux-keyring archlinuxarm-keyring dosfstools arch-install-scripts)
+ONLINE_PACKAGES=()
 
-fetch_custom_pkgs_cache http://mutuatech.com/MutuatechLinux/cache/x86_64/{mutuatechlinux-general-multiarch-1.1.40-1-x86_64.pkg.tar.zst,mutuatechlinux-general-x86_64-1.1.40-1-x86_64.pkg.tar.zst,httpstat-go-1.1.0-1-x86_64.pkg.tar.zst,rar-7.12-1-x86_64.pkg.tar.zst}
+fetch_custom_pkgs_cache http://mutuatech.com/MutuatechLinux/cache/aarch64/{mutuatechlinux-general-multiarch-1.1.41-1-aarch64.pkg.tar.xz,paru-bin-2.1.0-1-aarch64.pkg.tar.xz}
 create_and_partition_image
 format_and_mount_partitions
-bootstrap_native
+bootstrap_emulated
+debug # go there and see where the files got downloaded. Bring them to the local cache pacman directory, to be restored after this step
 generate_fstab
 execute_inner_script "./image_setup_inner_script"
 adjust_grub
@@ -38,7 +36,7 @@ zeroize
 ready_msg
 
 # NOTES
-# 1) To update the cache, chroot into the image and update the packages, then scp -pr cache/* mutuatec@mutuatech.com:~/public_html/MutuatechLinux/cache/x86_64/
+# 1) To update the cache, chroot into the image and update the packages, then scp -pr cache/* mutuatec@mutuatech.com:~/public_html/MutuatechLinux/cache/aarch64/
 # 2) After updating the cache, update the package names being fetched to the cache above in this script
 # 3) To enter the chroot image, just add a line containing 'debug' between any of the above steps
 # 4) To chroot on the final image, execute "..."

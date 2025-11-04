@@ -136,7 +136,6 @@ bootstrap_native() {
 }
 
 bootstrap_emulated() {
-# sudo pacstrap -C ./alarm-pacman.conf -M -G -K "${ROOT}" base linux-aarch64 linux-firmware btrfs-progs openssh sudo archlinux-keyring archlinuxarm-keyring &&
     echo ">> pacstrap base + tools for an alien platform"
     pacstrap -C ./alarm-pacman.conf -M -G -K "$MNT" "${BASE_PKGS[@]}"
     pacstrap -C ./alarm-pacman.conf -M -G -K -U "$MNT" "$CACHE_DIR"/*.pkg.tar* "${ONLINE_PACKAGES[@]}"
@@ -160,11 +159,11 @@ generate_fstab() {
     done
 }
 
-# Uses the following global variables:
-#  - INNER_SCRIPT: the name of the script to execute on the new image
+# Receives as argument the name of the local script to execute on the new image,
+# inside its chroot env
 execute_inner_script() {
     echo ">> Executing the inner script (into the new image)"
-    cat "${INNER_SCRIPT}" | arch-chroot "$MNT" bash -eux
+    cat "$1" | arch-chroot "$MNT" bash -eux
 }
 
 adjust_grub() {
