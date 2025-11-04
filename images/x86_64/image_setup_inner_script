@@ -1,0 +1,44 @@
+
+# timezone
+ln -sf /usr/share/zoneinfo/UTC /etc/localtime
+
+# locale
+sed -i 's/^#\(en_US\.UTF-8 UTF-8\)/\1/' /etc/locale.gen
+locale-gen
+echo 'LANG=en_US.UTF-8' > /etc/locale.conf
+
+# hostname
+echo 'mutuatechlinux' > /etc/hostname
+
+# network
+# systemd-networkd (DHCP on any "en*" NIC), resolved
+mkdir -p /etc/systemd/network
+cat >/etc/systemd/network/20-dhcp.network <<NET
+[Match]
+Name=en*
+
+[Network]
+DHCP=yes
+NET
+
+# startup services
+systemctl enable systemd-networkd systemd-resolved sshd
+systemctl mask tmp.mount
+
+# further fstab tunning
+swap_UUID=`blkid | grep 'LABEL="swap"' | grep loop | tail -n 1 | sed 's|.* UUID="\([^"]*\)".*|\1|'`
+sed -i "s|^[^ ]*\( *.*swap.*\)|UUID=$swap_UUID\1|" /etc/fstab
+
+# reinstall the kernel -- fixes bad initramdisk generated in the bootstrap phase
+# (the need for this might be due to a bug. Recheck in the future)
+sed -i 's|^#\(.*\.br/.*\)|\1|' /etc/pacman.d/mirrorlist
+yes | pacman -S --noconfirm linux
+rm -fr /var/cache/pacman/pkg/*
+
+# safely boot everywhere
+mv /boot/initramfs-linux-fallback.img /boot/initramfs-linux.img
+
+# GRUB (UEFI + MBR)
+grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=MutuatechLinux --recheck --no-nvram --removable
+grub-mkconfig -o /boot/grub/grub.cfg
+grub-install --target=i386-pc --boot-directory=/boot --recheck "$(grub-probe -t disk /)"    # also support MBR booting
