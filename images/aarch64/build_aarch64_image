@@ -5,6 +5,8 @@ set -euo pipefail
 # pacman -S --needed qemu-user-static qemu-user-static-binfmt
 # and must execute this before this script (if the above was installed after the last reboot)
 # sudo /usr/lib/systemd/systemd-binfmt
+# after this script, you may restore the previous state with
+# sudo /usr/lib/systemd/systemd-binfmt --unregister && pacman -Rsc qemu-user-static qemu-user-static-binfmt
 
 # --- Default Settings ---
 mkdir -p artifacts
