@@ -3,7 +3,6 @@ set -euo pipefail
 
 [ "$EUID" -ne 0 ] && { echo "Please run this as root: sudo $0" >&2; exit 1; }
 
-
 # Ensures the cache directory contains all files specified by the URLs passaed as arguments to this function
 #
 # Defines the following global variables:
@@ -25,8 +24,6 @@ require_commands() {
         command -v "$bin" >/dev/null || { echo "Missing: $bin"; exit 1; };
     done
 }
-
-mkdir -p artifacts
 
 # function to execute when the script ends
 cleanup() {
@@ -178,9 +175,11 @@ adjust_grub() {
     sed -i "s| root=$P3| root=$ROOT_UUID|g" "$MNT/boot/grub/grub.cfg"
 }
 
+# Receive as argument the directory (with files) corresponding to the
+# root structure of the target machine
 copy_image_files() {
     echo ">> Copying static files to the image"
-    cd files
+    cd "$1"
     for f in *; do
         cp -av "$f" "$MNT/"
         chown -fR root:root "$MNT/$f"
