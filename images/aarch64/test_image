@@ -1,0 +1,11 @@
+#! /bin/bash
+
+# qemu-system-aarch64   -machine virt -accel tcg,thread=multi -cpu max -m 1024 -smp 1   -bios /usr/share/edk2/aarch64/QEMU_EFI.fd   -drive if=none,file=artifacts/test-mutuatechlinux-general-aarch64.img,format=raw,id=disk0   -device virtio-blk-device,drive=disk0,bootindex=0   -netdev user,id=n0,hostfwd=tcp::2223-:22 -device virtio-net-device,netdev=n0   -boot order=c,menu=on -serial mon:stdio -nographic
+
+qemu-system-aarch64 \
+  -machine virt -accel tcg,thread=multi -cpu max -m 1024 -smp 2 \
+  -bios /usr/share/edk2/aarch64/QEMU_EFI.fd \
+  -drive if=none,file=artifacts/mutuatechlinux-general-aarch64.img,format=raw,id=disk0 \
+  -device virtio-blk-device,drive=disk0,bootindex=0 \
+  -netdev user,id=n0,hostfwd=tcp::2222-:22 -device virtio-net-device,netdev=n0 \
+  -boot order=c,menu=on -serial mon:stdio -nographic
