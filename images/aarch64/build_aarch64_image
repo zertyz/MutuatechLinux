@@ -29,7 +29,7 @@ BASE_PKGS=(base base-devel linux-aarch64 linux-firmware btrfs-progs compsize gpt
 ONLINE_PACKAGES=()
 
 fetch_custom_pkgs_cache http://mutuatech.com/MutuatechLinux/cache/aarch64/{mutuatechlinux-general-multiarch-1.1.41-1-aarch64.pkg.tar.xz,paru-bin-2.1.0-1-aarch64.pkg.tar.xz}
-create_and_partition_image
+create_and_partition_image_gpt
 format_and_mount_partitions
 restore_pacman_pkgs
 bootstrap_emulated

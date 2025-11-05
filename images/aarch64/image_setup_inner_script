@@ -43,6 +43,7 @@ rm -fr /var/cache/pacman/pkg/*
 mv /boot/initramfs-linux-fallback.img /boot/initramfs-linux.img
 
 # GRUB (UEFI + MBR)
-grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=MutuatechLinux --recheck --no-nvram --removable
+grub-install --target=arm64-efi --efi-directory=/boot/efi --bootloader-id=MutuatechLinux --recheck --no-nvram --removable
+# Fix the archlinux arm kernel naming
+ln -sf /boot/Image /boot/vmlinuz-linux
 grub-mkconfig -o /boot/grub/grub.cfg
-grub-install --target=i386-pc --boot-directory=/boot --recheck "$(grub-probe -t disk /)"    # also support MBR booting
