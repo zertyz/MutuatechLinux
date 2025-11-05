@@ -1,0 +1,8 @@
+#! /bin/bash
+
+IMG="./artifacts/mutuatechlinux-general-aarch64.img"
+INITRD_SCRIPTS="../common/initrd_installer/initcpio"
+ARTIFACTS="./artifacts"
+
+
+. ../common/initrd_installer/generate_initrd_installer

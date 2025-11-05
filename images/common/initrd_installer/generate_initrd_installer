@@ -3,8 +3,8 @@ set -euo pipefail
 
 # ---- host machine vars ----
 IMG="${IMG:-../artifacts/mutuatechlinux-general-x86_64.img}"
-INITRD_SCRIPTS="initcpio/"
-ARTIFACTS="artifacts/"
+INITRD_SCRIPTS="${INITRD_SCRIPTS:-./initcpio}"
+ARTIFACTS="${ARTIFACTS:-./artifacts}"
 
 # ---- VM vars
 KERNEL_PRESET="${KERNEL_PRESET:-linux}"
@@ -12,7 +12,7 @@ INSTALL_INITRAMFS="/root/initcpio/initramfs-${KERNEL_PRESET}.img"
 
 [ "$EUID" -ne 0 ] && { echo "Please run this as root: sudo $0" >&2; exit 1; }
 
-mkdir -p artifacts
+mkdir -p "${ARTIFACTS}"/
 
 require() { command -v "$1" >/dev/null || { echo "Missing: $1"; exit 1; }; }
 for b in losetup partprobe mount arch-chroot umount mktemp; do require "$b"; done
@@ -40,20 +40,21 @@ mount "$P1" "$MNT/boot/efi"
 
 # --- drop one-time unit & scripts into the target root ---
 echo ">> Installing initramfs one-time unit & scripts"
-cp -a initcpio "$MNT/root/"
-cp -a initcpio/{hooks,install} "$MNT/etc/initcpio/"
+cp -a "${INITRD_SCRIPTS}"/ "$MNT/root/"
+cp -a "${INITRD_SCRIPTS}"/{hooks,install} "$MNT/etc/initcpio/"
 
 # Build our initramfs installer
 arch-chroot "$MNT" bash -eux <<'CHROOT'
-KERNEL_VER=`pacman -Q linux | sed 's|.* ||; s|\.arch|-arch|'`
+KERNEL_VER=`pacman -Q linux | sed 's|.* ||; s|\.arch|-arch|'`     # get the version name from the kernel package -- might be incomplete 'though
+KERNEL_VER=`ls -1d /lib/modules/${KERNEL_VER}* | sed 's|.*/||'`   # resolve the exact name from the modules dir
 mkinitcpio -k $KERNEL_VER -c /root/initcpio/once-mkinitcpio.conf -S autodetect -g /root/initcpio/initramfs-linux.img || :
 CHROOT
 
 echo "Installer ramdisk was created. Copying to the artifacts directory"
-cp -a "$MNT/boot/vmlinuz-linux" artifacts/
-cp -a "$MNT/root/initcpio/initramfs-linux.img" artifacts/
-chmod 644 artifacts/*
-ls -l artifacts/
+cp -a "$MNT/boot/vmlinuz-linux" "${ARTIFACTS}"/
+cp -a "$MNT/root/initcpio/initramfs-linux.img" "${ARTIFACTS}"/
+chmod 644 "${ARTIFACTS}"/*
+ls -l "${ARTIFACTS}"/
 
 echo "Done."
 echo
