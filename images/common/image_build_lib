@@ -73,11 +73,11 @@ trap cleanup EXIT
 #  - ESP_SIZE: the size for the EFI/ESP partition
 #  - SWAP_SIZE: the size for the swap partition
 # The root partition will take the reminder of the space
-create_and_partition_image() {
+create_and_partition_image_dos_mbr() {
 
     echo ">> Creating image file: $IMG ($IMG_SIZE)"
     >"$IMG"
-    chattr +Cm "$IMG" || :         # if on BTRFS, do not compress nor COW the file
+    chattr +Cm "$IMG" || :         # if host is on BTRFS, do not compress nor COW the image
     truncate -s "$IMG_SIZE" "$IMG"
 
     ## 2) GPT layout: 1=ESP, 2=swap, 3=root
@@ -103,6 +103,32 @@ size=${SWAP_SIZE}, type=82
 type=83
 EOF
 
+}
+
+# Creates a sparse image file representing the raw disk contents
+# and also partition it in the GPT format with the following layout:
+# GPT layout: 1=ESP, 2=swap, 3=root
+#
+# Uses the following global variables:
+#  - IMG: path to the target system image to be generated
+#  - IMG_SIZE: predefined size the above file will have
+#  - ESP_SIZE: the size for the EFI/ESP partition
+#  - SWAP_SIZE: the size for the swap partition
+# The root partition will take the reminder of the space
+create_and_partition_image_gpt() {
+
+    echo ">> Creating image file: $IMG ($IMG_SIZE)"
+    >"$IMG"
+    chattr +Cm "$IMG" || :         # if host is on BTRFS, do not compress nor COW the image
+    truncate -s "$IMG_SIZE" "$IMG"
+
+    # 2) GPT layout: 1=ESP, 2=swap, 3=root
+    echo ">> Partitioning GPT (ESP ${ESP_SIZE}, swap ${SWAP_SIZE}, root=rest)"
+    sgdisk -Z "$IMG"
+    sgdisk -n 1:0:+"$ESP_SIZE" -t 1:EF00 -c 1:"EFI System" "$IMG"
+    sgdisk -n 2:0:+"$SWAP_SIZE" -t 2:8200 -c 2:"swap" "$IMG"
+    sgdisk -n 3:0:0        -t 3:8300 -c 3:"${FS_LABEL}" "$IMG"
+    sgdisk -p "$IMG"
 }
 
 # Mounts the raw image file using a loop device,
@@ -273,7 +299,7 @@ ready_msg() {
     echo
     echo ">> For publishing:"
     echo ">> Compress with: 'xz -T1 -1kv $IMG'"
-    echo ">> Publish with: 'scp -pr ${IMG}.xz mutuatec@mutuatech.com:~/public_html/MutuatechLinux/images/x86_64/'"
+    echo ">> Publish with: 'scp -pr ${IMG}.xz mutuatec@mutuatech.com:~/public_html/MutuatechLinux/images/`uname -m`/'"
     echo ">> Build & publish the initrd installation artifacts: 'cd initrd_installer; sudo ./generate_initrd_installer; cd ..'"
     echo
     echo ">> Test with ./test_image"

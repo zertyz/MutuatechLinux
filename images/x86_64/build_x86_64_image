@@ -25,7 +25,7 @@ ONLINE_PACKAGES=(
 )
 
 fetch_custom_pkgs_cache http://mutuatech.com/MutuatechLinux/cache/x86_64/{mutuatechlinux-general-multiarch-1.1.40-1-x86_64.pkg.tar.zst,mutuatechlinux-general-x86_64-1.1.40-1-x86_64.pkg.tar.zst,httpstat-go-1.1.0-1-x86_64.pkg.tar.zst,rar-7.12-1-x86_64.pkg.tar.zst}
-create_and_partition_image
+create_and_partition_image_dos_mbr
 format_and_mount_partitions
 bootstrap_native
 generate_fstab
