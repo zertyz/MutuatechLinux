@@ -18,7 +18,7 @@ DEF_USER_PW="${DEF_USER_PW:-}"        # optional
 require_commands sgdisk sfdisk losetup mkfs.fat mkswap mkfs.btrfs pacstrap arch-chroot genfstab grub-install grub-mkconfig partprobe
 
 
-BASE_PKGS=(base base-devel linux linux-firmware intel-ucode amd-ucode btrfs-progs compsize gptfdisk parted qemu-system-x86-firmware mkinitcpio-nfs-utils cloud-guest-utils wget grub efibootmgr net-tools dhclient openssh openbsd-netcat vim sudo rust paru dosfstools arch-install-scripts)
+BASE_PKGS=(base base-devel linux linux-firmware intel-ucode amd-ucode btrfs-progs compsize gptfdisk parted qemu-system-x86-firmware mkinitcpio-nfs-utils cloud-guest-utils wget grub efibootmgr net-tools dhclient openssh openbsd-netcat less vim sudo rust paru dosfstools arch-install-scripts)
 ONLINE_PACKAGES=(
   'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
   'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'

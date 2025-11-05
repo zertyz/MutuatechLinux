@@ -25,7 +25,7 @@ DEF_USER_PW="${DEF_USER_PW:-}"        # optional
 require_commands sgdisk sfdisk losetup mkfs.fat mkswap mkfs.btrfs pacstrap arch-chroot genfstab grub-install grub-mkconfig partprobe
 
 
-BASE_PKGS=(base base-devel linux-aarch64 linux-firmware btrfs-progs compsize gptfdisk parted mkinitcpio-nfs-utils cloud-guest-utils wget grub efibootmgr net-tools dhclient openssh openbsd-netcat vim sudo rust archlinux-keyring archlinuxarm-keyring dosfstools arch-install-scripts)
+BASE_PKGS=(base base-devel linux-aarch64 linux-firmware btrfs-progs compsize gptfdisk parted mkinitcpio-nfs-utils cloud-guest-utils wget grub efibootmgr net-tools dhclient openssh openbsd-netcat less vim sudo rust archlinux-keyring archlinuxarm-keyring dosfstools arch-install-scripts)
 ONLINE_PACKAGES=()
 
 fetch_custom_pkgs_cache http://mutuatech.com/MutuatechLinux/cache/aarch64/{mutuatechlinux-general-multiarch-1.1.41-1-aarch64.pkg.tar.xz,paru-bin-2.1.0-1-aarch64.pkg.tar.xz}
