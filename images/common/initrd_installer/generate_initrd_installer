@@ -51,7 +51,7 @@ mkinitcpio -k $KERNEL_VER -c /root/initcpio/once-mkinitcpio.conf -S autodetect -
 CHROOT
 
 echo "Installer ramdisk was created. Copying to the artifacts directory"
-cp -aL "$MNT/boot/vmlinuz-linux" "${ARTIFACTS}"/
+cp -aL "$MNT/boot/vmlinuz-linux" "${ARTIFACTS}"/ || cp -aL "$MNT/boot/Image" "${ARTIFACTS}"/vmlinuz-linux
 cp -a "$MNT/root/initcpio/initramfs-linux.img" "${ARTIFACTS}"/
 chmod 644 "${ARTIFACTS}"/*
 ls -l "${ARTIFACTS}"/
