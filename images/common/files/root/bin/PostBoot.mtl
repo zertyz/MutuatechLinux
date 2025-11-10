@@ -29,8 +29,12 @@ for s in $SERVICES; do
 done
 
 # experimental ZRAM with backing_dev swapping
-DEV=$(blkid -t TYPE=swap -o device | head -n1); swapon -s; swapoff "$DEV"; modprobe zram; echo 1 >/sys/block/zram0/reset; sleep 1; echo $DEV >/sys/block/zram0/backing_dev; echo zstd >/sys/block/zram0/comp_algorithm; echo 2g >/sys/block/zram0/disksize; echo 1g >/sys/block/zram0/mem_limit; mkswap /dev/zram0; swapon /dev/zram0; swapon -s
+echo 0 >/proc/sys/vm/page-cluster; echo 15000 >/proc/sys/vm/watermark_boost_factor; echo 30 >/proc/sys/vm/watermark_scale_factor
+echo 'N' >/sys/module/zswap/parameters/enabled
+DEV=$(blkid -t TYPE=swap -o device | head -n1); swapon -s; swapoff "$DEV"; rmmod zswap; modprobe zram; echo 1 >/sys/block/zram0/reset; sleep 1; echo $DEV >/sys/block/zram0/backing_dev; echo zstd >/sys/block/zram0/comp_algorithm; echo 'algo=zstd level=1' > /sys/block/zram0/algorithm_params; echo 1864m >/sys/block/zram0/disksize; echo 836m >/sys/block/zram0/mem_limit; mkswap /dev/zram0; swapon /dev/zram0; swapon -s
 /root/bin/zram_writeback_daemon -p 60 -w 6 &
+echo "Now use the system with:"
+echo "export MALLOC_ARENA_MAX=1; export MALLOC_TRIM_THRESHOLD=$((4*1024)); export LD_PRELOAD=/usr/lib/libjemalloc.so; ulimit -Hn $((1024*1024));  ulimit -Sn $((1024*1024)); exec screen"
 
 # # experimental small performance gain
 # echo 0 >/proc/sys/kernel/sched_autogroup_enabled
