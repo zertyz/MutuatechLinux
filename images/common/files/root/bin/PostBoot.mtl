@@ -1,6 +1,6 @@
 #! /bin/bash
 
-SERVICES="polkit systemd-timesyncd systemd-journald systemd-udevd systemd-logind systemd-oomd systemd-resolved systemd-networkd avahi polkit systemd-userdbd getty@tty1 serial-getty@ttyS0 getty@.service dbus"
+SERVICES="polkit systemd-timesyncd systemd-journald systemd-udevd systemd-logind systemd-oomd systemd-resolved systemd-networkd avahi polkit systemd-userdbd getty@tty1 serial-getty@ttyS0 getty@.service serial-getty@.service dbus"
 
 # reset the network for low RAM footprint
 for s in systemd-resolved systemd-networkd; do
