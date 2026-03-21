@@ -8,6 +8,7 @@ ARTIFACTS="${ARTIFACTS:-./artifacts}"
 
 # ---- VM vars
 KERNEL_PRESET="${KERNEL_PRESET:-linux}"
+KERNEL_PKG="${KERNEL_PKG:-${KERNEL_PRESET}}"
 INSTALL_INITRAMFS="/root/initcpio/initramfs-${KERNEL_PRESET}.img"
 
 [ "$EUID" -ne 0 ] && { echo "Please run this as root: sudo $0" >&2; exit 1; }
@@ -47,8 +48,8 @@ cp -a "${INITRD_SCRIPTS}"/ "$MNT/root/"
 cp -a "${INITRD_SCRIPTS}"/{hooks,install} "$MNT/etc/initcpio/"
 
 # Build our initramfs installer
-arch-chroot "$MNT" bash -eux <<'CHROOT'
-KERNEL_VER=`pacman -Q linux | sed 's|.* ||; s|\.arch|-arch|'`     # get the version name from the kernel package -- might be incomplete 'though
+KERNEL_PKG="$KERNEL_PKG" arch-chroot "$MNT" bash -eux <<'CHROOT'
+KERNEL_VER=`pacman -Q "$KERNEL_PKG" | sed 's|.* ||; s|\.arch|-arch|'`     # get the version name from the kernel package -- might be incomplete 'though
 KERNEL_VER=`ls -1d /lib/modules/${KERNEL_VER}* | sed 's|.*/||'`   # resolve the exact name from the modules dir
 mkinitcpio -k $KERNEL_VER -c /root/initcpio/once-mkinitcpio.conf -S autodetect -g /root/initcpio/initramfs-linux.img || :
 CHROOT
