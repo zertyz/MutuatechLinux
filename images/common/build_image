@@ -3,7 +3,12 @@ set -euo pipefail
 
 . ../common/image_build_lib
 
+require_arch_family_host
 require_commands sgdisk sfdisk losetup mkfs.fat mkswap mkfs.btrfs pacstrap arch-chroot genfstab grub-install grub-mkconfig partprobe
+
+if [[ -n "${PRE_FLIGHT_FN:-}" ]]; then
+    "$PRE_FLIGHT_FN"
+fi
 
 if [[ ${#CUSTOM_CACHE_URLS[@]} -gt 0 ]]; then
     fetch_custom_pkgs_cache "${CUSTOM_CACHE_URLS[@]}"
