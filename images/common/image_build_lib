@@ -10,12 +10,10 @@ set -euo pipefail
 fetch_custom_pkgs_cache() {
     CACHE_DIR="cache"
     mkdir -p "$CACHE_DIR"
-    if ! ls "$CACHE_DIR"/*.pkg.tar.* &>/dev/null; then
-        echo ">> Fetching custom packages and putting them into the local cache..."
-        cd "$CACHE_DIR"
-        wget -c "$@"
-        cd ..
-    fi
+    echo ">> Fetching custom packages and putting them into the local cache..."
+    cd "$CACHE_DIR"
+    wget -c "$@"
+    cd ..
 }
 
 # Only useful if building the system with `bootstrap_emulated()`
