@@ -108,6 +108,17 @@ parse_cmdline
 
 verified_tag() { [[ "$1" -eq 0 ]] && echo "verified" || echo "unverified"; }
 
+select_primary_initrd() {
+  local idx
+  PRIMARY_INITRD_PATH=""
+  for ((idx=${#initrd_paths[@]} - 1; idx >= 0; idx--)); do
+    [[ "${initrd_paths[idx]}" =~ -ucode\.(img|cpio)$ ]] && continue
+    PRIMARY_INITRD_PATH="${initrd_paths[idx]}"
+    return 0
+  done
+  return 1
+}
+
 # ---------- detect kernel (preferred: /proc/cmdline BOOT_IMAGE= ) ----------
 
 kernel_src="heuristic"
@@ -228,7 +239,13 @@ if [[ ${#initrd_paths[@]} -eq 0 ]]; then
     initrd_embedded="yes"
   else
     initrd_src="heuristic"
+    kernel_boot_name="${kernel_path##*/}"
+    kernel_boot_suffix="$kernel_boot_name"
+    kernel_boot_suffix="${kernel_boot_suffix#vmlinuz-}"
+    kernel_boot_suffix="${kernel_boot_suffix#bzImage-}"
     candidates=(
+      "/boot/initramfs-${kernel_boot_suffix}.img"
+      "/boot/initramfs-${kernel_boot_suffix}.img.gz"
       "/boot/initrd.img-${uname_r}"
       "/boot/initramfs-${uname_r}.img"
       "/boot/initramfs-${uname_r}.img.gz"
@@ -263,22 +280,15 @@ fi
 
 # ---------- print results ----------
 
-var=`printf 'KERNEL_PATH=%s # %s\n' "${kernel_path:-unknown}" "$(verified_tag "$kernel_verified")"`
-eval "export $var"
-echo $var
+printf 'KERNEL_PATH=%s # %s\n' "${kernel_path:-unknown}" "$(verified_tag "$kernel_verified")"
 
 if [[ "$initrd_src" == "embedded" ]]; then
   printf 'INITRD_PATHS=(embedded in UKI)\n'
 else
   if [[ ${#initrd_paths[@]} -gt 0 ]]; then
-    # Mark each as verified/unverified independently
-    out=()
     for p in "${initrd_paths[@]}"; do
-      if [[ -e "$p" ]]; then out+=("$p # verified"); else out+=("$p # unverified"); fi
+      printf 'INITRD_PATH=%s # %s\n' "$p" "$( [[ -e "$p" ]] && echo verified || echo unverified )"
     done
-    var=`printf 'INITRD_PATHS=%s\n' "${out[*]}"`
-    eval "export $var"
-    echo $var
   else
     printf 'INITRD_PATHS=unknown\n'
   fi
@@ -289,7 +299,38 @@ printf 'DETECTION_INITRD=%s\n' "$initrd_src"
 printf '\n'
 echo '------------------------------------'
 ARCH=`uname -m`
-printf 'Working with ARCH=%s, KERNEL=%s, and INITRD=%s\n' "$ARCH" "$KERNEL_PATH" "$INITRD_PATHS"
+PRIMARY_INITRD_PATH=""
+EXTRA_INITRD_PATHS=()
+
+if [[ -z "$kernel_path" ]]; then
+  echo "Cannot continue automatically because the active kernel path could not be determined."
+  exit 1
+fi
+
+if [[ "$initrd_src" == "embedded" ]]; then
+  echo "Cannot continue automatically because the current system boots a UKI with an embedded initrd."
+  echo "MutuatechLinux currently publishes separate kernel and initramfs artifacts, not a UKI."
+  exit 1
+fi
+
+if [[ ${#initrd_paths[@]} -gt 0 ]]; then
+  select_primary_initrd || true
+fi
+
+if [[ -z "$PRIMARY_INITRD_PATH" ]]; then
+  echo "Cannot continue automatically because the primary initrd path could not be determined."
+  exit 1
+fi
+
+for p in "${initrd_paths[@]}"; do
+  [[ "$p" == "$PRIMARY_INITRD_PATH" ]] && continue
+  EXTRA_INITRD_PATHS+=("$p")
+done
+
+printf 'Working with ARCH=%s, KERNEL=%s, and INITRD=%s\n' "$ARCH" "$kernel_path" "$PRIMARY_INITRD_PATH"
+if [[ ${#EXTRA_INITRD_PATHS[@]} -gt 0 ]]; then
+  printf 'Leaving additional initrd entries unchanged: %s\n' "${EXTRA_INITRD_PATHS[*]}"
+fi
 printf "which will be backup to '/boot/orig' and replaced by our auto-installation ones\n"
 printf '\n'
 printf 'Please verify and manually apply the following commands to get Mutuatech Linux installed\n'
@@ -297,15 +338,9 @@ printf 'into this instance\n'
 printf '\n'
 printf 'VERY IMPORTANT: all files from local attached media will be lost!\n'
 printf '\n'
-cat <<EOF
-
-sudo mkdir /boot/orig || echo 'FAILED. DO NOT PROCEED'
-sudo mv '$KERNEL_PATH' '$INITRD_PATHS' /boot/orig || echo 'FAILED. DO NOT PROCEED'
-wget -O - -c 'https://mutuatech.com/MutuatechLinux/initrd_installers/$ARCH/vmlinuz-linux.xz' | xz -dcv | sudo dd of='$KERNEL_PATH' || echo 'FAILED. DO NOT PROCEED'
-wget -O - -c 'https://mutuatech.com/MutuatechLinux/initrd_installers/$ARCH/initramfs-linux.img.xz' | xz -dcv | sudo dd of='$INITRD_PATHS' || echo 'FAILED. DO NOT PROCEED'
-echo "Press CTRL-D when you are ready to LOSE ALL YOUR DATA"; cat &>/dev/null; shutdown -r now
-
-EOF
-
-
-
+printf '\n'
+printf "sudo mkdir -p /boot/orig || echo 'FAILED. DO NOT PROCEED'\n"
+printf "sudo mv %q %q /boot/orig || echo 'FAILED. DO NOT PROCEED'\n" "$kernel_path" "$PRIMARY_INITRD_PATH"
+printf "wget -O - -c 'https://mutuatech.com/MutuatechLinux/initrd_installers/%s/vmlinuz-linux.xz' | xz -dcv | sudo dd of=%q || echo 'FAILED. DO NOT PROCEED'\n" "$ARCH" "$kernel_path"
+printf "wget -O - -c 'https://mutuatech.com/MutuatechLinux/initrd_installers/%s/initramfs-linux.img.xz' | xz -dcv | sudo dd of=%q || echo 'FAILED. DO NOT PROCEED'\n" "$ARCH" "$PRIMARY_INITRD_PATH"
+printf '%s\n' 'echo "Press CTRL-D when you are ready to LOSE ALL YOUR DATA"; cat &>/dev/null; shutdown -r now'
