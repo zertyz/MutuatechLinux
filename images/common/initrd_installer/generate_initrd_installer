@@ -20,7 +20,10 @@ for b in losetup partprobe mount arch-chroot umount mktemp; do require "$b"; don
 MNT="$(mktemp -d)"
 cleanup() {
   sync
-  rm -fr "$MNT/root/initcpio" "$MNT/etc/initcpio/hooks/*/run-once"
+  rm -fr \
+    "$MNT/root/initcpio" \
+    "$MNT/etc/initcpio/hooks/run-once" \
+    "$MNT/etc/initcpio/install/run-once"
   umount -l "$MNT/boot/efi"
   umount -l "$MNT"
   losetup -d "$LOOPDEV"
