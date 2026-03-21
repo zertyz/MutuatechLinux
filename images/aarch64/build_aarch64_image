@@ -1,5 +1,8 @@
-#! /bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
 
 # pre-requisites: the host must have the following packages installed
 # pacman -S --needed qemu-user-static qemu-user-static-binfmt
@@ -21,28 +24,19 @@ ROOT_PW="${ROOT_PW:-mutuatechlinux}"  # optional; if empty, root password stays 
 DEF_USER="${DEF_USER:-}"              # e.g. 'arch'
 DEF_USER_PW="${DEF_USER_PW:-}"        # optional
 
-# load the building functions
-. ../common/image_build_lib
-require_commands sgdisk sfdisk losetup mkfs.fat mkswap mkfs.btrfs pacstrap arch-chroot genfstab grub-install grub-mkconfig partprobe
-
-
 BASE_PKGS=(base base-devel linux-aarch64 linux-firmware btrfs-progs compsize jemalloc gptfdisk parted mkinitcpio-nfs-utils cloud-guest-utils wget grub efibootmgr net-tools dhclient openssh openbsd-netcat less vim sudo rust archlinux-keyring archlinuxarm-keyring dosfstools arch-install-scripts)
 ONLINE_PACKAGES=()
+CUSTOM_CACHE_URLS=(
+  'http://mutuatech.com/MutuatechLinux/cache/aarch64/mutuatechlinux-general-multiarch-1.1.41-1-aarch64.pkg.tar.xz'
+  'http://mutuatech.com/MutuatechLinux/cache/aarch64/paru-bin-2.1.0-1-aarch64.pkg.tar.xz'
+)
+PARTITION_FN=create_and_partition_image_gpt
+BOOTSTRAP_FN=bootstrap_emulated
+SYNC_PACMAN_CACHE=1
+INNER_SCRIPT="./image_setup_inner_script"
+COMMON_FILES_DIR="../common/files"
 
-fetch_custom_pkgs_cache http://mutuatech.com/MutuatechLinux/cache/aarch64/{mutuatechlinux-general-multiarch-1.1.41-1-aarch64.pkg.tar.xz,paru-bin-2.1.0-1-aarch64.pkg.tar.xz}
-create_and_partition_image_gpt
-format_and_mount_partitions
-restore_pacman_pkgs
-bootstrap_emulated
-save_pacman_pkgs
-generate_fstab
-execute_inner_script "./image_setup_inner_script"
-adjust_grub
-copy_image_files ../common/files
-setup_sshd_and_keys
-setup_root_and_users
-zeroize
-ready_msg
+. ../common/build_image
 
 # NOTES
 # 1) To update the cache, chroot into the image and update the packages, then scp -pr cache/* mutuatec@mutuatech.com:~/public_html/MutuatechLinux/cache/aarch64/

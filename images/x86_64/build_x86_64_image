@@ -1,5 +1,8 @@
-#! /bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
 
 # --- Default Settings ---
 mkdir -p artifacts
@@ -14,29 +17,23 @@ ROOT_PW="${ROOT_PW:-mutuatechlinux}"  # optional; if empty, root password stays 
 DEF_USER="${DEF_USER:-}"              # e.g. 'arch'
 DEF_USER_PW="${DEF_USER_PW:-}"        # optional
 
-# load the building functions
-. ../common/image_build_lib
-require_commands sgdisk sfdisk losetup mkfs.fat mkswap mkfs.btrfs pacstrap arch-chroot genfstab grub-install grub-mkconfig partprobe
-
-
 BASE_PKGS=(base base-devel linux linux-firmware intel-ucode amd-ucode btrfs-progs compsize jemalloc gptfdisk parted qemu-system-x86-firmware mkinitcpio-nfs-utils cloud-guest-utils wget grub efibootmgr net-tools dhclient openssh openbsd-netcat less vim sudo rust paru dosfstools arch-install-scripts)
 ONLINE_PACKAGES=(
   'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
   'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
 )
+CUSTOM_CACHE_URLS=(
+  'http://mutuatech.com/MutuatechLinux/cache/x86_64/mutuatechlinux-general-multiarch-1.1.40-1-x86_64.pkg.tar.zst'
+  'http://mutuatech.com/MutuatechLinux/cache/x86_64/mutuatechlinux-general-x86_64-1.1.40-1-x86_64.pkg.tar.zst'
+  'http://mutuatech.com/MutuatechLinux/cache/x86_64/httpstat-go-1.1.0-1-x86_64.pkg.tar.zst'
+  'http://mutuatech.com/MutuatechLinux/cache/x86_64/rar-7.12-1-x86_64.pkg.tar.zst'
+)
+PARTITION_FN=create_and_partition_image_dos_mbr
+BOOTSTRAP_FN=bootstrap_native
+INNER_SCRIPT="./image_setup_inner_script"
+COMMON_FILES_DIR="../common/files"
 
-fetch_custom_pkgs_cache http://mutuatech.com/MutuatechLinux/cache/x86_64/{mutuatechlinux-general-multiarch-1.1.40-1-x86_64.pkg.tar.zst,mutuatechlinux-general-x86_64-1.1.40-1-x86_64.pkg.tar.zst,httpstat-go-1.1.0-1-x86_64.pkg.tar.zst,rar-7.12-1-x86_64.pkg.tar.zst}
-create_and_partition_image_dos_mbr
-format_and_mount_partitions
-bootstrap_native
-generate_fstab
-execute_inner_script "./image_setup_inner_script"
-adjust_grub
-copy_image_files ../common/files
-setup_sshd_and_keys
-setup_root_and_users
-zeroize
-ready_msg
+. ../common/build_image
 
 # NOTES
 # 1) To update the cache, chroot into the image and update the packages, then scp -pr cache/* mutuatec@mutuatech.com:~/public_html/MutuatechLinux/cache/x86_64/

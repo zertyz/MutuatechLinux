@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+. ../common/image_build_lib
+
+require_commands sgdisk sfdisk losetup mkfs.fat mkswap mkfs.btrfs pacstrap arch-chroot genfstab grub-install grub-mkconfig partprobe
+
+if [[ ${#CUSTOM_CACHE_URLS[@]} -gt 0 ]]; then
+    fetch_custom_pkgs_cache "${CUSTOM_CACHE_URLS[@]}"
+fi
+
+"$PARTITION_FN"
+format_and_mount_partitions
+
+if [[ "${SYNC_PACMAN_CACHE:-0}" == 1 ]]; then
+    restore_pacman_pkgs
+fi
+
+"$BOOTSTRAP_FN"
+
+if [[ "${SYNC_PACMAN_CACHE:-0}" == 1 ]]; then
+    save_pacman_pkgs
+fi
+
+generate_fstab
+execute_inner_script "$INNER_SCRIPT"
+adjust_grub
+copy_image_files "$COMMON_FILES_DIR"
+setup_sshd_and_keys
+setup_root_and_users
+zeroize
+ready_msg
