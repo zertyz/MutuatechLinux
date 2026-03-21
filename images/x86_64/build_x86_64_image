@@ -22,11 +22,12 @@ ONLINE_PACKAGES=(
   'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
   'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
 )
-CUSTOM_CACHE_URLS=(
-  'http://mutuatech.com/MutuatechLinux/cache/x86_64/mutuatechlinux-general-multiarch-1.1.40-1-x86_64.pkg.tar.zst'
-  'http://mutuatech.com/MutuatechLinux/cache/x86_64/mutuatechlinux-general-x86_64-1.1.40-1-x86_64.pkg.tar.zst'
-  'http://mutuatech.com/MutuatechLinux/cache/x86_64/httpstat-go-1.1.0-1-x86_64.pkg.tar.zst'
-  'http://mutuatech.com/MutuatechLinux/cache/x86_64/rar-7.12-1-x86_64.pkg.tar.zst'
+CUSTOM_CACHE_BASE_URL="http://mutuatech.com/MutuatechLinux/cache/x86_64"
+CUSTOM_CACHE_PACKAGE_FILES=(
+  'mutuatechlinux-general-multiarch-1.1.40-1-x86_64.pkg.tar.zst'
+  'mutuatechlinux-general-x86_64-1.1.40-1-x86_64.pkg.tar.zst'
+  'httpstat-go-1.1.0-1-x86_64.pkg.tar.zst'
+  'rar-7.12-1-x86_64.pkg.tar.zst'
 )
 PARTITION_FN=create_and_partition_image_dos_mbr
 BOOTSTRAP_FN=bootstrap_native

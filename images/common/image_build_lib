@@ -51,24 +51,6 @@ require_commands() {
     done
 }
 
-require_arch_family_host() {
-    [[ -r /etc/os-release ]] || {
-        echo "Cannot determine the host OS. This script currently expects an Arch-family host." >&2
-        exit 1
-    }
-
-    . /etc/os-release
-    case " ${ID:-} ${ID_LIKE:-} " in
-        *" arch "*|*" cachyos "*)
-            return 0
-            ;;
-    esac
-
-    echo "Unsupported host OS: ${PRETTY_NAME:-unknown}" >&2
-    echo "This script currently expects an Arch-family host such as Arch Linux or CachyOS." >&2
-    exit 1
-}
-
 preflight_emulated_aarch64_build() {
     require_commands qemu-aarch64-static
     [[ -e /proc/sys/fs/binfmt_misc/qemu-aarch64 ]] || {

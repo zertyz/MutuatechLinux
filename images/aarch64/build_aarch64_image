@@ -26,9 +26,10 @@ DEF_USER_PW="${DEF_USER_PW:-}"        # optional
 
 BASE_PKGS=(base base-devel linux-aarch64 linux-firmware btrfs-progs compsize jemalloc gptfdisk parted mkinitcpio-nfs-utils cloud-guest-utils wget grub efibootmgr net-tools dhclient openssh openbsd-netcat less vim sudo rust archlinux-keyring archlinuxarm-keyring dosfstools arch-install-scripts)
 ONLINE_PACKAGES=()
-CUSTOM_CACHE_URLS=(
-  'http://mutuatech.com/MutuatechLinux/cache/aarch64/mutuatechlinux-general-multiarch-1.1.41-1-aarch64.pkg.tar.xz'
-  'http://mutuatech.com/MutuatechLinux/cache/aarch64/paru-bin-2.1.0-1-aarch64.pkg.tar.xz'
+CUSTOM_CACHE_BASE_URL="http://mutuatech.com/MutuatechLinux/cache/aarch64"
+CUSTOM_CACHE_PACKAGE_FILES=(
+  'mutuatechlinux-general-multiarch-1.1.41-1-aarch64.pkg.tar.xz'
+  'paru-bin-2.1.0-1-aarch64.pkg.tar.xz'
 )
 PARTITION_FN=create_and_partition_image_gpt
 BOOTSTRAP_FN=bootstrap_emulated
