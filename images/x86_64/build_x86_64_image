@@ -9,6 +9,7 @@ ESP_SIZE="${ESP_SIZE:-4MiB}"
 SWAP_SIZE="${SWAP_SIZE:-1GiB}"
 HOST_AUTH_KEYS="${HOST_AUTH_KEYS:-$HOME/.ssh/authorized_keys}"  # copied to root
 FS_LABEL="${FS_LABEL:-mtl_root}"
+TARGET_ARCH="${TARGET_ARCH:-x86_64}"
 ROOT_PW="${ROOT_PW:-mutuatechlinux}"  # optional; if empty, root password stays locked
 DEF_USER="${DEF_USER:-}"              # e.g. 'arch'
 DEF_USER_PW="${DEF_USER_PW:-}"        # optional
