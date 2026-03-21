@@ -7,9 +7,7 @@ INITRD_SCRIPTS="${INITRD_SCRIPTS:-./initcpio}"
 ARTIFACTS="${ARTIFACTS:-./artifacts}"
 
 # ---- VM vars
-KERNEL_PRESET="${KERNEL_PRESET:-linux}"
-KERNEL_PKG="${KERNEL_PKG:-${KERNEL_PRESET}}"
-INSTALL_INITRAMFS="/root/initcpio/initramfs-${KERNEL_PRESET}.img"
+KERNEL_PKG="${KERNEL_PKG:-linux}"
 
 [ "$EUID" -ne 0 ] && { echo "Please run this as root: sudo $0" >&2; exit 1; }
 
