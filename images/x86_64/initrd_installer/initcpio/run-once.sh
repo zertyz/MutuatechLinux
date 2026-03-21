@@ -72,7 +72,7 @@ setup_network() {
 	fi
 	echo "### `date`: starting network for interface ${NETDEV} -- eth is ${ETH}; wlan is ${WLAN}"
 	# get the IP
-		dhclient -pf /run/dhclient.pid -lf /run/dhclient.leases "${NETDEV}" || dhcpcd -4 "${NETDEV}" || continue
+		dhclient -pf /run/dhclient.pid -lf /run/dhclient.leases "${NETDEV}" || dhcpcd -4 -p "${NETDEV}" || continue
 	# time set & network test
 	sleep 3
 	ping -c1 -W1 1.1.1.1 &>/dev/null && return 0 || sleep 16
