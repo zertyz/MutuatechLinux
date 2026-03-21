@@ -18,11 +18,16 @@ for b in losetup partprobe mount arch-chroot umount mktemp; do require "$b"; don
 
 MNT="$(mktemp -d)"
 cleanup() {
+  local path rel_path subdir
   sync
-  rm -fr \
-    "$MNT/root/initcpio" \
-    "$MNT/etc/initcpio/hooks/run-once" \
-    "$MNT/etc/initcpio/install/run-once"
+  rm -fr "$MNT/root/initcpio"
+  for subdir in hooks install; do
+    [[ -d "$INITRD_SCRIPTS/$subdir" ]] || continue
+    while IFS= read -r path; do
+      rel_path="${path#"$INITRD_SCRIPTS"/}"
+      rm -fr "$MNT/etc/initcpio/$rel_path"
+    done < <(find "$INITRD_SCRIPTS/$subdir" -mindepth 1)
+  done
   umount -l "$MNT/boot/efi"
   umount -l "$MNT"
   losetup -d "$LOOPDEV"
