@@ -167,7 +167,7 @@ format_and_mount_partitions() {
 
     # Make the filesystems
     echo ">> mkfs ESP FAT32"
-    mkfs.fat -F12 -n EFI "$P1"
+    mkfs.fat -F32 -n EFI "$P1"
     echo ">> mkswap"
     mkswap -L swap "$P2"
     echo ">> mkfs Btrfs root"
