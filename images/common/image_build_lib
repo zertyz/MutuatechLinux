@@ -51,6 +51,37 @@ require_commands() {
     done
 }
 
+esp_size_to_mib() {
+    local size="${1//[[:space:]]/}"
+    case "$size" in
+        *GiB|*G)
+            echo $(( ${size%%G*} * 1024 ))
+            ;;
+        *MiB|*M)
+            echo "${size%%M*}"
+            ;;
+        *KiB|*K)
+            echo $(( (${size%%K*} + 1023) / 1024 ))
+            ;;
+        *B)
+            echo $(( (${size%%B} + 1024 * 1024 - 1) / (1024 * 1024) ))
+            ;;
+        *)
+            echo "$size"
+            ;;
+    esac
+}
+
+esp_fat_bits() {
+    local esp_size_mib
+    esp_size_mib="$(esp_size_to_mib "$ESP_SIZE")"
+    if (( esp_size_mib < 32 )); then
+        echo 12
+    else
+        echo 32
+    fi
+}
+
 preflight_emulated_aarch64_build() {
     require_commands qemu-aarch64-static
     [[ -e /proc/sys/fs/binfmt_misc/qemu-aarch64 ]] || {
@@ -100,7 +131,7 @@ create_and_partition_image_dos_mbr() {
     sfdisk "$IMG" <<EOF
 label: dos
 
-# p1: ESP (FAT32), bootable
+# p1: ESP (FAT), bootable
 start=1MiB, size=${ESP_SIZE}, type=ef, bootable
 
 # p2: swap
@@ -166,8 +197,10 @@ format_and_mount_partitions() {
     P3="${LOOPDEV}p3"
 
     # Make the filesystems
-    echo ">> mkfs ESP FAT32"
-    mkfs.fat -F32 -n EFI "$P1"
+    local esp_fat
+    esp_fat="$(esp_fat_bits)"
+    echo ">> mkfs ESP FAT${esp_fat}"
+    mkfs.fat -F"${esp_fat}" -n EFI "$P1"
     echo ">> mkswap"
     mkswap -L swap "$P2"
     echo ">> mkfs Btrfs root"
