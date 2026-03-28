@@ -100,7 +100,11 @@ preflight_emulated_aarch64_build() {
 require_pacman_repos() {
     local repo configured_repos
     require_commands pacman-conf
-    configured_repos="$(pacman-conf --repo-list)"
+    if [[ -n "${PACMAN_CONF:-}" ]]; then
+        configured_repos="$(pacman-conf -c "$PACMAN_CONF" --repo-list)"
+    else
+        configured_repos="$(pacman-conf --repo-list)"
+    fi
     for repo in "$@"; do
         grep -qxF "$repo" <<<"$configured_repos" || {
             echo "Missing required pacman repo: $repo" >&2
@@ -127,6 +131,16 @@ preflight_native_cachyos_v3_build() {
         /etc/pacman.d/cachyos-v3-mirrorlist \
         /usr/share/pacman/keyrings/cachyos.gpg
     require_x86_64_glibc_level x86-64-v3
+}
+
+preflight_native_cachyos_v4_build() {
+    require_pacman_repos cachyos-v4 cachyos-core-v4 cachyos-extra-v4 cachyos
+    require_files \
+        /etc/pacman.d/mirrorlist \
+        /etc/pacman.d/cachyos-mirrorlist \
+        /etc/pacman.d/cachyos-v4-mirrorlist \
+        /usr/share/pacman/keyrings/cachyos.gpg
+    require_x86_64_glibc_level x86-64-v4
 }
 
 # function to execute when the script ends
