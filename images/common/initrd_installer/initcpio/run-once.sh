@@ -19,8 +19,13 @@ setup_network() {
     # network device not found? be verbose and try several fallback methods
     if [[ ! -n "$ETH"  && ! -n "$WLAN" ]]; then
         echo  "::::::::::     COULDN'T determine the network interfaces using ifconfig. Trying to load common cloud drivers and waiting a little bit for them to settle ::::::::::"
-	modprobe xen_netfront                        # used in AWS, as it seems
-        modprobe virtio_pci; modprobe virtio_net;    # also used in AWS, as it seems
+	modprobe xen_netfront
+        modprobe virtio_pci
+        modprobe virtio_net
+        modprobe virtio_scsi
+        modprobe ena
+        modprobe gve
+        modprobe vmxnet3
 	sleep 5
 	ip link
         ETH=`ifconfig -a -s | grep '^e' | sed 's| .*||'`
@@ -123,7 +128,8 @@ install_image() {
     echo ":::::::::: Growing the rootfs partition to take all the remaining device space in ${root_disk_dev} ::::::::::" &&
     growpart "$root_disk_dev" ${IMAGE_ROOT_PARTITION_N} &&
     echo "::::::::::     refreshing the kernel's partition table ::::::::::" &&
-    partprobe "$root_disk_dev" || return 1
+    partprobe "$root_disk_dev" &&
+    udevadm settle || return 1
 
     # determine the device for the root partition
     if [[ $root_disk_dev =~ [0-9]$ ]]; then
