@@ -116,6 +116,65 @@ parse_cmdline
 
 verified_tag() { [[ "$1" -eq 0 ]] && echo "verified" || echo "unverified"; }
 
+highest_supported_cachyos_target_arch() {
+  if [[ "$ARCH" != "x86_64" || ! -x /lib/ld-linux-x86-64.so.2 ]]; then
+    echo "$ARCH"
+    return 0
+  fi
+
+  if /lib/ld-linux-x86-64.so.2 --help 2>/dev/null | grep -Fq 'x86-64-v4 (supported'; then
+    echo "x86_64_v4"
+  elif /lib/ld-linux-x86-64.so.2 --help 2>/dev/null | grep -Fq 'x86-64-v3 (supported'; then
+    echo "x86_64_v3"
+  else
+    echo "x86_64"
+  fi
+}
+
+determine_published_artifacts() {
+  local kernel_boot_name pkg_candidate installed_from=""
+  local published_target_overridden="${PUBLISHED_TARGET_ARCH+x}"
+  local published_kernel_overridden="${PUBLISHED_KERNEL_BASENAME+x}"
+  local published_initrd_overridden="${PUBLISHED_INITRAMFS_BASENAME+x}"
+
+  : "${PUBLISHED_TARGET_ARCH:=$ARCH}"
+  : "${PUBLISHED_KERNEL_BASENAME:=vmlinuz-linux}"
+  : "${PUBLISHED_INITRAMFS_BASENAME:=initramfs-linux.img}"
+  PUBLISHED_DETECTION="default"
+
+  kernel_boot_name="${kernel_path##*/}"
+  pkg_candidate="${kernel_boot_name#vmlinuz-}"
+
+  if command -v pacman >/dev/null 2>&1 && [[ "$pkg_candidate" != "$kernel_boot_name" ]]; then
+    installed_from="$(LC_ALL=C pacman -Qi "$pkg_candidate" 2>/dev/null | sed -n 's/^Installed From[[:space:]]*:[[:space:]]*//p' | head -n1)"
+  fi
+
+  if [[ "$kernel_boot_name" == *cachyos* || "$installed_from" == cachyos* ]]; then
+    [[ -n "$published_kernel_overridden" ]] || PUBLISHED_KERNEL_BASENAME="vmlinuz-linux-cachyos"
+    [[ -n "$published_initrd_overridden" ]] || PUBLISHED_INITRAMFS_BASENAME="initramfs-linux-cachyos.img"
+    if [[ -z "$published_target_overridden" ]]; then
+      case "$installed_from" in
+        cachyos-v4|cachyos-core-v4|cachyos-extra-v4)
+          PUBLISHED_TARGET_ARCH="x86_64_v4"
+          PUBLISHED_DETECTION="pacman"
+          ;;
+        cachyos-v3|cachyos-core-v3|cachyos-extra-v3)
+          PUBLISHED_TARGET_ARCH="x86_64_v3"
+          PUBLISHED_DETECTION="pacman"
+          ;;
+        *)
+          PUBLISHED_TARGET_ARCH="$(highest_supported_cachyos_target_arch)"
+          PUBLISHED_DETECTION="heuristic-cachyos"
+          ;;
+      esac
+    else
+      PUBLISHED_DETECTION="override"
+    fi
+  elif [[ -n "$published_target_overridden" || -n "$published_kernel_overridden" || -n "$published_initrd_overridden" ]]; then
+    PUBLISHED_DETECTION="override"
+  fi
+}
+
 select_primary_initrd() {
   local idx
   PRIMARY_INITRD_PATH=""
@@ -335,10 +394,13 @@ for p in "${initrd_paths[@]}"; do
   EXTRA_INITRD_PATHS+=("$p")
 done
 
+determine_published_artifacts
+
 printf 'Working with ARCH=%s, KERNEL=%s, and INITRD=%s\n' "$ARCH" "$kernel_path" "$PRIMARY_INITRD_PATH"
 if [[ ${#EXTRA_INITRD_PATHS[@]} -gt 0 ]]; then
   printf 'Leaving additional initrd entries unchanged: %s\n' "${EXTRA_INITRD_PATHS[*]}"
 fi
+printf 'Using published artifacts from %s: %s and %s\n' "$PUBLISHED_TARGET_ARCH" "$PUBLISHED_KERNEL_BASENAME" "$PUBLISHED_INITRAMFS_BASENAME"
 printf "which will be backup to '/boot/orig' and replaced by our auto-installation ones\n"
 printf '\n'
 printf 'Please verify and manually apply the following commands to get Mutuatech Linux installed\n'
@@ -349,6 +411,6 @@ printf '\n'
 printf '\n'
 printf "sudo mkdir -p /boot/orig || echo 'FAILED. DO NOT PROCEED'\n"
 printf "sudo mv %q %q /boot/orig || echo 'FAILED. DO NOT PROCEED'\n" "$kernel_path" "$PRIMARY_INITRD_PATH"
-printf "wget -O - -c 'https://mutuatech.com/MutuatechLinux/initrd_installers/%s/vmlinuz-linux.xz' | xz -dcv | sudo dd of=%q || echo 'FAILED. DO NOT PROCEED'\n" "$ARCH" "$kernel_path"
-printf "wget -O - -c 'https://mutuatech.com/MutuatechLinux/initrd_installers/%s/initramfs-linux.img.xz' | xz -dcv | sudo dd of=%q || echo 'FAILED. DO NOT PROCEED'\n" "$ARCH" "$PRIMARY_INITRD_PATH"
+printf "wget -O - -c 'https://mutuatech.com/MutuatechLinux/initrd_installers/%s/%s.xz' | xz -dcv | sudo dd of=%q || echo 'FAILED. DO NOT PROCEED'\n" "$PUBLISHED_TARGET_ARCH" "$PUBLISHED_KERNEL_BASENAME" "$kernel_path"
+printf "wget -O - -c 'https://mutuatech.com/MutuatechLinux/initrd_installers/%s/%s.xz' | xz -dcv | sudo dd of=%q || echo 'FAILED. DO NOT PROCEED'\n" "$PUBLISHED_TARGET_ARCH" "$PUBLISHED_INITRAMFS_BASENAME" "$PRIMARY_INITRD_PATH"
 printf '%s\n' 'echo "Press CTRL-D when you are ready to LOSE ALL YOUR DATA"; cat &>/dev/null; shutdown -r now'
