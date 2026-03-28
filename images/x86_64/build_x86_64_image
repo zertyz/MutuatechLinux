@@ -29,8 +29,11 @@ CUSTOM_CACHE_PACKAGE_FILES=(
   'httpstat-go-1.1.0-1-x86_64.pkg.tar.zst'
   'rar-7.12-1-x86_64.pkg.tar.zst'
 )
+PACMAN_CONF="./archlinux-pacman.conf"
+PACMAN_SUPPORT_FILES=(/etc/pacman.d/mirrorlist)
 PARTITION_FN=create_and_partition_image_dos_mbr
 BOOTSTRAP_FN=bootstrap_native
+PRE_FLIGHT_FN=preflight_native_archlinux_build
 INNER_SCRIPT_FILES=(./image_setup_inner_script ../common/image_setup_inner_script_x86_64)
 COMMON_FILES_DIR="../common/files"
 

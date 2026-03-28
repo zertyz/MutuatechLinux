@@ -97,6 +97,12 @@ preflight_emulated_aarch64_build() {
     }
 }
 
+preflight_native_archlinux_build() {
+    require_files \
+        /etc/pacman.d/mirrorlist \
+        /usr/share/pacman/keyrings/archlinux.gpg
+}
+
 require_pacman_repos() {
     local repo configured_repos
     require_commands pacman-conf
