@@ -4,6 +4,7 @@
 ARCH=`uname -m`
 IMAGE_URL="http://mutuatech.com/MutuatechLinux/images/$ARCH/mutuatechlinux-general-${ARCH}.img.xz"
 IMAGE_ROOT_PARTITION_N=3
+[[ -f /root/initcpio/image-install.env ]] && . /root/initcpio/image-install.env
 
 
 setup_network() {

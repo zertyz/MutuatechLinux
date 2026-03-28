@@ -6,6 +6,8 @@ IMG="${IMG:-../artifacts/mutuatechlinux-general-x86_64.img}"
 INITRD_SCRIPTS="${INITRD_SCRIPTS:-./initcpio}"
 ARTIFACTS="${ARTIFACTS:-./artifacts}"
 TARGET_ARCH="${TARGET_ARCH:-x86_64}"
+IMAGE_URL="${IMAGE_URL:-}"
+IMAGE_ROOT_PARTITION_N="${IMAGE_ROOT_PARTITION_N:-3}"
 
 # ---- VM vars
 KERNEL_PKG="${KERNEL_PKG:-linux}"
@@ -53,6 +55,10 @@ mount "$P1" "$MNT/boot/efi"
 echo ">> Installing initramfs one-time unit & scripts"
 cp -a "${INITRD_SCRIPTS}"/ "$MNT/root/"
 cp -a "${INITRD_SCRIPTS}"/{hooks,install} "$MNT/etc/initcpio/"
+cat >"$MNT/root/initcpio/image-install.env" <<EOF
+IMAGE_URL='${IMAGE_URL}'
+IMAGE_ROOT_PARTITION_N='${IMAGE_ROOT_PARTITION_N}'
+EOF
 
 # Build our initramfs installer
 KERNEL_PKG="$KERNEL_PKG" INITRAMFS_BASENAME="$INITRAMFS_BASENAME" arch-chroot "$MNT" bash -eux <<'CHROOT'

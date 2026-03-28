@@ -7,6 +7,7 @@ IMG="${IMG:-${SCRIPT_DIR}/../artifacts/mutuatechlinux-general-cachyos-x86_64_v3.
 INITRD_SCRIPTS="${INITRD_SCRIPTS:-${SCRIPT_DIR}/../../common/initrd_installer/initcpio}"
 ARTIFACTS="${ARTIFACTS:-${SCRIPT_DIR}/artifacts/cachyos-x86_64_v3}"
 TARGET_ARCH="${TARGET_ARCH:-x86_64_v3}"
+IMAGE_URL="${IMAGE_URL:-http://mutuatech.com/MutuatechLinux/images/x86_64_v3/mutuatechlinux-general-cachyos-x86_64_v3.img.xz}"
 KERNEL_PKG="${KERNEL_PKG:-linux-cachyos}"
 
 . "${SCRIPT_DIR}/../../common/initrd_installer/generate_initrd_installer"
