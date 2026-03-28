@@ -51,6 +51,12 @@ require_commands() {
     done
 }
 
+require_files() {
+    for path in "$@"; do
+        [[ -e "$path" ]] || { echo "Missing: $path" >&2; exit 1; }
+    done
+}
+
 esp_size_to_mib() {
     local size="${1//[[:space:]]/}"
     case "$size" in
@@ -89,6 +95,38 @@ preflight_emulated_aarch64_build() {
         echo "Install qemu-user-static and qemu-user-static-binfmt, then run: sudo /usr/lib/systemd/systemd-binfmt" >&2
         exit 1
     }
+}
+
+require_pacman_repos() {
+    local repo configured_repos
+    require_commands pacman-conf
+    configured_repos="$(pacman-conf --repo-list)"
+    for repo in "$@"; do
+        grep -qxF "$repo" <<<"$configured_repos" || {
+            echo "Missing required pacman repo: $repo" >&2
+            exit 1
+        }
+    done
+}
+
+require_x86_64_glibc_level() {
+    local level="$1"
+    require_files /lib/ld-linux-x86-64.so.2
+    /lib/ld-linux-x86-64.so.2 --help | grep -Fq "${level} (supported" || {
+        echo "Host CPU/glibc does not support ${level}." >&2
+        echo "Run this builder on a machine that reports ${level} support." >&2
+        exit 1
+    }
+}
+
+preflight_native_cachyos_v3_build() {
+    require_pacman_repos cachyos-v3 cachyos-core-v3 cachyos-extra-v3 cachyos
+    require_files \
+        /etc/pacman.d/mirrorlist \
+        /etc/pacman.d/cachyos-mirrorlist \
+        /etc/pacman.d/cachyos-v3-mirrorlist \
+        /usr/share/pacman/keyrings/cachyos.gpg
+    require_x86_64_glibc_level x86-64-v3
 }
 
 # function to execute when the script ends
@@ -224,9 +262,14 @@ format_and_mount_partitions() {
 #  - MNT: the temporary directory where the root partition is mounted
 #  - CACHE_DIR: where the externally fetched packages were downloaded
 bootstrap_native() {
+    local pacstrap_opts=(-M -c -P)
+    if [[ -n "${PACMAN_CONF:-}" ]]; then
+        pacstrap_opts=(-M -c -C "$PACMAN_CONF")
+    fi
+
     echo ">> pacstrap base + tools for the native platform"
-    pacstrap -M -c -P "$MNT" "${BASE_PKGS[@]}"
-    pacstrap -M -c -P -U "$MNT" "$CACHE_DIR"/*.pkg.tar* "${ONLINE_PACKAGES[@]}"
+    pacstrap "${pacstrap_opts[@]}" "$MNT" "${BASE_PKGS[@]}"
+    pacstrap "${pacstrap_opts[@]}" -U "$MNT" "$CACHE_DIR"/*.pkg.tar* "${ONLINE_PACKAGES[@]}"
 }
 
 bootstrap_emulated() {
@@ -258,6 +301,22 @@ generate_fstab() {
 execute_inner_script() {
     echo ">> Executing the inner script (into the new image)"
     cat "$@" | arch-chroot "$MNT" bash -eux
+}
+
+copy_target_pacman_config() {
+    local target_pacman_conf
+    target_pacman_conf="${TARGET_PACMAN_CONF:-${PACMAN_CONF:-}}"
+    if [[ -n "$target_pacman_conf" ]]; then
+        echo ">> Installing target pacman configuration"
+        install -Dm644 "$target_pacman_conf" "$MNT/etc/pacman.conf"
+    fi
+
+    if declare -p PACMAN_SUPPORT_FILES >/dev/null 2>&1; then
+        local file
+        for file in "${PACMAN_SUPPORT_FILES[@]}"; do
+            install -Dm644 "$file" "$MNT/$file"
+        done
+    fi
 }
 
 adjust_grub() {
@@ -335,12 +394,15 @@ CHROOT_EOF
 }
 
 ready_msg() {
+    local initrd_installer_hint
+    initrd_installer_hint="${INITRD_INSTALLER_HINT:-cd initrd_installer; sudo ./generate_initrd_installer; cd ..}"
+
     echo ">> Image ready: $IMG"
     echo
     echo ">> For publishing:"
     echo ">> Compress with: 'xz -T1 -1kv $IMG'"
     echo ">> Publish with: 'scp -pr ${IMG}.xz mutuatec@mutuatech.com:~/public_html/MutuatechLinux/images/${TARGET_ARCH}/'"
-    echo ">> Build & publish the initrd installation artifacts: 'cd initrd_installer; sudo ./generate_initrd_installer; cd ..'"
+    echo ">> Build & publish the initrd installation artifacts: '${initrd_installer_hint}'"
     echo
     echo ">> Test with ./test_image"
 }

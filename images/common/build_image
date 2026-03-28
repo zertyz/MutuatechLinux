@@ -33,6 +33,7 @@ if [[ "${SYNC_PACMAN_CACHE:-0}" == 1 ]]; then
     save_pacman_pkgs
 fi
 
+copy_target_pacman_config
 generate_fstab
 if declare -p INNER_SCRIPT_FILES >/dev/null 2>&1; then
     execute_inner_script "${INNER_SCRIPT_FILES[@]}"
