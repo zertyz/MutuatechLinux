@@ -5,6 +5,9 @@ INITRD_SCRIPTS="../common/initrd_installer/initcpio"
 ARTIFACTS="./artifacts"
 TARGET_ARCH="${TARGET_ARCH:-aarch64}"
 KERNEL_PKG="${KERNEL_PKG:-linux-${TARGET_ARCH}}"
+KERNEL_BASENAME="${KERNEL_BASENAME:-vmlinuz-linux}"
+KERNEL_FALLBACK_BASENAME="${KERNEL_FALLBACK_BASENAME:-Image}"
+INITRAMFS_BASENAME="${INITRAMFS_BASENAME:-initramfs-linux.img}"
 
 
 . ../common/initrd_installer/generate_initrd_installer

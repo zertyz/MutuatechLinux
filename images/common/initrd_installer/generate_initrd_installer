@@ -9,6 +9,9 @@ TARGET_ARCH="${TARGET_ARCH:-x86_64}"
 
 # ---- VM vars
 KERNEL_PKG="${KERNEL_PKG:-linux}"
+KERNEL_BASENAME="${KERNEL_BASENAME:-vmlinuz-${KERNEL_PKG}}"
+KERNEL_FALLBACK_BASENAME="${KERNEL_FALLBACK_BASENAME:-Image}"
+INITRAMFS_BASENAME="${INITRAMFS_BASENAME:-initramfs-${KERNEL_PKG}.img}"
 
 [ "$EUID" -ne 0 ] && { echo "Please run this as root: sudo $0" >&2; exit 1; }
 
@@ -52,15 +55,15 @@ cp -a "${INITRD_SCRIPTS}"/ "$MNT/root/"
 cp -a "${INITRD_SCRIPTS}"/{hooks,install} "$MNT/etc/initcpio/"
 
 # Build our initramfs installer
-KERNEL_PKG="$KERNEL_PKG" arch-chroot "$MNT" bash -eux <<'CHROOT'
+KERNEL_PKG="$KERNEL_PKG" INITRAMFS_BASENAME="$INITRAMFS_BASENAME" arch-chroot "$MNT" bash -eux <<'CHROOT'
 KERNEL_VER=`pacman -Q "$KERNEL_PKG" | sed 's|.* ||; s|\.arch|-arch|'`     # get the version name from the kernel package -- might be incomplete 'though
 KERNEL_VER=`ls -1d /lib/modules/${KERNEL_VER}* | sed 's|.*/||'`   # resolve the exact name from the modules dir
-mkinitcpio -k $KERNEL_VER -c /root/initcpio/once-mkinitcpio.conf -S autodetect -g /root/initcpio/initramfs-linux.img || :
+mkinitcpio -k $KERNEL_VER -c /root/initcpio/once-mkinitcpio.conf -S autodetect -g "/root/initcpio/${INITRAMFS_BASENAME}" || :
 CHROOT
 
 echo "Installer ramdisk was created. Copying to the artifacts directory"
-cp -aL "$MNT/boot/vmlinuz-linux" "${ARTIFACTS}"/ || cp -aL "$MNT/boot/Image" "${ARTIFACTS}"/vmlinuz-linux
-cp -a "$MNT/root/initcpio/initramfs-linux.img" "${ARTIFACTS}"/
+cp -aL "$MNT/boot/${KERNEL_BASENAME}" "${ARTIFACTS}"/ || cp -aL "$MNT/boot/${KERNEL_FALLBACK_BASENAME}" "${ARTIFACTS}/${KERNEL_BASENAME}"
+cp -a "$MNT/root/initcpio/${INITRAMFS_BASENAME}" "${ARTIFACTS}/"
 chmod 644 "${ARTIFACTS}"/*
 ls -l "${ARTIFACTS}"/
 
@@ -72,5 +75,5 @@ echo
 echo "You can follow the README to test it locally."
 echo
 echo "When ready, publish with:"
-echo "rm -f artifacts/*.xz && xz -T1 -9kv artifacts/{vmlinuz-linux,initramfs-linux.img}"
-echo "scp -pr artifacts/*.xz mutuatec@mutuatech.com:~/public_html/MutuatechLinux/initrd_installers/${TARGET_ARCH}/"
+echo "rm -f ${ARTIFACTS}/*.xz && xz -T1 -9kv ${ARTIFACTS}/${KERNEL_BASENAME} ${ARTIFACTS}/${INITRAMFS_BASENAME}"
+echo "scp -pr ${ARTIFACTS}/*.xz mutuatec@mutuatech.com:~/public_html/MutuatechLinux/initrd_installers/${TARGET_ARCH}/"
