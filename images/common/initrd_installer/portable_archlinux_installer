@@ -65,6 +65,14 @@ resolve_on_disk() {
     if [[ -e "$p" ]]; then
       echo "$p"; return 0
     fi
+    # Some setups pass a path rooted inside a Btrfs subvolume such as /@/boot/...
+    # but the live path on the running system is still /boot/...
+    if [[ "$p" == */boot/* ]]; then
+      local boot_path="/boot/${p##*/boot/}"
+      if [[ -e "$boot_path" ]]; then
+        echo "$boot_path"; return 0
+      fi
+    fi
     # Sometimes bootloaders pass "/vmlinuz-…" (ESP-rooted in systemd-boot).
     # Try ESP mountpoints as a prefix.
     while IFS= read -r mp; do
