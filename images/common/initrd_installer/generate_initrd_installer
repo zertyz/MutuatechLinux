@@ -5,6 +5,7 @@ set -euo pipefail
 IMG="${IMG:-../artifacts/mutuatechlinux-general-x86_64.img}"
 INITRD_SCRIPTS="${INITRD_SCRIPTS:-./initcpio}"
 ARTIFACTS="${ARTIFACTS:-./artifacts}"
+TARGET_ARCH="${TARGET_ARCH:-x86_64}"
 
 # ---- VM vars
 KERNEL_PKG="${KERNEL_PKG:-linux}"
@@ -72,4 +73,4 @@ echo "You can follow the README to test it locally."
 echo
 echo "When ready, publish with:"
 echo "rm -f artifacts/*.xz && xz -T1 -9kv artifacts/{vmlinuz-linux,initramfs-linux.img}"
-echo "scp -pr artifacts/*.xz mutuatec@mutuatech.com:~/public_html/MutuatechLinux/initrd_installers/x86_64/"
+echo "scp -pr artifacts/*.xz mutuatec@mutuatech.com:~/public_html/MutuatechLinux/initrd_installers/${TARGET_ARCH}/"
