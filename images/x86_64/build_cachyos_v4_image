@@ -34,7 +34,7 @@ PACMAN_SUPPORT_FILES=(/etc/pacman.d/mirrorlist /etc/pacman.d/cachyos-mirrorlist 
 PARTITION_FN=create_and_partition_image_dos_mbr
 BOOTSTRAP_FN=bootstrap_native
 PRE_FLIGHT_FN=preflight_native_cachyos_v4_build
-INITRD_INSTALLER_HINT="cd initrd_installer; sudo env IMG=../artifacts/mutuatechlinux-general-cachyos-x86_64_v4.img KERNEL_PKG=linux-cachyos TARGET_ARCH=x86_64_v4 ./generate_initrd_installer; cd .."
+INITRD_INSTALLER_HINT="cd initrd_installer; sudo ./generate_cachyos_v4_initrd_installer; cd .."
 INNER_SCRIPT_FILES=(./image_setup_inner_script_cachyos ../common/image_setup_inner_script_x86_64)
 COMMON_FILES_DIR="../common/files"
 

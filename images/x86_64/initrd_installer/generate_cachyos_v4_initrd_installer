@@ -1,0 +1,12 @@
+#! /bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+IMG="${IMG:-${SCRIPT_DIR}/../artifacts/mutuatechlinux-general-cachyos-x86_64_v4.img}"
+INITRD_SCRIPTS="${INITRD_SCRIPTS:-${SCRIPT_DIR}/../../common/initrd_installer/initcpio}"
+ARTIFACTS="${ARTIFACTS:-${SCRIPT_DIR}/artifacts/cachyos-x86_64_v4}"
+TARGET_ARCH="${TARGET_ARCH:-x86_64_v4}"
+KERNEL_PKG="${KERNEL_PKG:-linux-cachyos}"
+
+. "${SCRIPT_DIR}/../../common/initrd_installer/generate_initrd_installer"
