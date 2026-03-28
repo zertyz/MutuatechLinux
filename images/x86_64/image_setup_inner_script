@@ -1,5 +1,5 @@
 KERNEL_PKG="${KERNEL_PKG:-linux}"
-INITRAMFS_PREFIX="${INITRAMFS_PREFIX:-linux}"
+INITRAMFS_PREFIX="${INITRAMFS_PREFIX:-$KERNEL_PKG}"
 
 # Prefer a live mirror before the shared kernel reinstall step.
 sed -i 's|^#\(.*\.br/.*\)|\1|' /etc/pacman.d/mirrorlist
