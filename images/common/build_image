@@ -34,7 +34,11 @@ if [[ "${SYNC_PACMAN_CACHE:-0}" == 1 ]]; then
 fi
 
 generate_fstab
-execute_inner_script "$INNER_SCRIPT"
+if declare -p INNER_SCRIPT_FILES >/dev/null 2>&1; then
+    execute_inner_script "${INNER_SCRIPT_FILES[@]}"
+else
+    execute_inner_script "$INNER_SCRIPT"
+fi
 adjust_grub
 copy_image_files "$COMMON_FILES_DIR"
 setup_sshd_and_keys

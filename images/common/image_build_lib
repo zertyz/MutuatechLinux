@@ -224,7 +224,7 @@ generate_fstab() {
 # inside its chroot env
 execute_inner_script() {
     echo ">> Executing the inner script (into the new image)"
-    cat "$1" | arch-chroot "$MNT" bash -eux
+    cat "$@" | arch-chroot "$MNT" bash -eux
 }
 
 adjust_grub() {

@@ -31,7 +31,7 @@ CUSTOM_CACHE_PACKAGE_FILES=(
 )
 PARTITION_FN=create_and_partition_image_dos_mbr
 BOOTSTRAP_FN=bootstrap_native
-INNER_SCRIPT="./image_setup_inner_script"
+INNER_SCRIPT_FILES=(./image_setup_inner_script ../common/image_setup_inner_script_x86_64)
 COMMON_FILES_DIR="../common/files"
 
 . ../common/build_image
