@@ -17,7 +17,7 @@ ROOT_PW="${ROOT_PW:-mutuatechlinux}"  # optional; if empty, root password stays 
 DEF_USER="${DEF_USER:-}"              # e.g. 'arch'
 DEF_USER_PW="${DEF_USER_PW:-}"        # optional
 
-BASE_PKGS=(base base-devel linux linux-firmware intel-ucode amd-ucode btrfs-progs compsize jemalloc gptfdisk parted qemu-system-x86-firmware mkinitcpio-nfs-utils cloud-guest-utils wget grub efibootmgr net-tools dhclient openssh openbsd-netcat less vim sudo rust paru dosfstools arch-install-scripts)
+BASE_PKGS=(base base-devel linux linux-firmware intel-ucode amd-ucode btrfs-progs compsize jemalloc gptfdisk parted qemu-system-x86-firmware mkinitcpio-nfs-utils cloud-guest-utils wget grub efibootmgr net-tools dhclient openssh openbsd-netcat less vim sudo rust dosfstools arch-install-scripts)
 ONLINE_PACKAGES=(
   'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
   'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
