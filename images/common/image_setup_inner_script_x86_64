@@ -10,6 +10,11 @@ cat >/etc/locale.conf <<'EOF'
 LANG=en_US.UTF-8
 EOF
 
+# console
+cat >/etc/vconsole.conf <<'EOF'
+KEYMAP=us
+EOF
+
 # hostname
 echo 'mutuatechlinux' > /etc/hostname
 
@@ -32,11 +37,9 @@ systemctl mask tmp.mount
 swap_UUID=`blkid | grep 'LABEL="swap"' | grep loop | tail -n 1 | sed 's|.* UUID="\([^"]*\)".*|\1|'`
 sed -i "s|^[^ ]*\( *.*swap.*\)|UUID=$swap_UUID\1|" /etc/fstab
 
-# reinstall the kernel -- fixes bad initramdisk generated in the bootstrap phase
-# (the need for this might be due to a bug. Recheck in the future)
+# regenerate the initramfs after the bootstrap phase
 KERNEL_PKG="${KERNEL_PKG:-linux}"
-yes | pacman -S --noconfirm "$KERNEL_PKG"
-rm -fr /var/cache/pacman/pkg/*
+mkinitcpio -P
 
 # safely boot everywhere
 INITRAMFS_PREFIX="${INITRAMFS_PREFIX:-$KERNEL_PKG}"
