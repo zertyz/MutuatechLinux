@@ -18,10 +18,7 @@ DEF_USER="${DEF_USER:-}"              # e.g. 'arch'
 DEF_USER_PW="${DEF_USER_PW:-}"        # optional
 
 BASE_PKGS=(base base-devel cachyos-keyring cachyos-mirrorlist cachyos-v3-mirrorlist linux-cachyos linux-firmware intel-ucode amd-ucode btrfs-progs compsize jemalloc gptfdisk parted qemu-system-x86-firmware mkinitcpio-nfs-utils cloud-guest-utils wget grub efibootmgr net-tools dhclient openssh openbsd-netcat less vim sudo rust dosfstools arch-install-scripts)
-ONLINE_PACKAGES=(
-  'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
-  'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
-)
+ONLINE_PACKAGES=()
 CUSTOM_CACHE_BASE_URL="http://mutuatech.com/MutuatechLinux/cache/x86_64"
 CUSTOM_CACHE_PACKAGE_FILES=(
   'mutuatechlinux-general-multiarch-1.1.40-1-x86_64.pkg.tar.zst'
