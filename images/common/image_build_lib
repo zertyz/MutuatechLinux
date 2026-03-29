@@ -352,19 +352,23 @@ generate_fstab() {
     echo ">>     ... fixing any device resolution mistakes in the fstab file"
     # genfstab works badly inside AWS and GCE (at least) -- it uses the /dev/ entries instead of the UUID. The bellow fixes that
     # (harmless if no /dev/* entries are in use)
-    cat "$MNT/etc/fstab" | grep -v '#' | grep '/dev/' | while read md; do
-        echo $md | sed 's| .*||' | while read ld; do
-            UUID=`blkid | grep "$ld" | sed 's|.* \(UUID="[^"]*"\).*|\1|'`
-            sed -i "s|^$ld|$UUID|g" "$MNT/etc/fstab"
-        done
-    done
+    while read -r ld; do
+        local uuid
+        uuid="$(blkid -s UUID -o value "$ld")"
+        sed -i "s|^$ld|UUID=$uuid|g" "$MNT/etc/fstab"
+    done < <(awk '!/^#/ && /\/dev\// { print $1 }' "$MNT/etc/fstab")
+
+    if [[ ! -s "$MNT/etc/fstab" ]]; then
+        echo "Generated fstab is empty: $MNT/etc/fstab" >&2
+        exit 1
+    fi
 }
 
 # Receives as argument the name of the local script to execute on the new image,
 # inside its chroot env
 execute_inner_script() {
     echo ">> Executing the inner script (into the new image)"
-    cat "$@" | arch-chroot "$MNT" bash -eux
+    cat "$@" | arch-chroot "$MNT" bash -euxo pipefail
 }
 
 copy_target_pacman_config() {
