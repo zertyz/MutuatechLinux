@@ -35,6 +35,8 @@ PARTITION_FN=create_and_partition_image_gpt
 BOOTSTRAP_FN=bootstrap_emulated
 SYNC_PACMAN_CACHE=1
 PRE_FLIGHT_FN=preflight_emulated_aarch64_build
+PUBLISH_IMAGE_HINT="./publish_aarch64_image"
+TEST_IMAGE_HINT="./test_image"
 INNER_SCRIPT="./image_setup_inner_script"
 COMMON_FILES_DIR="../common/files"
 

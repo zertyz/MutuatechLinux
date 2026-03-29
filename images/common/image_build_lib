@@ -415,14 +415,17 @@ CHROOT_EOF
 
 ready_msg() {
     local initrd_installer_hint
+    local publish_image_hint
+    local test_image_hint
     initrd_installer_hint="${INITRD_INSTALLER_HINT:-cd initrd_installer; sudo ./generate_initrd_installer; cd ..}"
+    publish_image_hint="${PUBLISH_IMAGE_HINT:-xz -T1 -1kv $IMG && scp -pr ${IMG}.xz mutuatec@mutuatech.com:~/public_html/MutuatechLinux/images/${TARGET_ARCH}/}"
+    test_image_hint="${TEST_IMAGE_HINT:-./test_image}"
 
     echo ">> Image ready: $IMG"
     echo
     echo ">> For publishing:"
-    echo ">> Compress with: 'xz -T1 -1kv $IMG'"
-    echo ">> Publish with: 'scp -pr ${IMG}.xz mutuatec@mutuatech.com:~/public_html/MutuatechLinux/images/${TARGET_ARCH}/'"
+    echo ">> Publish with: '${publish_image_hint}'"
     echo ">> Build & publish the initrd installation artifacts: '${initrd_installer_hint}'"
     echo
-    echo ">> Test with ./test_image"
+    echo ">> Test with '${test_image_hint}'"
 }
