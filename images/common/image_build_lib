@@ -22,8 +22,9 @@ fetch_custom_pkgs_cache() {
 }
 
 require_cached_package_patterns() {
-    local cache_dir cache_dir_abs pattern
+    local cache_dir cache_dir_abs pattern url_path cut_dirs
     local -a missing_patterns=()
+    local -a url_parts=()
 
     CACHE_DIR="${CACHE_DIR:-cache}"
     mkdir -p "$CACHE_DIR"
@@ -46,7 +47,14 @@ require_cached_package_patterns() {
         done
         echo "Place matching package files under: $cache_dir_abs/" >&2
         if [[ -n "${CUSTOM_CACHE_BASE_URL:-}" ]]; then
-            echo "Or publish them under ${CUSTOM_CACHE_BASE_URL}/ and list their exact filenames in CUSTOM_CACHE_PACKAGE_FILES." >&2
+            url_path="${CUSTOM_CACHE_BASE_URL#*://}"
+            url_path="${url_path#*/}"
+            url_path="${url_path%/}"
+            IFS='/' read -r -a url_parts <<< "$url_path"
+            cut_dirs="${#url_parts[@]}"
+            echo "Populate the cache with:" >&2
+            echo "  ( cd \"$cache_dir_abs\" && wget -m -np -nH --cut-dirs=${cut_dirs} -R 'index.html*' -A '*.pkg.tar.*' \"${CUSTOM_CACHE_BASE_URL%/}/\" )" >&2
+            echo "If you publish new cached package filenames, also list them in CUSTOM_CACHE_PACKAGE_FILES for automatic fetching." >&2
         fi
         exit 1
     fi
