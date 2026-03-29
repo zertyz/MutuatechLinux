@@ -15,8 +15,41 @@ fetch_custom_pkgs_cache() {
     mkdir -p "$CACHE_DIR"
     echo ">> Fetching custom packages and putting them into the local cache..."
     cd "$CACHE_DIR"
-    wget -c "$@"
+    if ! wget -c "$@"; then
+        echo ">> Some cached packages could not be fetched automatically." >&2
+    fi
     cd ..
+}
+
+require_cached_package_patterns() {
+    local cache_dir cache_dir_abs pattern
+    local -a missing_patterns=()
+
+    CACHE_DIR="${CACHE_DIR:-cache}"
+    mkdir -p "$CACHE_DIR"
+    cache_dir="$CACHE_DIR"
+    cache_dir_abs="$(cd "$cache_dir" && pwd)"
+
+    shopt -s nullglob
+    for pattern in "$@"; do
+        local matches=( "$cache_dir"/$pattern )
+        if (( ${#matches[@]} == 0 )); then
+            missing_patterns+=("$pattern")
+        fi
+    done
+    shopt -u nullglob
+
+    if (( ${#missing_patterns[@]} > 0 )); then
+        echo "Missing required cached package files:" >&2
+        for pattern in "${missing_patterns[@]}"; do
+            echo "  - $pattern" >&2
+        done
+        echo "Place matching package files under: $cache_dir_abs/" >&2
+        if [[ -n "${CUSTOM_CACHE_BASE_URL:-}" ]]; then
+            echo "Or publish them under ${CUSTOM_CACHE_BASE_URL}/ and list their exact filenames in CUSTOM_CACHE_PACKAGE_FILES." >&2
+        fi
+        exit 1
+    fi
 }
 
 # Only useful if building the system with `bootstrap_emulated()`

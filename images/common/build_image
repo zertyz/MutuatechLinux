@@ -20,6 +20,10 @@ if [[ ${#custom_cache_urls[@]} -gt 0 ]]; then
     fetch_custom_pkgs_cache "${custom_cache_urls[@]}"
 fi
 
+if declare -p CUSTOM_CACHE_REQUIRED_PATTERNS >/dev/null 2>&1; then
+    require_cached_package_patterns "${CUSTOM_CACHE_REQUIRED_PATTERNS[@]}"
+fi
+
 "$PARTITION_FN"
 format_and_mount_partitions
 

@@ -31,6 +31,10 @@ CUSTOM_CACHE_PACKAGE_FILES=(
   'mutuatechlinux-general-multiarch-1.1.41-1-aarch64.pkg.tar.xz'
   'paru-bin-2.1.0-1-aarch64.pkg.tar.xz'
 )
+CUSTOM_CACHE_REQUIRED_PATTERNS=(
+  'mutuatechlinux-general-multiarch-*-aarch64.pkg.tar.*'
+  'paru-bin-*-aarch64.pkg.tar.*'
+)
 PARTITION_FN=create_and_partition_image_gpt
 BOOTSTRAP_FN=bootstrap_emulated
 SYNC_PACMAN_CACHE=1
