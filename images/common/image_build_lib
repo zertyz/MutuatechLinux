@@ -3,6 +3,9 @@ set -euo pipefail
 
 [ "$EUID" -ne 0 ] && { echo "Please run this as root: sudo $0" >&2; exit 1; }
 
+LOOPDEV=""
+MNT=""
+
 # Ensures the cache directory contains all files specified by the URLs passaed as arguments to this function
 #
 # Defines the following global variables:
@@ -152,10 +155,10 @@ preflight_native_cachyos_v4_build() {
 # function to execute when the script ends
 cleanup() {
   set +e
-  if mountpoint -q "$MNT/boot/efi"; then umount -l "$MNT/boot/efi"; fi
-  if mountpoint -q "$MNT"; then umount -l "$MNT"; fi
-  if [[ -n "${LOOPDEV:-}" ]]; then losetup -d "$LOOPDEV"; fi
-  [[ -d "${MNT:-}" ]] && rmdir "$MNT"
+  if [[ -n "$MNT" ]] && mountpoint -q "$MNT/boot/efi"; then umount -l "$MNT/boot/efi"; fi
+  if [[ -n "$MNT" ]] && mountpoint -q "$MNT"; then umount -l "$MNT"; fi
+  if [[ -n "$LOOPDEV" ]]; then losetup -d "$LOOPDEV"; fi
+  [[ -n "$MNT" ]] && [[ -d "$MNT" ]] && rmdir "$MNT"
 }
 trap cleanup EXIT
 
