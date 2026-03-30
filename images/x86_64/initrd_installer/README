@@ -3,8 +3,8 @@
 ## Arch Linux `x86_64`
 
 ```bash
-sudo ./generate_initrd_installer
-./publish_initrd_installer
+sudo ./generate_archlinux_x86_64_initrd_installer
+./publish_archlinux_x86_64_initrd_installer
 ./portable_archlinux_installer
 ```
 

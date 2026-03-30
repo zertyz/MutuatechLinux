@@ -36,7 +36,7 @@ See [../../README](../../README) for the image-builder and publish-helper matrix
 
 The usual entrypoints are:
 
-- `../../x86_64/initrd_installer/generate_initrd_installer`
-- `../../aarch64/generate_initrd_installer`
+- `../../x86_64/initrd_installer/generate_archlinux_x86_64_initrd_installer`
+- `../../aarch64/initrd_installer/generate_archlinux_aarch64_initrd_installer`
 - `../../x86_64/initrd_installer/generate_cachyos_v3_initrd_installer`
 - `../../x86_64/initrd_installer/generate_cachyos_v4_initrd_installer`

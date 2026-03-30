@@ -1,6 +1,6 @@
 # Image Build Matrix
 
-This tree now produces four final disk images:
+Use these scripts to produce four final disk images:
 
 | Target | Final image |
 | --- | --- |
@@ -19,8 +19,8 @@ sudo ./build_x86_64_image
 ./test_x86_64_image
 ./publish_x86_64_image
 cd initrd_installer
-sudo ./generate_initrd_installer
-./publish_initrd_installer
+sudo ./generate_archlinux_x86_64_initrd_installer
+./publish_archlinux_x86_64_initrd_installer
 ```
 
 ### Arch Linux `aarch64`
@@ -30,8 +30,9 @@ cd aarch64
 sudo ./build_aarch64_image
 ./test_image
 ./publish_aarch64_image
-sudo ./generate_initrd_installer
-./publish_initrd_installer
+cd initrd_installer
+sudo ./generate_archlinux_aarch64_initrd_installer
+./publish_archlinux_aarch64_initrd_installer
 ```
 
 ### CachyOS `x86_64_v3`
@@ -61,8 +62,9 @@ sudo ./generate_cachyos_v4_initrd_installer
 ## Notes
 
 - The Arch `x86_64` and `aarch64` on-site installer generators still exist exactly as before.
+- The generic Arch installer entrypoints now use explicit names: `archlinux_x86_64` and `archlinux_aarch64`.
 - The CachyOS `x86_64_v3` and `x86_64_v4` initrd generator wrappers are convenience entrypoints that make the installer fetch the matching CachyOS final image automatically.
-- If you only want one generic `x86_64` on-site installer family, keep using `x86_64/initrd_installer/generate_initrd_installer`.
+- The old generic script names are kept as compatibility wrappers.
 - All publish helpers accept `REMOTE_HOST` and `REMOTE_BASE_DIR` overrides.
 - Image publish helpers use `XZ_LEVEL=1` by default; initrd publish helpers use `XZ_LEVEL=9`.
 - The `x86_64_v4` builder intentionally aborts on hosts that do not report `x86-64-v4` support.

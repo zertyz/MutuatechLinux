@@ -2,12 +2,4 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-
-IMG="${IMG:-${SCRIPT_DIR}/../artifacts/mutuatechlinux-general-x86_64.img}"
-INITRD_SCRIPTS="${INITRD_SCRIPTS:-${SCRIPT_DIR}/../../common/initrd_installer/initcpio}"
-ARTIFACTS="${ARTIFACTS:-${SCRIPT_DIR}/artifacts}"
-TARGET_ARCH="${TARGET_ARCH:-x86_64}"
-IMAGE_URL="${IMAGE_URL:-http://mutuatech.com/MutuatechLinux/images/x86_64/mutuatechlinux-general-x86_64.img.xz}"
-PUBLISH_INITRD_HINT="${PUBLISH_INITRD_HINT:-./publish_initrd_installer}"
-
-. "${SCRIPT_DIR}/../../common/initrd_installer/generate_initrd_installer"
+exec "${SCRIPT_DIR}/generate_archlinux_x86_64_initrd_installer" "$@"

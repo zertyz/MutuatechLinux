@@ -1,0 +1,17 @@
+#! /bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+IMG="${IMG:-${SCRIPT_DIR}/../artifacts/mutuatechlinux-general-aarch64.img}"
+INITRD_SCRIPTS="${INITRD_SCRIPTS:-${SCRIPT_DIR}/../../common/initrd_installer/initcpio}"
+ARTIFACTS="${ARTIFACTS:-${SCRIPT_DIR}/../artifacts}"
+TARGET_ARCH="${TARGET_ARCH:-aarch64}"
+IMAGE_URL="${IMAGE_URL:-http://mutuatech.com/MutuatechLinux/images/aarch64/mutuatechlinux-general-aarch64.img.xz}"
+PUBLISH_INITRD_HINT="${PUBLISH_INITRD_HINT:-./publish_archlinux_aarch64_initrd_installer}"
+KERNEL_PKG="${KERNEL_PKG:-linux-${TARGET_ARCH}}"
+KERNEL_BASENAME="${KERNEL_BASENAME:-vmlinuz-linux}"
+KERNEL_FALLBACK_BASENAME="${KERNEL_FALLBACK_BASENAME:-Image}"
+INITRAMFS_BASENAME="${INITRAMFS_BASENAME:-initramfs-linux.img}"
+
+. "${SCRIPT_DIR}/../../common/initrd_installer/generate_initrd_installer"

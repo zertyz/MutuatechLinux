@@ -2,11 +2,4 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
-
-ARTIFACTS="${ARTIFACTS:-artifacts}" \
-TARGET_ARCH="${TARGET_ARCH:-aarch64}" \
-KERNEL_BASENAME="${KERNEL_BASENAME:-vmlinuz-linux}" \
-INITRAMFS_BASENAME="${INITRAMFS_BASENAME:-initramfs-linux.img}" \
-XZ_LEVEL="${XZ_LEVEL:-9}" \
-../common/publish_initrd_artifacts
+exec "${SCRIPT_DIR}/initrd_installer/publish_archlinux_aarch64_initrd_installer" "$@"
