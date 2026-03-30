@@ -15,7 +15,7 @@ Use these scripts to produce four final disk images:
 
 ```bash
 cd x86_64
-sudo ./build_x86_64_image
+sudo ./build_archlinux_x86_64_image
 ./test_x86_64_image
 ./publish_x86_64_image
 cd initrd_installer
@@ -67,6 +67,7 @@ sudo ./test_cachyos_v4_initrd_installer
 
 - The Arch `x86_64` and `aarch64` on-site installer generators still exist exactly as before.
 - The generic Arch installer entrypoints now use explicit names: `archlinux_x86_64` and `archlinux_aarch64`.
+- The generic Arch `x86_64` image builder now uses an explicit name too: `build_archlinux_x86_64_image`.
 - The CachyOS `x86_64_v3` and `x86_64_v4` initrd generator wrappers are convenience entrypoints that make the installer fetch the matching CachyOS final image automatically.
 - The old generic script names are kept as compatibility wrappers.
 - The initrd installer test wrappers create a disposable copy of the built image, replace the boot kernel and initramfs with the generated installer artifacts, optionally wipe everything except `/boot`, and then launch the usual QEMU test flow.
