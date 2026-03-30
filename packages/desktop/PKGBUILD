@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-desktop
-pkgver=1.1.40
+pkgver=1.1.45
 pkgrel=1
 pkgdesc="Desktop part of the MutuaTech Linux packages"
 arch=('x86_64')
@@ -16,7 +16,7 @@ url="https://github.com/zertyz/MutuatechLinux"
 # eval $(echo -en "installed=( `pacman -Qn | sed 's| .*||'` `pacman -Q --foreign | sed 's| .*||'` )"); echo -en "Wanted packages NOT INSTALLED: "; . ./PKGBUILD; wanted_packages=("${depends[@]}"); . ../general/PKGBUILD; wanted_packages=("${depends[@]}" "${wanted_packages[@]}"); for wanted_package in "${wanted_packages[@]}"; do found=0; for installed_package in "${installed[@]}"; do if [ "$wanted_package" == "$installed_package" ]; then found=1; break; fi; done; if [ $found -eq 0 ]; then echo -en "$wanted_package "; fi; done; echo
 depends=(
 
-'mutuatechlinux-general'
+'mutuatechlinux-general-multiarch'
 
 # cli
 ######
@@ -271,7 +271,7 @@ treesheets-git
 obsidian
 
 # rust
-rustup
+rust # rustup
 rustrover rustrover-jre
 evcxr_repl
 cargo-depgraph cargo-modules cargo-udeps cargo-sweep
@@ -297,7 +297,7 @@ sublime-text-4
 qtcreator
 geany
 rstudio-desktop-bin
-visual-studio-code-bin
+code  # visual-studio-code-bin
 modelio-bin
 xxdiff diffuse
 ddd
