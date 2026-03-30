@@ -2,6 +2,4 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
-
-IMG="${IMG:-artifacts/mutuatechlinux-general-x86_64.img}" ./test_image
+exec "${SCRIPT_DIR}/test_archlinux_x86_64_image" "$@"

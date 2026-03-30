@@ -14,4 +14,4 @@ INITRAMFS_BASENAME="${INITRAMFS_BASENAME:-initramfs-linux.img}" \
 WIPE_ROOT="${WIPE_ROOT:-1}" \
 ../../common/prepare_initrd_installer_test_image
 
-IMG="$TEST_IMG" "${SCRIPT_DIR}/../test_x86_64_image"
+IMG="$TEST_IMG" "${SCRIPT_DIR}/../test_archlinux_x86_64_image"

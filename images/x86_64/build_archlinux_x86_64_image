@@ -38,8 +38,8 @@ PACMAN_SUPPORT_FILES=(/etc/pacman.d/mirrorlist)
 PARTITION_FN=create_and_partition_image_dos_mbr
 BOOTSTRAP_FN=bootstrap_native
 PRE_FLIGHT_FN=preflight_native_archlinux_build
-PUBLISH_IMAGE_HINT="./publish_x86_64_image"
-TEST_IMAGE_HINT="./test_x86_64_image"
+PUBLISH_IMAGE_HINT="./publish_archlinux_x86_64_image"
+TEST_IMAGE_HINT="./test_archlinux_x86_64_image"
 INNER_SCRIPT_FILES=(./image_setup_inner_script ../common/image_setup_inner_script_x86_64)
 COMMON_FILES_DIR="../common/files"
 

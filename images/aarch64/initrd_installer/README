@@ -8,7 +8,7 @@ sudo ./generate_archlinux_aarch64_initrd_installer
 sudo ./test_archlinux_aarch64_initrd_installer
 ```
 
-The test wrapper creates a disposable copy of the built image, replaces the boot kernel and initramfs with the generated installer artifacts while preserving the target boot file names, optionally wipes everything except `/boot`, and then runs the normal `../test_image` QEMU flow.
+The test wrapper creates a disposable copy of the built image, replaces the boot kernel and initramfs with the generated installer artifacts while preserving the target boot file names, optionally wipes everything except `/boot`, and then runs the normal `../test_archlinux_aarch64_image` QEMU flow.
 
 Set `WIPE_ROOT=0` if you want to keep the original root filesystem for a lighter test.
 
