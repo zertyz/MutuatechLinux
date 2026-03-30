@@ -5,6 +5,7 @@
 ```bash
 sudo ./generate_archlinux_x86_64_initrd_installer
 ./publish_archlinux_x86_64_initrd_installer
+sudo ./test_archlinux_x86_64_initrd_installer
 ./portable_archlinux_installer
 ```
 
@@ -13,6 +14,7 @@ sudo ./generate_archlinux_x86_64_initrd_installer
 ```bash
 sudo ./generate_cachyos_v3_initrd_installer
 ./publish_cachyos_v3_initrd_installer
+sudo ./test_cachyos_v3_initrd_installer
 ./portable_archlinux_installer
 ```
 
@@ -21,9 +23,12 @@ sudo ./generate_cachyos_v3_initrd_installer
 ```bash
 sudo ./generate_cachyos_v4_initrd_installer
 ./publish_cachyos_v4_initrd_installer
+sudo ./test_cachyos_v4_initrd_installer
 ./portable_archlinux_installer
 ```
 
 `portable_archlinux_installer` keeps the destination boot file names already used by the current system, and now picks the matching published Arch Linux or CachyOS installer artifacts automatically.
+
+The test wrappers create a disposable copy of the corresponding built disk image, replace the boot kernel and initramfs in that copy with the generated installer artifacts, optionally wipe everything except `/boot`, and then launch the usual `../test_*` QEMU flow. Set `WIPE_ROOT=0` if you want to skip the wipe and just validate the boot handoff.
 
 See [../../README](../../README) for the final image build/test/publish commands, and [../../common/initrd_installer/README](../../common/initrd_installer/README) for the shared initrd installer notes.

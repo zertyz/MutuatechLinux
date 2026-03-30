@@ -21,6 +21,7 @@ sudo ./build_x86_64_image
 cd initrd_installer
 sudo ./generate_archlinux_x86_64_initrd_installer
 ./publish_archlinux_x86_64_initrd_installer
+sudo ./test_archlinux_x86_64_initrd_installer
 ```
 
 ### Arch Linux `aarch64`
@@ -33,6 +34,7 @@ sudo ./build_aarch64_image
 cd initrd_installer
 sudo ./generate_archlinux_aarch64_initrd_installer
 ./publish_archlinux_aarch64_initrd_installer
+sudo ./test_archlinux_aarch64_initrd_installer
 ```
 
 ### CachyOS `x86_64_v3`
@@ -45,6 +47,7 @@ sudo ./build_cachyos_v3_image
 cd initrd_installer
 sudo ./generate_cachyos_v3_initrd_installer
 ./publish_cachyos_v3_initrd_installer
+sudo ./test_cachyos_v3_initrd_installer
 ```
 
 ### CachyOS `x86_64_v4`
@@ -57,6 +60,7 @@ sudo ./build_cachyos_v4_image
 cd initrd_installer
 sudo ./generate_cachyos_v4_initrd_installer
 ./publish_cachyos_v4_initrd_installer
+sudo ./test_cachyos_v4_initrd_installer
 ```
 
 ## Notes
@@ -65,6 +69,7 @@ sudo ./generate_cachyos_v4_initrd_installer
 - The generic Arch installer entrypoints now use explicit names: `archlinux_x86_64` and `archlinux_aarch64`.
 - The CachyOS `x86_64_v3` and `x86_64_v4` initrd generator wrappers are convenience entrypoints that make the installer fetch the matching CachyOS final image automatically.
 - The old generic script names are kept as compatibility wrappers.
+- The initrd installer test wrappers create a disposable copy of the built image, replace the boot kernel and initramfs with the generated installer artifacts, optionally wipe everything except `/boot`, and then launch the usual QEMU test flow.
 - All publish helpers accept `REMOTE_HOST` and `REMOTE_BASE_DIR` overrides.
 - Image publish helpers use `XZ_LEVEL=1` by default; initrd publish helpers use `XZ_LEVEL=9`.
 - The `x86_64_v4` builder intentionally aborts on hosts that do not report `x86-64-v4` support.

@@ -40,3 +40,16 @@ The usual entrypoints are:
 - `../../aarch64/initrd_installer/generate_archlinux_aarch64_initrd_installer`
 - `../../x86_64/initrd_installer/generate_cachyos_v3_initrd_installer`
 - `../../x86_64/initrd_installer/generate_cachyos_v4_initrd_installer`
+
+## Local Testing
+
+The test wrappers build a disposable copy of the already generated disk image, replace the boot kernel and initramfs in that copy with the installer artifacts while preserving the target boot file names, optionally wipe everything except `/boot`, and then launch the existing QEMU test script for that image flavor.
+
+The current wrappers are:
+
+- `../../x86_64/initrd_installer/test_archlinux_x86_64_initrd_installer`
+- `../../aarch64/initrd_installer/test_archlinux_aarch64_initrd_installer`
+- `../../x86_64/initrd_installer/test_cachyos_v3_initrd_installer`
+- `../../x86_64/initrd_installer/test_cachyos_v4_initrd_installer`
+
+By default they use `WIPE_ROOT=1` to force the installer to recreate the system. Set `WIPE_ROOT=0` if you want to keep the original root filesystem for a lighter boot-path check.
