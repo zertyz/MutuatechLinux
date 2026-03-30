@@ -95,4 +95,10 @@ build_shipping_initramfs
 grub-install --target=arm64-efi --efi-directory=/boot/efi --bootloader-id=MutuatechLinux --recheck --no-nvram --removable
 # Fix the archlinux arm kernel naming
 ln -sf /boot/Image /boot/vmlinuz-linux
+# Keep GRUB on the serial/text console and avoid probing missing EFI video modules.
+if grep -q '^#\?GRUB_TERMINAL_OUTPUT=' /etc/default/grub; then
+    sed -i 's/^#\?GRUB_TERMINAL_OUTPUT=.*/GRUB_TERMINAL_OUTPUT=console/' /etc/default/grub
+else
+    echo 'GRUB_TERMINAL_OUTPUT=console' >> /etc/default/grub
+fi
 grub-mkconfig -o /boot/grub/grub.cfg
