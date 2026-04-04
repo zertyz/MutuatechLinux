@@ -76,8 +76,8 @@ build_shipping_initramfs() {
 }
 
 # further fstab tunning
-swap_UUID=`blkid | grep 'LABEL="swap"' | grep loop | tail -n 1 | sed 's|.* UUID="\([^"]*\)".*|\1|'`
-sed -i "s|^[^ ]*\( *.*swap.*\)|UUID=$swap_UUID\1|" /etc/fstab
+# swap_UUID=`blkid | grep 'LABEL="swap"' | grep loop | tail -n 1 | sed 's|.* UUID="\([^"]*\)".*|\1|'`
+# sed -i "s|^[^ ]*\( *.*swap.*\)|UUID=$swap_UUID\1|" /etc/fstab 
 
 # regenerate the initramfs after the bootstrap phase
 KERNEL_PKG="${KERNEL_PKG:-linux}"

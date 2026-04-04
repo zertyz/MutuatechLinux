@@ -167,8 +167,8 @@ require_x86_64_glibc_level() {
     local level="$1"
     require_files /lib/ld-linux-x86-64.so.2
     /lib/ld-linux-x86-64.so.2 --help | grep -Fq "${level} (supported" || {
-        echo "Host CPU/glibc does not support ${level}." >&2
-        echo "Run this builder on a machine that reports ${level} support." >&2
+        echo "Host CPU/glibc does not support instruction set ${level}." >&2
+        echo "Run this builder on a machine that reports x86_64 instruction set ${level} support." >&2
         exit 1
     }
 }
@@ -205,13 +205,12 @@ trap cleanup EXIT
 
 # Creates a sparse image file representing the raw disk contents
 # and also partition it in the DOS/MBR format with the following layout:
-# MBR/DOS layout: 1=ESP, 2=swap, 3=root
+# MBR/DOS layout: 1=ESP, 2=root
 #
 # Uses the following global variables:
 #  - IMG: path to the target system image to be generated
 #  - IMG_SIZE: predefined size the above file will have
 #  - ESP_SIZE: the size for the EFI/ESP partition
-#  - SWAP_SIZE: the size for the swap partition
 # The root partition will take the reminder of the space
 create_and_partition_image_dos_mbr() {
 
@@ -220,26 +219,15 @@ create_and_partition_image_dos_mbr() {
     chattr +Cm "$IMG" || :         # if host is on BTRFS, do not compress nor COW the image
     truncate -s "$IMG_SIZE" "$IMG"
 
-    ## 2) GPT layout: 1=ESP, 2=swap, 3=root
-    #echo ">> Partitioning GPT (ESP ${ESP_SIZE}, swap ${SWAP_SIZE}, root=rest)"
-    #sgdisk -Z "$IMG"
-    #sgdisk -n 1:0:+"$ESP_SIZE" -t 1:EF00 -c 1:"EFI System" "$IMG"
-    #sgdisk -n 2:0:+"$SWAP_SIZE" -t 2:8200 -c 2:"swap" "$IMG"
-    #sgdisk -n 3:0:0        -t 3:8300 -c 3:"${FS_LABEL}" "$IMG"
-    #sgdisk -p "$IMG"
-
     # 2) MBR/DOS layout: 1=ESP, 2=swap, 3=root
-    echo ">> Partitioning MBR/DOS (ESP ${ESP_SIZE}, swap ${SWAP_SIZE}, root=rest)"
+    echo ">> Partitioning MBR/DOS (ESP ${ESP_SIZE}, root=rest)"
     sfdisk "$IMG" <<EOF
 label: dos
 
 # p1: ESP (FAT), bootable
 start=1MiB, size=${ESP_SIZE}, type=ef, bootable
 
-# p2: swap
-size=${SWAP_SIZE}, type=82
-
-# p3: root (rest of disk)
+# p2: root (rest of disk)
 type=83
 EOF
 
@@ -247,13 +235,13 @@ EOF
 
 # Creates a sparse image file representing the raw disk contents
 # and also partition it in the GPT format with the following layout:
-# GPT layout: 1=ESP, 2=swap, 3=root
+# GPT layout: 1=ESP, 2=root
 #
 # Uses the following global variables:
 #  - IMG: path to the target system image to be generated
 #  - IMG_SIZE: predefined size the above file will have
 #  - ESP_SIZE: the size for the EFI/ESP partition
-#  - SWAP_SIZE: the size for the swap partition
+#  - FS_LABEL: the label for the root (BTRFS) filesystem
 # The root partition will take the reminder of the space
 create_and_partition_image_gpt() {
 
@@ -263,11 +251,10 @@ create_and_partition_image_gpt() {
     truncate -s "$IMG_SIZE" "$IMG"
 
     # 2) GPT layout: 1=ESP, 2=swap, 3=root
-    echo ">> Partitioning GPT (ESP ${ESP_SIZE}, swap ${SWAP_SIZE}, root=rest)"
+    echo ">> Partitioning GPT (ESP ${ESP_SIZE}, root=rest)"
     sgdisk -Z "$IMG"
     sgdisk -n 1:0:+"$ESP_SIZE" -t 1:EF00 -c 1:"EFI System" "$IMG"
-    sgdisk -n 2:0:+"$SWAP_SIZE" -t 2:8200 -c 2:"swap" "$IMG"
-    sgdisk -n 3:0:0        -t 3:8300 -c 3:"${FS_LABEL}" "$IMG"
+    sgdisk -n 2:0:0            -t 2:8300 -c 2:"${FS_LABEL}" "$IMG"
     sgdisk -p "$IMG"
 }
 
@@ -282,10 +269,9 @@ create_and_partition_image_gpt() {
 #
 # Defines the following global variables:
 #  - LOOPDEV: the loop device reserved for mapping the IMG file
-#  - P1, P2 and P3: the device for each of the image partitions:
+#  - P1 and P2: the device for each of the image partitions:
 #    - P1: ESP/EFI
-#    - P2: swap
-#    - P3: root
+#    - P2: root
 #  - MNT: a temporary directory where the root partition is mounted
 format_and_mount_partitions() {
 
@@ -296,22 +282,19 @@ format_and_mount_partitions() {
 
     P1="${LOOPDEV}p1"
     P2="${LOOPDEV}p2"
-    P3="${LOOPDEV}p3"
 
     # Make the filesystems
     local esp_fat
     esp_fat="$(esp_fat_bits)"
     echo ">> mkfs ESP FAT${esp_fat}"
     mkfs.fat -F"${esp_fat}" -n EFI "$P1"
-    echo ">> mkswap"
-    mkswap -L swap "$P2"
     echo ">> mkfs Btrfs root"
-    mkfs.btrfs -f -L "${FS_LABEL}" "$P3"
+    mkfs.btrfs -f -L "${FS_LABEL}" "$P2"
 
-    # Mount with max zstd and sane opts
+    # Mount with max zstd and optimized write opts
     MNT="$(mktemp -d)"
     echo ">> Mounting root at $MNT"
-    mount -o defaults,compress-force=zstd:15,noatime,commit=600 "$P3" "$MNT"
+    mount -o defaults,compress-force=zstd:15,noatime,commit=600,nobarrier "$P2" "$MNT"
     mkdir -p "$MNT/boot/efi"
     mount "$P1" "$MNT/boot/efi"
 }
@@ -347,7 +330,7 @@ generate_fstab() {
     echo ">> Generating fstab with Btrfs opts (by UUID)"
     genfstab -t UUID -U "$MNT" >> "$MNT/etc/fstab"
     # Harden Btrfs mount options for root
-    sed -i 's|\(\s/\s*btrfs\s*\)\S*|\1defaults,noatime,compress=zstd:15,commit=600|' "$MNT/etc/fstab"
+    sed -i 's|\(\s/\s*btrfs\s*\)\S*|\1defaults,noatime,compress=zstd:15,commit=600,nobarrier|' "$MNT/etc/fstab"
 
     echo ">>     ... fixing any device resolution mistakes in the fstab file"
     # genfstab works badly inside AWS and GCE (at least) -- it uses the /dev/ entries instead of the UUID. The bellow fixes that
@@ -391,8 +374,8 @@ adjust_grub() {
     echo ">> Adjusting GRUB -- to boot from the partition's UUID and to log to the serial console"
     # activate ttys & uses UUID to boot (just in case...)
     sed -i 's| quiet$| console=ttyS0,115200|g' "$MNT/boot/grub/grub.cfg"
-    ROOT_UUID=`blkid | grep "$P3" | sed 's|.* \(UUID="[^"]*"\).*|\1|'` 
-    sed -i "s| root=$P3| root=$ROOT_UUID|g" "$MNT/boot/grub/grub.cfg"
+    ROOT_UUID=`blkid | grep "$P2" | sed 's|.* \(UUID="[^"]*"\).*|\1|'` 
+    sed -i "s| root=$P2| root=$ROOT_UUID|g" "$MNT/boot/grub/grub.cfg"
 }
 
 # Receive as argument the directory (with files) corresponding to the

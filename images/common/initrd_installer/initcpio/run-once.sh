@@ -3,11 +3,14 @@
 # Settings
 ARCH=`uname -m`
 IMAGE_URL="http://mutuatech.com/MutuatechLinux/images/$ARCH/mutuatechlinux-general-${ARCH}.img.xz"
-IMAGE_ROOT_PARTITION_N=3
+IMAGE_ROOT_PARTITION_N=2
 [[ -f /root/initcpio/image-install.env ]] && . /root/initcpio/image-install.env
 
 
 setup_network() {
+
+    # prepare dhcpcd directories
+    mkdir -p /var/lib/dhcpcd
 
     # wait a little bit for devices to settle
     sleep 2
@@ -19,13 +22,15 @@ setup_network() {
     # network device not found? be verbose and try several fallback methods
     if [[ ! -n "$ETH"  && ! -n "$WLAN" ]]; then
         echo  "::::::::::     COULDN'T determine the network interfaces using ifconfig. Trying to load common cloud drivers and waiting a little bit for them to settle ::::::::::"
-	modprobe xen_netfront
-        modprobe virtio_pci
-        modprobe virtio_net
-        modprobe virtio_scsi
-        modprobe ena
-        modprobe gve
-        modprobe vmxnet3
+	#modprobe xen_netfront
+        #modprobe virtio_pci
+        #modprobe virtio_net
+        #modprobe virtio_scsi
+        #modprobe virtio_ring
+        #modprobe virtio
+        #modprobe ena
+        #modprobe gve
+        #modprobe vmxnet3
 	sleep 5
 	ip link
         ETH=`ifconfig -a -s | grep '^e' | sed 's| .*||'`
@@ -78,10 +83,11 @@ setup_network() {
 	fi
 	echo "### `date`: starting network for interface ${NETDEV} -- eth is ${ETH}; wlan is ${WLAN}"
 	# get the IP
-		dhclient -pf /run/dhclient.pid -lf /run/dhclient.leases "${NETDEV}" || dhcpcd -4 -p "${NETDEV}" || continue
+	dhcpcd "${NETDEV}" || dhclient -pf /run/dhclient.pid -lf /run/dhclient.leases "${NETDEV}" || continue
 	# time set & network test
 	sleep 3
-	ping -c1 -W1 1.1.1.1 &>/dev/null && return 0 || sleep 16
+	echo 'nameserver 8.8.8.8' >/etc/resolv.conf
+	ping -c1 -W1 1.1.1.1 &>/dev/null && return 0 || { echo "### `date`: ping test to 1.1.1.1 failed:"; ping -c1 -W1 1.1.1.1; sleep 16; }
 	pkill dhclient
 	pkill dhcpcd
     done
@@ -103,7 +109,7 @@ determine_root_device() {
 	# (most probably we must set rootfs_dev to empty)
         rootfs_dev=$(findmnt -no SOURCE /new_root) ;;
       *)
-        rootfs_dev=""  # e.g. ZFS=…/ nfs:… not supported
+        rootfs_dev=""  # else not supported
     esac
 
     root_disk_dev=$(lsblk -no PATH -p -s "$rootfs_dev" | sort | head -n1)
@@ -122,7 +128,7 @@ install_image() {
     echo ":::::::::: Downloading and installing full HD image to ${root_disk_dev} ::::::::::" &&
 
     wget -O - -c "${IMAGE_URL}" |
-      xz -T1 -dc |
+      xz -T0 -dc |
       dd of=${root_disk_dev} bs=$((64*1024*1024)) status=progress &&
 
     echo ":::::::::: Growing the rootfs partition to take all the remaining device space in ${root_disk_dev} ::::::::::" &&

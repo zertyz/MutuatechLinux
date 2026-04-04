@@ -5,6 +5,6 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 IMG="${IMG:-artifacts/mutuatechlinux-general-cachyos-x86_64_v3.img}" \
-TARGET_ARCH="${TARGET_ARCH:-x86_64_v3}" \
-XZ_LEVEL="${XZ_LEVEL:-1}" \
+TARGET_ARCH="${TARGET_ARCH:-x86_64}" \
+XZ_LEVEL="${XZ_LEVEL:-9e}" \
 ../common/publish_image

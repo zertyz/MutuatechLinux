@@ -7,7 +7,6 @@ INITRD_SCRIPTS="${INITRD_SCRIPTS:-./initcpio}"
 ARTIFACTS="${ARTIFACTS:-./artifacts}"
 TARGET_ARCH="${TARGET_ARCH:-x86_64}"
 IMAGE_URL="${IMAGE_URL:-}"
-IMAGE_ROOT_PARTITION_N="${IMAGE_ROOT_PARTITION_N:-3}"
 PUBLISH_INITRD_HINT="${PUBLISH_INITRD_HINT:-}"
 
 # ---- VM vars
@@ -46,9 +45,9 @@ echo ">> Attaching image"
 LOOPDEV="$(losetup --find --show -P "$IMG")"
 partprobe "$LOOPDEV"
 P1="${LOOPDEV}p1"   # ESP
-P3="${LOOPDEV}p3"   # root (btrfs)
+P2="${LOOPDEV}p2"   # root (btrfs)
 
-mount -o compress-force=zstd:15,noatime "$P3" "$MNT"
+mount -o compress-force=zstd:15,noatime,commit=600,nobarrier "$P2" "$MNT"
 mkdir -p "$MNT/boot/efi"
 mount "$P1" "$MNT/boot/efi"
 
@@ -58,7 +57,6 @@ cp -a "${INITRD_SCRIPTS}"/ "$MNT/root/"
 cp -a "${INITRD_SCRIPTS}"/{hooks,install} "$MNT/etc/initcpio/"
 cat >"$MNT/root/initcpio/image-install.env" <<EOF
 IMAGE_URL='${IMAGE_URL}'
-IMAGE_ROOT_PARTITION_N='${IMAGE_ROOT_PARTITION_N}'
 EOF
 
 # Build our initramfs installer

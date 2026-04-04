@@ -9,7 +9,6 @@ mkdir -p artifacts
 IMG="${IMG:-artifacts/mutuatechlinux-general-cachyos-x86_64_v3.img}"
 IMG_SIZE="${IMG_SIZE:-4G}"
 ESP_SIZE="${ESP_SIZE:-4MiB}"
-SWAP_SIZE="${SWAP_SIZE:-1GiB}"
 HOST_AUTH_KEYS="${HOST_AUTH_KEYS:-$HOME/.ssh/authorized_keys}"  # copied to root
 FS_LABEL="${FS_LABEL:-mtl_root}"
 TARGET_ARCH="${TARGET_ARCH:-x86_64_v3}"
@@ -17,7 +16,7 @@ ROOT_PW="${ROOT_PW:-mutuatechlinux}"  # optional; if empty, root password stays 
 DEF_USER="${DEF_USER:-}"              # e.g. 'arch'
 DEF_USER_PW="${DEF_USER_PW:-}"        # optional
 
-BASE_PKGS=(base base-devel cachyos-keyring cachyos-mirrorlist cachyos-v3-mirrorlist linux-cachyos linux-firmware intel-ucode amd-ucode btrfs-progs compsize jemalloc gptfdisk parted qemu-system-x86-firmware mkinitcpio-nfs-utils cloud-guest-utils wget grub efibootmgr net-tools dhclient openssh openbsd-netcat less vim sudo rust dosfstools arch-install-scripts)
+BASE_PKGS=(base base-devel cachyos-keyring cachyos-mirrorlist cachyos-v3-mirrorlist linux-cachyos linux-firmware intel-ucode amd-ucode btrfs-progs compsize jemalloc gptfdisk parted qemu-system-x86-firmware mkinitcpio-nfs-utils cloud-guest-utils wget grub efibootmgr net-tools dhclient dhcpcd openssh openbsd-netcat less vim sudo rust dosfstools arch-install-scripts)
 ONLINE_PACKAGES=()
 CUSTOM_CACHE_BASE_URL="http://mutuatech.com/MutuatechLinux/cache/x86_64"
 CUSTOM_CACHE_PACKAGE_FILES=(

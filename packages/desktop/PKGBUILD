@@ -253,7 +253,7 @@ l3afpad
 mupdf
 hyprland xdg-desktop-portal-hyprland waybar foot network-manager-applet thunar wpaperd slurp mako wofi nwg-drawer grim nwg-launchers swaylock swayidle
 # also don´t  forget to apply the following for all users: ~common/{config/{hypr,waybar},local/bin}
-# additionally: manually copy some files of garuda-hyprland-settings -- /usr/share/* -- and its dependencies: ttf-fira-code gtk-engine-murrine qt5ct
+# additionally: manually copy files from garuda-hyprland-settings -- /usr/share/* -- and its font dependencies: ttf-fira-code ttf-firacode-nerd
 
 # development
 #############
