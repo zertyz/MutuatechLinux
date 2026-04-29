@@ -7,7 +7,7 @@ build() {
     map add_file "/etc/wpa_supplicant/wpa_supplicant.conf" "/etc/resolv.conf" "/root/initcpio/run-once.sh"
     [[ -f /root/initcpio/image-install.env ]] && add_file /root/initcpio/image-install.env
 
-    map add_binary /usr/bin/{bash,btrfs,uname,date,ifconfig,ethtool,dhclient*,dhcpcd,ip,lsmod,chown,wpa_supplicant,pkill,wget,dd,xz,grep,sed,blkid,readlink,findmnt,lsblk,sort,head,growpart,sfdisk,sgdisk,flock,partprobe,mktemp,rmdir,mount,umount,reboot,ping,udevadm}
+    map add_binary /usr/bin/{bash,btrfs,uname,date,ifconfig,ethtool,dhclient*,dhcpcd,ip,lsmod,chown,wpa_supplicant,pkill,wget,dd,xz,grep,sed,blkid,readlink,findmnt,lsblk,sort,head,growpart,sfdisk,sgdisk,parted,mkswap,flock,partprobe,mktemp,rmdir,mount,umount,reboot,ping,udevadm}
     map add_binary /usr/bin/modprobe
     map add_binary /usr/lib/initcpio/ipconfig
     map add_binary /usr/lib/dhcpcd/dhcpcd-run-hooks /etc/dhcpcd.conf

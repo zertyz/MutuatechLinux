@@ -4,6 +4,7 @@
 ARCH=`uname -m`
 IMAGE_URL="http://mutuatech.com/MutuatechLinux/images/$ARCH/mutuatechlinux-general-${ARCH}.img.xz"
 IMAGE_ROOT_PARTITION_N=2
+IMAGE_SWAP_PARTITION_N=3
 [[ -f /root/initcpio/image-install.env ]] && . /root/initcpio/image-install.env
 
 
@@ -121,6 +122,84 @@ determine_root_device() {
     }
 }
 
+partition_device() {
+    local disk_dev="$1"
+    local partition_n="$2"
+
+    if [[ $disk_dev =~ [0-9]$ ]]; then
+        echo "${disk_dev}p${partition_n}"
+    else
+        echo "${disk_dev}${partition_n}"
+    fi
+}
+
+wait_for_block_device() {
+    local block_dev="$1"
+
+    for i in {1..10}; do
+        [[ -b "$block_dev" ]] && return 0
+        sleep 1
+    done
+    return 1
+}
+
+move_swap_partition_to_disk_end() {
+    local swap_fs_dev swap_type swap_size_bytes swap_size_mib swap_uuid pttype
+    local -a mkswap_args
+
+    swap_fs_dev="$(partition_device "$root_disk_dev" "$IMAGE_SWAP_PARTITION_N")"
+    [[ -b "$swap_fs_dev" ]] || return 0
+
+    swap_type="$(blkid -s TYPE -o value "$swap_fs_dev" 2>/dev/null || true)"
+    [[ "$swap_type" == swap ]] || return 0
+
+    swap_size_bytes="$(lsblk -bno SIZE "$swap_fs_dev" | head -n1)"
+    [[ "$swap_size_bytes" =~ ^[0-9]+$ ]] || {
+        echo ":::::::::: FAILED at determining the swap partition size for '${swap_fs_dev}' ::::::::::"
+        return 1
+    }
+    swap_size_mib=$(( (swap_size_bytes + 1024 * 1024 - 1) / (1024 * 1024) ))
+    swap_uuid="$(blkid -s UUID -o value "$swap_fs_dev" 2>/dev/null || true)"
+    pttype="$(blkid -s PTTYPE -o value "$root_disk_dev" 2>/dev/null || true)"
+
+    echo ":::::::::: Recreating swap partition ${swap_fs_dev} at the end of ${root_disk_dev} ::::::::::"
+    case "$pttype" in
+        gpt)
+            sgdisk -e "$root_disk_dev" &&
+            sgdisk -d "$IMAGE_SWAP_PARTITION_N" "$root_disk_dev" &&
+            sgdisk \
+                -n "${IMAGE_SWAP_PARTITION_N}:-${swap_size_mib}M:0" \
+                -t "${IMAGE_SWAP_PARTITION_N}:8200" \
+                -c "${IMAGE_SWAP_PARTITION_N}:swap" \
+                "$root_disk_dev" || return 1
+            ;;
+        dos)
+            parted -s -a optimal -- "$root_disk_dev" \
+                rm "$IMAGE_SWAP_PARTITION_N" \
+                mkpart primary linux-swap "-${swap_size_mib}MiB" 100% || return 1
+            ;;
+        *)
+            echo ":::::::::: FAILED because partition table type '${pttype}' is unsupported for swap recreation ::::::::::"
+            return 1
+            ;;
+    esac
+
+    echo "::::::::::     refreshing the kernel's partition table ::::::::::" &&
+    partprobe "$root_disk_dev" &&
+    udevadm settle || return 1
+
+    wait_for_block_device "$swap_fs_dev" || {
+        echo ":::::::::: FAILED at accessing the swap partition device at '${swap_fs_dev}' after recreating it ::::::::::"
+        return 1
+    }
+
+    mkswap_args=(-L swap)
+    [[ -n "$swap_uuid" ]] && mkswap_args+=(-U "$swap_uuid")
+
+    echo ":::::::::: Reinitializing swap partition ${swap_fs_dev} ::::::::::" &&
+    mkswap "${mkswap_args[@]}" "$swap_fs_dev"
+}
+
 install_image() {
 
     determine_root_device &&
@@ -131,21 +210,22 @@ install_image() {
       xz -T0 -dc |
       dd of=${root_disk_dev} bs=$((64*1024*1024)) status=progress &&
 
-    echo ":::::::::: Growing the rootfs partition to take all the remaining device space in ${root_disk_dev} ::::::::::" &&
+    echo "::::::::::     refreshing the kernel's partition table after writing the image ::::::::::" &&
+    partprobe "$root_disk_dev" &&
+    udevadm settle &&
+
+    move_swap_partition_to_disk_end || return 1
+
+    echo ":::::::::: Growing the rootfs partition in ${root_disk_dev} ::::::::::" &&
     growpart "$root_disk_dev" ${IMAGE_ROOT_PARTITION_N} &&
     echo "::::::::::     refreshing the kernel's partition table ::::::::::" &&
     partprobe "$root_disk_dev" &&
     udevadm settle || return 1
 
     # determine the device for the root partition
-    if [[ $root_disk_dev =~ [0-9]$ ]]; then
-        root_fs_dev="${root_disk_dev}p${IMAGE_ROOT_PARTITION_N}"
-    else
-        root_fs_dev="${root_disk_dev}${IMAGE_ROOT_PARTITION_N}"
-    fi
+    root_fs_dev="$(partition_device "$root_disk_dev" "$IMAGE_ROOT_PARTITION_N")"
     # wait a bit for the device to appear
-    for i in {1..10}; do [[ -b "$root_fs_dev" ]] && break; sleep 1; done
-    [[ -b "$root_fs_dev" ]] || {
+    wait_for_block_device "$root_fs_dev" || {
 	echo ":::::::::: FAILED at accessing the root partition device at '${root_fs_dev}'. The root disk device was '${root_disk_dev}' ::::::::::"
         return 1
     }

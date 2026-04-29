@@ -45,6 +45,8 @@ The usual entrypoints are:
 
 The test wrappers build a disposable copy of the already generated disk image, replace the boot kernel and initramfs in that copy with the installer artifacts while preserving the target boot file names, optionally wipe everything except `/boot`, and then launch the existing QEMU test script for that image flavor.
 
+When the source image has a swap partition, it is p3 at the end of the image. During installation the initrd recreates that empty swap partition at the end of the target disk, preserves its UUID, and grows p2 to fill the space before it. Images built with `SWAP_SIZE=0` or `SWAP_SIZE=0GiB` have no swap partition, so the installer grows p2 to the end of the disk.
+
 The current wrappers are:
 
 - `../../x86_64/initrd_installer/test_archlinux_x86_64_initrd_installer`

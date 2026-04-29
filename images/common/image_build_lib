@@ -132,6 +132,21 @@ esp_fat_bits() {
     fi
 }
 
+esp_end_mib() {
+    echo "$(( $(esp_size_to_mib "$ESP_SIZE") + 1 ))MiB"
+}
+
+swap_enabled() {
+    local size="${SWAP_SIZE:-0}"
+    size="${size//[[:space:]]/}"
+    case "$size" in
+        0|0B|0K|0KiB|0M|0MiB|0G|0GiB)
+            return 1
+            ;;
+    esac
+    return 0
+}
+
 preflight_emulated_aarch64_build() {
     require_commands qemu-aarch64-static
     [[ -e /proc/sys/fs/binfmt_misc/qemu-aarch64 ]] || {
@@ -205,44 +220,56 @@ trap cleanup EXIT
 
 # Creates a sparse image file representing the raw disk contents
 # and also partition it in the DOS/MBR format with the following layout:
-# MBR/DOS layout: 1=ESP, 2=root
+# MBR/DOS layout: 1=ESP, 2=root, 3=swap (optional, at end)
 #
 # Uses the following global variables:
 #  - IMG: path to the target system image to be generated
 #  - IMG_SIZE: predefined size the above file will have
 #  - ESP_SIZE: the size for the EFI/ESP partition
-# The root partition will take the reminder of the space
+#  - SWAP_SIZE: the size for the swap partition, or 0/0GiB to disable swap
+# The root partition will take the remaining space between ESP and swap.
 create_and_partition_image_dos_mbr() {
+    local esp_end
 
     echo ">> Creating image file: $IMG ($IMG_SIZE)"
     >"$IMG"
     chattr +Cm "$IMG" || :         # if host is on BTRFS, do not compress nor COW the image
     truncate -s "$IMG_SIZE" "$IMG"
 
-    # 2) MBR/DOS layout: 1=ESP, 2=swap, 3=root
-    echo ">> Partitioning MBR/DOS (ESP ${ESP_SIZE}, root=rest)"
-    sfdisk "$IMG" <<EOF
-label: dos
-
-# p1: ESP (FAT), bootable
-start=1MiB, size=${ESP_SIZE}, type=ef, bootable
-
-# p2: root (rest of disk)
-type=83
-EOF
+    esp_end="$(esp_end_mib)"
+    if swap_enabled; then
+        echo ">> Partitioning MBR/DOS (ESP ${ESP_SIZE}, root=rest, swap ${SWAP_SIZE} at end)"
+        parted -s -a optimal -- "$IMG" \
+            mklabel msdos \
+            mkpart primary fat32 1MiB "$esp_end" \
+            set 1 boot on \
+            type 1 ef \
+            mkpart primary btrfs "$esp_end" "-${SWAP_SIZE}" \
+            mkpart primary linux-swap "-${SWAP_SIZE}" 100%
+    else
+        echo ">> Partitioning MBR/DOS (ESP ${ESP_SIZE}, root=rest, no swap)"
+        parted -s -a optimal -- "$IMG" \
+            mklabel msdos \
+            mkpart primary fat32 1MiB "$esp_end" \
+            set 1 boot on \
+            type 1 ef \
+            mkpart primary btrfs "$esp_end" 100%
+    fi
+    parted -s "$IMG" print
 
 }
 
 # Creates a sparse image file representing the raw disk contents
 # and also partition it in the GPT format with the following layout:
-# GPT layout: 1=ESP, 2=root
+# GPT layout: 1=ESP, 2=root, 3=swap (optional, at end)
 #
 # Uses the following global variables:
 #  - IMG: path to the target system image to be generated
 #  - IMG_SIZE: predefined size the above file will have
 #  - ESP_SIZE: the size for the EFI/ESP partition
 #  - FS_LABEL: the label for the root (BTRFS) filesystem
-# The root partition will take the reminder of the space
+#  - SWAP_SIZE: the size for the swap partition, or 0/0GiB to disable swap
+# The root partition will take the remaining space between ESP and swap.
 create_and_partition_image_gpt() {
 
     echo ">> Creating image file: $IMG ($IMG_SIZE)"
@@ -250,11 +277,17 @@ create_and_partition_image_gpt() {
     chattr +Cm "$IMG" || :         # if host is on BTRFS, do not compress nor COW the image
     truncate -s "$IMG_SIZE" "$IMG"
 
-    # 2) GPT layout: 1=ESP, 2=swap, 3=root
-    echo ">> Partitioning GPT (ESP ${ESP_SIZE}, root=rest)"
     sgdisk -Z "$IMG"
-    sgdisk -n 1:0:+"$ESP_SIZE" -t 1:EF00 -c 1:"EFI System" "$IMG"
-    sgdisk -n 2:0:0            -t 2:8300 -c 2:"${FS_LABEL}" "$IMG"
+    if swap_enabled; then
+        echo ">> Partitioning GPT (ESP ${ESP_SIZE}, root=rest, swap ${SWAP_SIZE} at end)"
+        sgdisk -n 1:0:+"$ESP_SIZE" -t 1:EF00 -c 1:"EFI System" "$IMG"
+        sgdisk -n "3:-${SWAP_SIZE}:0" -t 3:8200 -c 3:"swap" "$IMG"
+        sgdisk -n 2:0:0 -t 2:8300 -c 2:"${FS_LABEL}" "$IMG"
+    else
+        echo ">> Partitioning GPT (ESP ${ESP_SIZE}, root=rest, no swap)"
+        sgdisk -n 1:0:+"$ESP_SIZE" -t 1:EF00 -c 1:"EFI System" "$IMG"
+        sgdisk -n 2:0:0 -t 2:8300 -c 2:"${FS_LABEL}" "$IMG"
+    fi
     sgdisk -p "$IMG"
 }
 
@@ -269,9 +302,10 @@ create_and_partition_image_gpt() {
 #
 # Defines the following global variables:
 #  - LOOPDEV: the loop device reserved for mapping the IMG file
-#  - P1 and P2: the device for each of the image partitions:
+#  - P1, P2 and P3: the device for each of the image partitions:
 #    - P1: ESP/EFI
 #    - P2: root
+#    - P3: swap (optional)
 #  - MNT: a temporary directory where the root partition is mounted
 format_and_mount_partitions() {
 
@@ -282,12 +316,17 @@ format_and_mount_partitions() {
 
     P1="${LOOPDEV}p1"
     P2="${LOOPDEV}p2"
+    P3="${LOOPDEV}p3"
 
     # Make the filesystems
     local esp_fat
     esp_fat="$(esp_fat_bits)"
     echo ">> mkfs ESP FAT${esp_fat}"
     mkfs.fat -F"${esp_fat}" -n EFI "$P1"
+    if swap_enabled; then
+        echo ">> mkswap"
+        mkswap -L swap "$P3"
+    fi
     echo ">> mkfs Btrfs root"
     mkfs.btrfs -f -L "${FS_LABEL}" "$P2"
 
@@ -329,6 +368,11 @@ generate_fstab() {
 
     echo ">> Generating fstab with Btrfs opts (by UUID)"
     genfstab -t UUID -U "$MNT" >> "$MNT/etc/fstab"
+    if swap_enabled; then
+        local swap_uuid
+        swap_uuid="$(blkid -s UUID -o value "$P3")"
+        printf 'UUID=%s none swap defaults 0 0\n' "$swap_uuid" >> "$MNT/etc/fstab"
+    fi
     # Harden Btrfs mount options for root
     sed -i 's|\(\s/\s*btrfs\s*\)\S*|\1defaults,noatime,compress=zstd:15,commit=600,nobarrier|' "$MNT/etc/fstab"
 

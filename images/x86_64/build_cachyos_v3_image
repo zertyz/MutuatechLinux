@@ -9,6 +9,7 @@ mkdir -p artifacts
 IMG="${IMG:-artifacts/mutuatechlinux-general-cachyos-x86_64_v3.img}"
 IMG_SIZE="${IMG_SIZE:-4G}"
 ESP_SIZE="${ESP_SIZE:-4MiB}"
+SWAP_SIZE="${SWAP_SIZE:-1GiB}"
 HOST_AUTH_KEYS="${HOST_AUTH_KEYS:-$HOME/.ssh/authorized_keys}"  # copied to root
 FS_LABEL="${FS_LABEL:-mtl_root}"
 TARGET_ARCH="${TARGET_ARCH:-x86_64_v3}"

@@ -3,7 +3,7 @@ set -euo pipefail
 
 . ../common/image_build_lib
 
-require_commands sgdisk sfdisk losetup mkfs.fat mkswap mkfs.btrfs pacstrap arch-chroot genfstab grub-install grub-mkconfig partprobe
+require_commands sgdisk sfdisk parted losetup mkfs.fat mkswap mkfs.btrfs pacstrap arch-chroot genfstab grub-install grub-mkconfig partprobe
 
 if [[ -n "${PRE_FLIGHT_FN:-}" ]]; then
     "$PRE_FLIGHT_FN"
