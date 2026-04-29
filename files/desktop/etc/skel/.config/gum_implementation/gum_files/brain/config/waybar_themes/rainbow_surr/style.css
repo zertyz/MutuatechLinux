@@ -1,0 +1,110 @@
+* {
+  transition: none;
+  box-shadow: none;
+  font-family: JetBrainsMono;
+  font-size: 15px;
+  color: #FFFFFF;
+}
+
+/* Waybar container + rainbow border */
+#waybar {
+  margin-top: 14px;
+  background: rgba(0,0,0,0.65);
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)),
+    linear-gradient(90deg,
+      #ff5a5a, #ff9f43, #f1fa8c, #50fa7b,
+      #8be9fd, #6272a4, #bd93f9, #ff79c6, #ff5a5a);
+  background-origin: padding-box, border-box;
+}
+
+/* workspace buttons */
+#workspaces { margin: 0 3px; color: transparent; }
+#workspaces button { margin: 3px 0; padding: 0 4px; }
+
+#workspaces button.active {
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.50), rgba(0,0,0,0.30));
+  background-origin: padding-box, border-box;
+  color: #FFFFFF;
+}
+
+#workspaces button.urgent {
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.50), rgba(0,0,0,0.30));
+  background-origin: padding-box, border-box;
+}
+#workspaces button.urgent * {
+  color: rgba(255,80,80,0.95);
+}
+
+/* tray */
+#tray {
+  margin: 3px 2px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.50), rgba(0,0,0,0.30));
+  background-origin: padding-box, border-box;
+}
+#tray * {
+  padding: 0 6px;
+  border-left: 1px solid rgba(0,0,0,0.45);
+}
+#tray *:first-child {
+  border-left: none;
+}
+
+/* modules/chips */
+#mode, #battery, #cpu, #disk, #memory, #network, #pulseaudio, #idle_inhibitor,
+#backlight, #custom-updates, #custom-keyboard-layout, #custom-network_traffic,
+#mpd, #clock, #temperature {
+  margin: 4px 2px;
+  padding: 0 6px;
+  min-width: 10px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.50), rgba(0,0,0,0.30));
+  background-origin: padding-box, border-box;
+}
+
+/* launcher + power */
+#custom-launcher, #custom-power {
+  margin: 4px 5px;
+  padding: 0 6px;
+  min-width: 15px;
+  border-radius: 10px;
+  color: #FFFFFF;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.50), rgba(0,0,0,0.30));
+  background-origin: padding-box, border-box;
+}
+
+#mpd * {
+  min-width: 10px;
+  font-size: 11px;
+  font-family: JetBrainsMono;
+}
+
+#clock {
+  margin: 4px 2px;
+}
+
+#temperature.critical {
+  color: #800020;
+}
+#waybar{ box-shadow: 0 0 12px 0 rgba(189,147,249,0.25), 0 0 18px 0 rgba(255,121,198,0.18); }

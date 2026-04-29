@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-desktop
-pkgver=1.1.45
+pkgver=1.1.47
 pkgrel=1
 pkgdesc="Desktop part of the MutuaTech Linux packages"
 arch=('x86_64')
@@ -53,7 +53,7 @@ ethtool
 net-tools
 nfs-utils
 
-# general programming tools
+# general programming-related tools
 base-devel
 android-tools
 gnuplot
@@ -113,7 +113,6 @@ radeontop
 #displaylink
 #nvidia-dkms
 #nvidia-settings
-#garuda-optimus-manager-config
 
 printer-support
 epsonscan2
@@ -134,6 +133,7 @@ zenity
 dialog
 
 # comms
+slack-desktop-wayland
 hamsket
 zoom
 kazam
@@ -147,7 +147,7 @@ speedcrunch
 calibre
 flameshot
 geeqie
-czkawka-gui dupeguru
+krokiet dupeguru
 
 # sys admin
 gkrellm
@@ -183,6 +183,7 @@ gimp
 inkscape
 scribus
 #fotoxx		# no longer available in the repos -- 2024-07-29
+digikam
 krita
 blender
 rawtherapee
@@ -224,6 +225,7 @@ ttf-funfonts
 noto-fonts
 noto-fonts-cjk
 noto-fonts-emoji
+nerd-fonts
 
 # games
 0ad
@@ -235,7 +237,7 @@ supertux
 supertuxkart
 hedgewars
 teeworlds
-pioneer-bin
+pioneer
 sdlpop
 minetest
 gnuchess
@@ -251,9 +253,7 @@ unigine-heaven unigine-sanctuary unigine-superposition unigine-tropics unigine-v
 jwm
 l3afpad
 mupdf
-hyprland xdg-desktop-portal-hyprland waybar foot network-manager-applet thunar wpaperd slurp mako wofi nwg-drawer grim nwg-launchers swaylock swayidle
-# also don´t  forget to apply the following for all users: ~common/{config/{hypr,waybar},local/bin}
-# additionally: manually copy files from garuda-hyprland-settings -- /usr/share/* -- and its font dependencies: ttf-fira-code ttf-firacode-nerd
+hyprland xdg-desktop-portal-hyprland waybar foot network-manager-applet thunar wpaperd slurp mako wofi nwg-drawer grim nwg-launchers swaylock swayidle ttf-fira-code ttf-firacode-nerd ttf-jetbrains-mono
 
 # development
 #############
@@ -296,7 +296,7 @@ electron
 sublime-text-4
 qtcreator
 geany
-rstudio-desktop-bin
+rstudio-desktop
 code  # visual-studio-code-bin
 modelio-bin
 xxdiff diffuse

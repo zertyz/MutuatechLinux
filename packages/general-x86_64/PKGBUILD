@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-general-x86_64
-pkgver=1.1.45
+pkgver=1.1.47
 pkgrel=1
 pkgdesc="Generic part (shared between 'server' and 'desktop') of the MutuaTech Linux packages -- with specific dependencies for x86_64"
 arch=('x86_64')
@@ -27,6 +27,9 @@ memtest86+
 
 # data management
 rar
+
+# GPU
+# intel-gpu-tools
 
 # OpenCL / Vulkan
 # intel-opencl-sdk intel-compute-runtime

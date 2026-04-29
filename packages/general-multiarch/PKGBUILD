@@ -1,5 +1,5 @@
 pkgname=mutuatechlinux-general-multiarch
-pkgver=1.1.45
+pkgver=1.1.47
 pkgrel=1
 pkgdesc="Generic part (shared between 'server' and 'desktop') of the MutuaTech Linux packages -- with dependencies that support multi-architecture"
 arch=('x86_64' 'aarch64')

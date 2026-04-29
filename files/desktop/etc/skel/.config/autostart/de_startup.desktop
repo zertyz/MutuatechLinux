@@ -1,0 +1,5 @@
+[Desktop Entry]
+Terminal=false
+Type=Application
+Name=User Desktop Environment Startup
+Exec=$HOME/.local/bin/de_startup
