@@ -7,9 +7,18 @@ pacman-key --populate archlinuxarm &&
 ln -sf /usr/share/zoneinfo/UTC /etc/localtime
 
 # locale
-sed -i 's/^#\(en_US\.UTF-8 UTF-8\)/\1/' /etc/locale.gen
+cat >/etc/locale.gen <<'EOF'
+en_US.UTF-8 UTF-8
+EOF
 locale-gen
-echo 'LANG=en_US.UTF-8' > /etc/locale.conf
+cat >/etc/locale.conf <<'EOF'
+LANG=en_US.UTF-8
+EOF
+
+# console
+cat >/etc/vconsole.conf <<'EOF'
+KEYMAP=us
+EOF
 
 # hostname
 echo 'mutuatechlinux' > /etc/hostname
@@ -29,21 +38,70 @@ NET
 systemctl enable systemd-networkd systemd-resolved sshd
 systemctl mask tmp.mount
 
-# further fstab tunning
-swap_UUID=`blkid | grep 'LABEL="swap"' | grep loop | tail -n 1 | sed 's|.* UUID="\([^"]*\)".*|\1|'`
-sed -i "s|^[^ ]*\( *.*swap.*\)|UUID=$swap_UUID\1|" /etc/fstab
+build_shipping_initramfs() {
+    local preset_path preset_name default_image fallback_image tmp_preset
+    local mkinitcpio_config mkinitcpio_kver
 
-# reinstall the kernel -- fixes bad initramdisk generated in the bootstrap phase
-# (the need for this might be due to a bug. Recheck in the future)
-sed -i 's|^#\(.*\.br/.*\)|\1|' /etc/pacman.d/mirrorlist
-yes | pacman -S --noconfirm linux-aarch64
-rm -fr /var/cache/pacman/pkg/*
+    preset_path="/etc/mkinitcpio.d/${KERNEL_PKG}.preset"
+    if [[ ! -f "$preset_path" ]]; then
+        preset_path="$(find /etc/mkinitcpio.d -maxdepth 1 -name '*.preset' | head -n 1)"
+    fi
+    [[ -n "${preset_path:-}" ]] && [[ -f "$preset_path" ]] || {
+        echo "Missing mkinitcpio preset for ${KERNEL_PKG}" >&2
+        exit 1
+    }
+    preset_name="$(basename "$preset_path" .preset)"
+
+    mkinitcpio -p "$preset_name"
+
+    default_image="/boot/initramfs-${INITRAMFS_PREFIX}.img"
+    fallback_image="/boot/initramfs-${INITRAMFS_PREFIX}-fallback.img"
+    if [[ ! -e "$fallback_image" ]]; then
+        unset ALL_config ALL_kver
+        # shellcheck disable=SC1090
+        . "$preset_path"
+        mkinitcpio_config="${ALL_config:-/etc/mkinitcpio.conf}"
+        mkinitcpio_kver="${ALL_kver:-}"
+        tmp_preset="$(mktemp "/etc/mkinitcpio.d/${preset_name}.compat-fallback.XXXXXX.preset")"
+        printf 'ALL_config=%q\n' "$mkinitcpio_config" >"$tmp_preset"
+        if [[ -n "$mkinitcpio_kver" ]]; then
+            printf 'ALL_kver=%q\n' "$mkinitcpio_kver" >>"$tmp_preset"
+        fi
+        printf "PRESETS=('fallback')\n" >>"$tmp_preset"
+        printf 'fallback_image=%q\n' "$fallback_image" >>"$tmp_preset"
+        printf 'fallback_options=%q\n' '-S autodetect' >>"$tmp_preset"
+        if ! mkinitcpio -p "$(basename "$tmp_preset" .preset)"; then
+            rm -f "$tmp_preset"
+            exit 1
+        fi
+        rm -f "$tmp_preset"
+    fi
+
+    mv "$fallback_image" "$default_image"
+}
+
+# further fstab tunning
+swap_DEV=`blkid -t LABEL=swap -o device | grep loop | tail -n 1 || true`
+if [[ -n "$swap_DEV" ]]; then
+    swap_UUID=`blkid -s UUID -o value "$swap_DEV"`
+    sed -i "s|^[^ ]*\( *.*swap.*\)|UUID=$swap_UUID\1|" /etc/fstab
+fi
+
+# regenerate the initramfs after the bootstrap phase
+KERNEL_PKG="${KERNEL_PKG:-linux-aarch64}"
+INITRAMFS_PREFIX="${INITRAMFS_PREFIX:-linux}"
+build_shipping_initramfs
 
 # safely boot everywhere
-mv /boot/initramfs-linux-fallback.img /boot/initramfs-linux.img
 
 # GRUB (UEFI + MBR)
 grub-install --target=arm64-efi --efi-directory=/boot/efi --bootloader-id=MutuatechLinux --recheck --no-nvram --removable
 # Fix the archlinux arm kernel naming
 ln -sf /boot/Image /boot/vmlinuz-linux
+# Keep GRUB on the serial/text console and avoid probing missing EFI video modules.
+if grep -q '^#\?GRUB_TERMINAL_OUTPUT=' /etc/default/grub; then
+    sed -i 's/^#\?GRUB_TERMINAL_OUTPUT=.*/GRUB_TERMINAL_OUTPUT=console/' /etc/default/grub
+else
+    echo 'GRUB_TERMINAL_OUTPUT=console' >> /etc/default/grub
+fi
 grub-mkconfig -o /boot/grub/grub.cfg

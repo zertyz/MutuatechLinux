@@ -1,0 +1,15 @@
+#! /bin/bash
+set -euo pipefail
+
+IMG="${IMG:-}"
+TARGET_ARCH="${TARGET_ARCH:-}"
+REMOTE_HOST="${REMOTE_HOST:-mutuatec@mutuatech.com}"
+REMOTE_BASE_DIR="${REMOTE_BASE_DIR:-~/public_html/MutuatechLinux}"
+XZ_LEVEL="${XZ_LEVEL:-1}"
+
+[[ -n "$IMG" ]] || { echo "Missing IMG" >&2; exit 1; }
+[[ -n "$TARGET_ARCH" ]] || { echo "Missing TARGET_ARCH" >&2; exit 1; }
+[[ -f "$IMG" ]] || { echo "Missing image: $IMG" >&2; exit 1; }
+
+xz -T1 -"${XZ_LEVEL}"kv "$IMG"
+scp -pr "${IMG}.xz" "${REMOTE_HOST}:${REMOTE_BASE_DIR}/images/${TARGET_ARCH}/"

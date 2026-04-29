@@ -1,0 +1,21 @@
+#! /bin/bash
+set -euo pipefail
+
+ARTIFACTS="${ARTIFACTS:-}"
+TARGET_ARCH="${TARGET_ARCH:-}"
+KERNEL_BASENAME="${KERNEL_BASENAME:-}"
+INITRAMFS_BASENAME="${INITRAMFS_BASENAME:-}"
+REMOTE_HOST="${REMOTE_HOST:-mutuatec@mutuatech.com}"
+REMOTE_BASE_DIR="${REMOTE_BASE_DIR:-~/public_html/MutuatechLinux}"
+XZ_LEVEL="${XZ_LEVEL:-9}"
+
+[[ -n "$ARTIFACTS" ]] || { echo "Missing ARTIFACTS" >&2; exit 1; }
+[[ -n "$TARGET_ARCH" ]] || { echo "Missing TARGET_ARCH" >&2; exit 1; }
+[[ -n "$KERNEL_BASENAME" ]] || { echo "Missing KERNEL_BASENAME" >&2; exit 1; }
+[[ -n "$INITRAMFS_BASENAME" ]] || { echo "Missing INITRAMFS_BASENAME" >&2; exit 1; }
+[[ -f "${ARTIFACTS}/${KERNEL_BASENAME}" ]] || { echo "Missing kernel artifact: ${ARTIFACTS}/${KERNEL_BASENAME}" >&2; exit 1; }
+[[ -f "${ARTIFACTS}/${INITRAMFS_BASENAME}" ]] || { echo "Missing initramfs artifact: ${ARTIFACTS}/${INITRAMFS_BASENAME}" >&2; exit 1; }
+
+rm -f "${ARTIFACTS}/${KERNEL_BASENAME}.xz" "${ARTIFACTS}/${INITRAMFS_BASENAME}.xz"
+xz -T1 -"${XZ_LEVEL}"kv "${ARTIFACTS}/${KERNEL_BASENAME}" "${ARTIFACTS}/${INITRAMFS_BASENAME}"
+scp -pr "${ARTIFACTS}"/*.xz "${REMOTE_HOST}:${REMOTE_BASE_DIR}/initrd_installers/${TARGET_ARCH}/"

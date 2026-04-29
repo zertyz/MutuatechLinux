@@ -1,0 +1,10 @@
+#! /bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+IMG="${IMG:-artifacts/mutuatechlinux-general-x86_64.img}" \
+TARGET_ARCH="${TARGET_ARCH:-x86_64}" \
+XZ_LEVEL="${XZ_LEVEL:-1}" \
+../common/publish_image

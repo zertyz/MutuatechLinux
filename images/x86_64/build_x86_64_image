@@ -1,45 +1,5 @@
 #! /bin/bash
 set -euo pipefail
 
-# --- Default Settings ---
-mkdir -p artifacts
-IMG="${IMG:-artifacts/mutuatechlinux-general-x86_64.img}"
-IMG_SIZE="${IMG_SIZE:-4G}"
-ESP_SIZE="${ESP_SIZE:-4MiB}"
-SWAP_SIZE="${SWAP_SIZE:-1GiB}"
-HOST_AUTH_KEYS="${HOST_AUTH_KEYS:-$HOME/.ssh/authorized_keys}"  # copied to root
-FS_LABEL="${FS_LABEL:-mtl_root}"
-ROOT_PW="${ROOT_PW:-mutuatechlinux}"  # optional; if empty, root password stays locked
-DEF_USER="${DEF_USER:-}"              # e.g. 'arch'
-DEF_USER_PW="${DEF_USER_PW:-}"        # optional
-
-# load the building functions
-. ../common/image_build_lib
-require_commands sgdisk sfdisk losetup mkfs.fat mkswap mkfs.btrfs pacstrap arch-chroot genfstab grub-install grub-mkconfig partprobe
-
-
-BASE_PKGS=(base base-devel linux linux-firmware intel-ucode amd-ucode btrfs-progs compsize jemalloc gptfdisk parted qemu-system-x86-firmware mkinitcpio-nfs-utils cloud-guest-utils wget grub efibootmgr net-tools dhclient openssh openbsd-netcat less vim sudo rust paru dosfstools arch-install-scripts)
-ONLINE_PACKAGES=(
-  'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'
-  'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'
-)
-
-fetch_custom_pkgs_cache http://mutuatech.com/MutuatechLinux/cache/x86_64/{mutuatechlinux-general-multiarch-1.1.40-1-x86_64.pkg.tar.zst,mutuatechlinux-general-x86_64-1.1.40-1-x86_64.pkg.tar.zst,httpstat-go-1.1.0-1-x86_64.pkg.tar.zst,rar-7.12-1-x86_64.pkg.tar.zst}
-create_and_partition_image_dos_mbr
-format_and_mount_partitions
-bootstrap_native
-generate_fstab
-execute_inner_script "./image_setup_inner_script"
-adjust_grub
-copy_image_files ../common/files
-setup_sshd_and_keys
-setup_root_and_users
-zeroize
-ready_msg
-
-# NOTES
-# 1) To update the cache, chroot into the image and update the packages, then scp -pr cache/* mutuatec@mutuatech.com:~/public_html/MutuatechLinux/cache/x86_64/
-# 2) After updating the cache, update the package names being fetched to the cache above in this script
-# 3) To enter the chroot image, just add a line containing 'debug' between any of the above steps
-# 4) To chroot on the final image, execute:
-IMG="artifacts/mutuatechlinux-general-x86_64.img"; LOOPDEV="$(sudo losetup --find --show -P "$IMG")"; sudo partprobe "$LOOPDEV"; P1="${LOOPDEV}p1"; P2="${LOOPDEV}p2"; P3="${LOOPDEV}p3"; MNT="$(mktemp -d)"; sudo mount -o compress-force=zstd:15,space_cache=v2,noatime "$P3" "$MNT"; sudo mkdir -p "$MNT/boot/efi"; sudo mount "$P1" "$MNT/boot/efi"; sudo arch-chroot "$MNT"; sudo umount -l "$MNT/boot/efi"; sudo umount -l "$MNT"; sudo losetup -d "$LOOPDEV"; sudo rmdir "$MNT"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+exec "${SCRIPT_DIR}/build_archlinux_x86_64_image" "$@"

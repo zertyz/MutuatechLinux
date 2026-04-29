@@ -1,0 +1,52 @@
+#! /bin/bash
+set -euo pipefail
+
+. ../common/image_build_lib
+
+require_commands sgdisk sfdisk parted losetup mkfs.fat mkswap mkfs.btrfs pacstrap arch-chroot genfstab grub-install grub-mkconfig partprobe
+
+if [[ -n "${PRE_FLIGHT_FN:-}" ]]; then
+    "$PRE_FLIGHT_FN"
+fi
+
+custom_cache_urls=()
+if [[ -n "${CUSTOM_CACHE_BASE_URL:-}" ]] && [[ ${#CUSTOM_CACHE_PACKAGE_FILES[@]} -gt 0 ]]; then
+    for pkg_file in "${CUSTOM_CACHE_PACKAGE_FILES[@]}"; do
+        custom_cache_urls+=("${CUSTOM_CACHE_BASE_URL}/${pkg_file}")
+    done
+fi
+
+if [[ ${#custom_cache_urls[@]} -gt 0 ]]; then
+    fetch_custom_pkgs_cache "${custom_cache_urls[@]}"
+fi
+
+if declare -p CUSTOM_CACHE_REQUIRED_PATTERNS >/dev/null 2>&1; then
+    require_cached_package_patterns "${CUSTOM_CACHE_REQUIRED_PATTERNS[@]}"
+fi
+
+"$PARTITION_FN"
+format_and_mount_partitions
+
+if [[ "${SYNC_PACMAN_CACHE:-0}" == 1 ]]; then
+    restore_pacman_pkgs
+fi
+
+"$BOOTSTRAP_FN"
+
+if [[ "${SYNC_PACMAN_CACHE:-0}" == 1 ]]; then
+    save_pacman_pkgs
+fi
+
+copy_target_pacman_config
+generate_fstab
+if declare -p INNER_SCRIPT_FILES >/dev/null 2>&1; then
+    execute_inner_script "${INNER_SCRIPT_FILES[@]}"
+else
+    execute_inner_script "$INNER_SCRIPT"
+fi
+adjust_grub
+copy_image_files "$COMMON_FILES_DIR"
+setup_sshd_and_keys
+setup_root_and_users
+zeroize
+ready_msg

@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+[ "$EUID" -ne 0 ] && { echo "Please run this as root: sudo $0" >&2; exit 1; }
+
+SRC_IMG="${SRC_IMG:-}"
+TEST_IMG="${TEST_IMG:-}"
+ARTIFACTS_DIR="${ARTIFACTS_DIR:-}"
+KERNEL_BASENAME="${KERNEL_BASENAME:-}"
+INITRAMFS_BASENAME="${INITRAMFS_BASENAME:-}"
+TARGET_KERNEL_BASENAME="${TARGET_KERNEL_BASENAME:-$KERNEL_BASENAME}"
+TARGET_INITRAMFS_BASENAME="${TARGET_INITRAMFS_BASENAME:-$INITRAMFS_BASENAME}"
+ROOT_PARTITION_N="${ROOT_PARTITION_N:-2}"
+WIPE_ROOT="${WIPE_ROOT:-1}"
+
+[[ -n "$SRC_IMG" ]] || { echo "Missing SRC_IMG" >&2; exit 1; }
+[[ -n "$TEST_IMG" ]] || { echo "Missing TEST_IMG" >&2; exit 1; }
+[[ -n "$ARTIFACTS_DIR" ]] || { echo "Missing ARTIFACTS_DIR" >&2; exit 1; }
+[[ -n "$KERNEL_BASENAME" ]] || { echo "Missing KERNEL_BASENAME" >&2; exit 1; }
+[[ -n "$INITRAMFS_BASENAME" ]] || { echo "Missing INITRAMFS_BASENAME" >&2; exit 1; }
+[[ -f "$SRC_IMG" ]] || { echo "Missing source image: $SRC_IMG" >&2; exit 1; }
+[[ -f "${ARTIFACTS_DIR}/${KERNEL_BASENAME}" ]] || { echo "Missing kernel artifact: ${ARTIFACTS_DIR}/${KERNEL_BASENAME}" >&2; exit 1; }
+[[ -f "${ARTIFACTS_DIR}/${INITRAMFS_BASENAME}" ]] || { echo "Missing initramfs artifact: ${ARTIFACTS_DIR}/${INITRAMFS_BASENAME}" >&2; exit 1; }
+
+require() { command -v "$1" >/dev/null || { echo "Missing: $1" >&2; exit 1; }; }
+for bin in cp losetup partprobe mount umount mountpoint mktemp install readlink find rm sync; do
+    require "$bin"
+done
+
+[[ "$(readlink -f "$SRC_IMG")" != "$(readlink -m "$TEST_IMG")" ]] || {
+    echo "Refusing to overwrite the source image in place: $SRC_IMG" >&2
+    exit 1
+}
+
+LOOPDEV=""
+MNT=""
+
+cleanup() {
+    set +e
+    if [[ -n "$MNT" ]] && mountpoint -q "$MNT/boot/efi"; then umount -l "$MNT/boot/efi"; fi
+    if [[ -n "$MNT" ]] && mountpoint -q "$MNT"; then umount -l "$MNT"; fi
+    if [[ -n "$LOOPDEV" ]]; then losetup -d "$LOOPDEV"; fi
+    [[ -n "$MNT" ]] && [[ -d "$MNT" ]] && rmdir "$MNT"
+}
+trap cleanup EXIT
+
+resolve_boot_target() {
+    local boot_path="$1"
+    [[ -e "$boot_path" || -L "$boot_path" ]] || {
+        echo "Missing boot target: $boot_path" >&2
+        exit 1
+    }
+    if [[ -L "$boot_path" ]]; then
+        readlink -f "$boot_path"
+    else
+        echo "$boot_path"
+    fi
+}
+
+mkdir -p "$(dirname "$TEST_IMG")"
+rm -f "$TEST_IMG"
+cp --reflink=auto "$SRC_IMG" "$TEST_IMG"
+
+MNT="$(mktemp -d)"
+LOOPDEV="$(losetup --find --show -P "$TEST_IMG")"
+partprobe "$LOOPDEV"
+P1="${LOOPDEV}p1"
+P_ROOT="${LOOPDEV}p${ROOT_PARTITION_N}"
+
+mount -o compress-force=zstd:15,noatime "$P_ROOT" "$MNT"
+mkdir -p "$MNT/boot/efi"
+mount "$P1" "$MNT/boot/efi"
+
+install -m 644 "${ARTIFACTS_DIR}/${KERNEL_BASENAME}" "$(resolve_boot_target "$MNT/boot/${TARGET_KERNEL_BASENAME}")"
+install -m 644 "${ARTIFACTS_DIR}/${INITRAMFS_BASENAME}" "$(resolve_boot_target "$MNT/boot/${TARGET_INITRAMFS_BASENAME}")"
+
+if [[ "$WIPE_ROOT" == 1 ]]; then
+    echo ">> Wiping the disposable root filesystem except /boot to force a fresh install"
+    find "$MNT" -mindepth 1 -maxdepth 1 ! -name boot -exec rm -rf {} +
+fi
+
+sync
+echo ">> Prepared disposable test image: $TEST_IMG"
+echo ">> Boot it now with the matching test wrapper."

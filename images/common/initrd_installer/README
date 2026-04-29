@@ -1,8 +1,57 @@
-# To test the installer works
-# (it will reuse the image, grow it a little, and reinstall itself there, boot and see the results -- with logs at /tmp/initramfs_installer.log)
+# Initrd Installer Notes
 
-sudo fallocate -l $((8*1024*1024*1024)) ../artifacts/mutuatechlinux-general-x86_64.img
+The generated installer artifacts are published as separate kernel and initramfs files.
 
-IMG="../artifacts/mutuatechlinux-general-x86_64.img"; LOOPDEV="$(sudo losetup --find --show -P "$IMG")"; sudo partprobe "$LOOPDEV"; P1="${LOOPDEV}p1"; P2="${LOOPDEV}p2"; P3="${LOOPDEV}p3"; MNT="$(mktemp -d)"; sudo mount -o compress-force=zstd:15,space_cache=v2,noatime "$P3" "$MNT"; sudo mkdir -p "$MNT/boot/efi"; sudo mount "$P1" "$MNT/boot/efi"; echo NOT DOING sudo arch-chroot "$MNT"; sudo mkdir "$MNT/boot/orig"; sudo mv $MNT/boot/{initramfs-linux.img,vmlinuz-linux} "$MNT/boot/orig"; sudo cp -a artifacts/* "$MNT/boot"; sudo umount -l "$MNT/boot/efi"; sudo umount -l "$MNT"; sudo losetup -d "$LOOPDEV"; sudo rmdir "$MNT"
+## Published Artifact Names
 
-sudo qemu-system-x86_64 -m 704m -smp 1 -drive if=none,file=../artifacts/mutuatechlinux-general-x86_64.img,format=raw,id=disk0     -device virtio-rng-pci     -device virtio-blk-pci,drive=disk0,bootindex=0     -device virtio-net-pci,netdev=n0 -netdev user,id=n0,hostfwd=tcp::2222-:22     -boot order=c,menu=on     -nographic 2>&1 | tee /tmp/initramfs_installer.log
+| Target | Kernel artifact | Initramfs artifact |
+| --- | --- | --- |
+| Arch Linux `x86_64` | `vmlinuz-linux` | `initramfs-linux.img` |
+| Arch Linux `aarch64` | `vmlinuz-linux` | `initramfs-linux.img` |
+| CachyOS `x86_64_v3` | `vmlinuz-linux-cachyos` | `initramfs-linux-cachyos.img` |
+| CachyOS `x86_64_v4` | `vmlinuz-linux-cachyos` | `initramfs-linux-cachyos.img` |
+
+## Portable Installer
+
+`portable_archlinux_installer` inspects the currently booted system and prints the commands needed to replace the active kernel and initramfs in place.
+
+On `x86_64` it now:
+
+- preserves the destination boot file names already in use on the machine
+- keeps extra initrd entries such as CPU microcode untouched
+- chooses matching published Mutuatech artifacts for Arch Linux and CachyOS automatically
+
+Optional overrides:
+
+```bash
+PUBLISHED_TARGET_ARCH=...
+PUBLISHED_KERNEL_BASENAME=...
+PUBLISHED_INITRAMFS_BASENAME=...
+./portable_archlinux_installer
+```
+
+## Wrapper Scripts
+
+See [../../README](../../README) for the image-builder and publish-helper matrix.
+
+The usual entrypoints are:
+
+- `../../x86_64/initrd_installer/generate_archlinux_x86_64_initrd_installer`
+- `../../aarch64/initrd_installer/generate_archlinux_aarch64_initrd_installer`
+- `../../x86_64/initrd_installer/generate_cachyos_v3_initrd_installer`
+- `../../x86_64/initrd_installer/generate_cachyos_v4_initrd_installer`
+
+## Local Testing
+
+The test wrappers build a disposable copy of the already generated disk image, replace the boot kernel and initramfs in that copy with the installer artifacts while preserving the target boot file names, optionally wipe everything except `/boot`, and then launch the existing QEMU test script for that image flavor.
+
+When the source image has a swap partition, it is p3 at the end of the image. During installation the initrd recreates that empty swap partition at the end of the target disk, preserves its UUID, and grows p2 to fill the space before it. Images built with `SWAP_SIZE=0` or `SWAP_SIZE=0GiB` have no swap partition, so the installer grows p2 to the end of the disk.
+
+The current wrappers are:
+
+- `../../x86_64/initrd_installer/test_archlinux_x86_64_initrd_installer`
+- `../../aarch64/initrd_installer/test_archlinux_aarch64_initrd_installer`
+- `../../x86_64/initrd_installer/test_cachyos_v3_initrd_installer`
+- `../../x86_64/initrd_installer/test_cachyos_v4_initrd_installer`
+
+By default they use `WIPE_ROOT=1` to force the installer to recreate the system. Set `WIPE_ROOT=0` if you want to keep the original root filesystem for a lighter boot-path check.

@@ -1,0 +1,93 @@
+#!/bin/sh
+set -eu
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/sbin:/bin:/sbin
+
+RUNTIME_DIR="${XDG_RUNTIME_DIR:-/tmp}"
+LOCKDIR="$RUNTIME_DIR/startup_cleanup.lockdir"
+
+# CONFIGS
+# #######
+
+# Delay before sweep
+STARTUP_CLEANUP_DELAY=12
+
+# Default kill lists
+COMMON_NON_KDE_PROCS="kclockd kdeconnectd kalendarac kgpg nm-applet"
+
+# Per-DE customization
+COSMIC_PROCS="$COMMON_NON_KDE_PROCS"
+HYPRLAND_PROCS="$COMMON_NON_KDE_PROCS"
+JWM_PROCS="$COMMON_NON_KDE_PROCS"
+
+# Usually keep KDE intact
+KDE_PROCS=""
+
+detect_desktop() {
+  raw="${XDG_CURRENT_DESKTOP:-${XDG_SESSION_DESKTOP:-${DESKTOP_SESSION:-}}}"
+  raw_lc="$(printf '%s' "$raw" | tr '[:upper:]' '[:lower:]')"
+
+  case "$raw_lc" in
+    *cosmic*)   printf '%s\n' cosmic ;;
+    *hyprland*) printf '%s\n' hyprland ;;
+    *plasma*|*kde*) printf '%s\n' kde ;;
+    *jwm*)      printf '%s\n' jwm ;;
+    *)
+      # Some sessions expose colon-separated desktops, e.g. "X-Cinnamon:GNOME"
+      case ":$raw_lc:" in
+        *:cosmic:*)   printf '%s\n' cosmic ;;
+        *:hyprland:*) printf '%s\n' hyprland ;;
+        *:plasma:*|*:kde:*) printf '%s\n' kde ;;
+        *:jwm:*)      printf '%s\n' jwm ;;
+        *)            printf '%s\n' unknown ;;
+      esac
+      ;;
+  esac
+}
+
+stop_procs() {
+  for p in $@; do
+    pkill -TERM -x "$p" 2>/dev/null || true
+  done
+
+  sleep 1
+
+  for p in $@; do
+    pkill -KILL -x "$p" 2>/dev/null || true
+  done
+}
+
+cleanup_cosmic() {
+  stop_procs "$COSMIC_PROCS"
+}
+
+cleanup_hyprland() {
+  stop_procs "$HYPRLAND_PROCS"
+}
+
+cleanup_jwm() {
+  stop_procs "$JWM_PROCS"
+}
+
+cleanup_kde() {
+  stop_procs "$KDE_PROCS"
+}
+
+main() {
+  de="$(detect_desktop)"
+  echo "desktop environment $de detected"
+  case "$de" in
+    cosmic)   cleanup_cosmic ;;
+    hyprland) cleanup_hyprland ;;
+    jwm)      cleanup_jwm ;;
+    kde)      cleanup_kde ;;
+    *)
+      echo "startup_cleanup: unknown desktop '${
+        XDG_CURRENT_DESKTOP:-${XDG_SESSION_DESKTOP:-${DESKTOP_SESSION:-unknown}}
+      }', doing nothing"
+      ;;
+  esac
+}
+
+sleep "$STARTUP_CLEANUP_DELAY"
+main "$@"

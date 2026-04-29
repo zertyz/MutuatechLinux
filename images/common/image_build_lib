@@ -3,6 +3,9 @@ set -euo pipefail
 
 [ "$EUID" -ne 0 ] && { echo "Please run this as root: sudo $0" >&2; exit 1; }
 
+LOOPDEV=""
+MNT=""
+
 # Ensures the cache directory contains all files specified by the URLs passaed as arguments to this function
 #
 # Defines the following global variables:
@@ -10,11 +13,50 @@ set -euo pipefail
 fetch_custom_pkgs_cache() {
     CACHE_DIR="cache"
     mkdir -p "$CACHE_DIR"
-    if ! ls "$CACHE_DIR"/*.pkg.tar.* &>/dev/null; then
-        echo ">> Fetching custom packages and putting them into the local cache..."
-        cd "$CACHE_DIR"
-        wget -c "$@"
-        cd ..
+    echo ">> Fetching custom packages and putting them into the local cache..."
+    cd "$CACHE_DIR"
+    if ! wget -c "$@"; then
+        echo ">> Some cached packages could not be fetched automatically." >&2
+    fi
+    cd ..
+}
+
+require_cached_package_patterns() {
+    local cache_dir cache_dir_abs pattern url_path cut_dirs
+    local -a missing_patterns=()
+    local -a url_parts=()
+
+    CACHE_DIR="${CACHE_DIR:-cache}"
+    mkdir -p "$CACHE_DIR"
+    cache_dir="$CACHE_DIR"
+    cache_dir_abs="$(cd "$cache_dir" && pwd)"
+
+    shopt -s nullglob
+    for pattern in "$@"; do
+        local matches=( "$cache_dir"/$pattern )
+        if (( ${#matches[@]} == 0 )); then
+            missing_patterns+=("$pattern")
+        fi
+    done
+    shopt -u nullglob
+
+    if (( ${#missing_patterns[@]} > 0 )); then
+        echo "Missing required cached package files:" >&2
+        for pattern in "${missing_patterns[@]}"; do
+            echo "  - $pattern" >&2
+        done
+        echo "Place matching package files under: $cache_dir_abs/" >&2
+        if [[ -n "${CUSTOM_CACHE_BASE_URL:-}" ]]; then
+            url_path="${CUSTOM_CACHE_BASE_URL#*://}"
+            url_path="${url_path#*/}"
+            url_path="${url_path%/}"
+            IFS='/' read -r -a url_parts <<< "$url_path"
+            cut_dirs="${#url_parts[@]}"
+            echo "Populate the cache with:" >&2
+            echo "  ( cd \"$cache_dir_abs\" && wget -m -np -nH --cut-dirs=${cut_dirs} -R 'index.html*' -A '*.pkg.tar.*' \"${CUSTOM_CACHE_BASE_URL%/}/\" )" >&2
+            echo "If you publish new cached package filenames, also list them in CUSTOM_CACHE_PACKAGE_FILES for automatic fetching." >&2
+        fi
+        exit 1
     fi
 }
 
@@ -53,68 +95,181 @@ require_commands() {
     done
 }
 
+require_files() {
+    for path in "$@"; do
+        [[ -e "$path" ]] || { echo "Missing: $path" >&2; exit 1; }
+    done
+}
+
+esp_size_to_mib() {
+    local size="${1//[[:space:]]/}"
+    case "$size" in
+        *GiB|*G)
+            echo $(( ${size%%G*} * 1024 ))
+            ;;
+        *MiB|*M)
+            echo "${size%%M*}"
+            ;;
+        *KiB|*K)
+            echo $(( (${size%%K*} + 1023) / 1024 ))
+            ;;
+        *B)
+            echo $(( (${size%%B} + 1024 * 1024 - 1) / (1024 * 1024) ))
+            ;;
+        *)
+            echo "$size"
+            ;;
+    esac
+}
+
+esp_fat_bits() {
+    local esp_size_mib
+    esp_size_mib="$(esp_size_to_mib "$ESP_SIZE")"
+    if (( esp_size_mib < 32 )); then
+        echo 12
+    else
+        echo 32
+    fi
+}
+
+esp_end_mib() {
+    echo "$(( $(esp_size_to_mib "$ESP_SIZE") + 1 ))MiB"
+}
+
+swap_enabled() {
+    local size="${SWAP_SIZE:-0}"
+    size="${size//[[:space:]]/}"
+    case "$size" in
+        0|0B|0K|0KiB|0M|0MiB|0G|0GiB)
+            return 1
+            ;;
+    esac
+    return 0
+}
+
+preflight_emulated_aarch64_build() {
+    require_commands qemu-aarch64-static
+    [[ -e /proc/sys/fs/binfmt_misc/qemu-aarch64 ]] || {
+        echo "Missing qemu-aarch64 binfmt support." >&2
+        echo "Install qemu-user-static and qemu-user-static-binfmt, then run: sudo /usr/lib/systemd/systemd-binfmt" >&2
+        exit 1
+    }
+}
+
+preflight_native_archlinux_build() {
+    require_files \
+        /etc/pacman.d/mirrorlist \
+        /usr/share/pacman/keyrings/archlinux.gpg
+}
+
+require_pacman_repos() {
+    local repo configured_repos
+    require_commands pacman-conf
+    if [[ -n "${PACMAN_CONF:-}" ]]; then
+        configured_repos="$(pacman-conf -c "$PACMAN_CONF" --repo-list)"
+    else
+        configured_repos="$(pacman-conf --repo-list)"
+    fi
+    for repo in "$@"; do
+        grep -qxF "$repo" <<<"$configured_repos" || {
+            echo "Missing required pacman repo: $repo" >&2
+            exit 1
+        }
+    done
+}
+
+require_x86_64_glibc_level() {
+    local level="$1"
+    require_files /lib/ld-linux-x86-64.so.2
+    /lib/ld-linux-x86-64.so.2 --help | grep -Fq "${level} (supported" || {
+        echo "Host CPU/glibc does not support instruction set ${level}." >&2
+        echo "Run this builder on a machine that reports x86_64 instruction set ${level} support." >&2
+        exit 1
+    }
+}
+
+preflight_native_cachyos_v3_build() {
+    require_pacman_repos cachyos-v3 cachyos-core-v3 cachyos-extra-v3 cachyos
+    require_files \
+        /etc/pacman.d/mirrorlist \
+        /etc/pacman.d/cachyos-mirrorlist \
+        /etc/pacman.d/cachyos-v3-mirrorlist \
+        /usr/share/pacman/keyrings/cachyos.gpg
+    require_x86_64_glibc_level x86-64-v3
+}
+
+preflight_native_cachyos_v4_build() {
+    require_pacman_repos cachyos-v4 cachyos-core-v4 cachyos-extra-v4 cachyos
+    require_files \
+        /etc/pacman.d/mirrorlist \
+        /etc/pacman.d/cachyos-mirrorlist \
+        /etc/pacman.d/cachyos-v4-mirrorlist \
+        /usr/share/pacman/keyrings/cachyos.gpg
+    require_x86_64_glibc_level x86-64-v4
+}
+
 # function to execute when the script ends
 cleanup() {
   set +e
-  if mountpoint -q "$MNT/boot/efi"; then umount -l "$MNT/boot/efi"; fi
-  if mountpoint -q "$MNT"; then umount -l "$MNT"; fi
-  if [[ -n "${LOOPDEV:-}" ]]; then losetup -d "$LOOPDEV"; fi
-  [[ -d "${MNT:-}" ]] && rmdir "$MNT"
+  if [[ -n "$MNT" ]] && mountpoint -q "$MNT/boot/efi"; then umount -l "$MNT/boot/efi"; fi
+  if [[ -n "$MNT" ]] && mountpoint -q "$MNT"; then umount -l "$MNT"; fi
+  if [[ -n "$LOOPDEV" ]]; then losetup -d "$LOOPDEV"; fi
+  [[ -n "$MNT" ]] && [[ -d "$MNT" ]] && rmdir "$MNT"
 }
 trap cleanup EXIT
 
 # Creates a sparse image file representing the raw disk contents
 # and also partition it in the DOS/MBR format with the following layout:
-# MBR/DOS layout: 1=ESP, 2=swap, 3=root
+# MBR/DOS layout: 1=ESP, 2=root, 3=swap (optional, at end)
 #
 # Uses the following global variables:
 #  - IMG: path to the target system image to be generated
 #  - IMG_SIZE: predefined size the above file will have
 #  - ESP_SIZE: the size for the EFI/ESP partition
-#  - SWAP_SIZE: the size for the swap partition
-# The root partition will take the reminder of the space
+#  - SWAP_SIZE: the size for the swap partition, or 0/0GiB to disable swap
+# The root partition will take the remaining space between ESP and swap.
 create_and_partition_image_dos_mbr() {
+    local esp_end
 
     echo ">> Creating image file: $IMG ($IMG_SIZE)"
     >"$IMG"
     chattr +Cm "$IMG" || :         # if host is on BTRFS, do not compress nor COW the image
     truncate -s "$IMG_SIZE" "$IMG"
 
-    ## 2) GPT layout: 1=ESP, 2=swap, 3=root
-    #echo ">> Partitioning GPT (ESP ${ESP_SIZE}, swap ${SWAP_SIZE}, root=rest)"
-    #sgdisk -Z "$IMG"
-    #sgdisk -n 1:0:+"$ESP_SIZE" -t 1:EF00 -c 1:"EFI System" "$IMG"
-    #sgdisk -n 2:0:+"$SWAP_SIZE" -t 2:8200 -c 2:"swap" "$IMG"
-    #sgdisk -n 3:0:0        -t 3:8300 -c 3:"${FS_LABEL}" "$IMG"
-    #sgdisk -p "$IMG"
-
-    # 2) MBR/DOS layout: 1=ESP, 2=swap, 3=root
-    echo ">> Partitioning MBR/DOS (ESP ${ESP_SIZE}, swap ${SWAP_SIZE}, root=rest)"
-    sfdisk "$IMG" <<EOF
-label: dos
-
-# p1: ESP (FAT32), bootable
-start=1MiB, size=${ESP_SIZE}, type=ef, bootable
-
-# p2: swap
-size=${SWAP_SIZE}, type=82
-
-# p3: root (rest of disk)
-type=83
-EOF
+    esp_end="$(esp_end_mib)"
+    if swap_enabled; then
+        echo ">> Partitioning MBR/DOS (ESP ${ESP_SIZE}, root=rest, swap ${SWAP_SIZE} at end)"
+        parted -s -a optimal -- "$IMG" \
+            mklabel msdos \
+            mkpart primary fat32 1MiB "$esp_end" \
+            set 1 boot on \
+            type 1 ef \
+            mkpart primary btrfs "$esp_end" "-${SWAP_SIZE}" \
+            mkpart primary linux-swap "-${SWAP_SIZE}" 100%
+    else
+        echo ">> Partitioning MBR/DOS (ESP ${ESP_SIZE}, root=rest, no swap)"
+        parted -s -a optimal -- "$IMG" \
+            mklabel msdos \
+            mkpart primary fat32 1MiB "$esp_end" \
+            set 1 boot on \
+            type 1 ef \
+            mkpart primary btrfs "$esp_end" 100%
+    fi
+    parted -s "$IMG" print
 
 }
 
 # Creates a sparse image file representing the raw disk contents
 # and also partition it in the GPT format with the following layout:
-# GPT layout: 1=ESP, 2=swap, 3=root
+# GPT layout: 1=ESP, 2=root, 3=swap (optional, at end)
 #
 # Uses the following global variables:
 #  - IMG: path to the target system image to be generated
 #  - IMG_SIZE: predefined size the above file will have
 #  - ESP_SIZE: the size for the EFI/ESP partition
-#  - SWAP_SIZE: the size for the swap partition
-# The root partition will take the reminder of the space
+#  - FS_LABEL: the label for the root (BTRFS) filesystem
+#  - SWAP_SIZE: the size for the swap partition, or 0/0GiB to disable swap
+# The root partition will take the remaining space between ESP and swap.
 create_and_partition_image_gpt() {
 
     echo ">> Creating image file: $IMG ($IMG_SIZE)"
@@ -122,12 +277,17 @@ create_and_partition_image_gpt() {
     chattr +Cm "$IMG" || :         # if host is on BTRFS, do not compress nor COW the image
     truncate -s "$IMG_SIZE" "$IMG"
 
-    # 2) GPT layout: 1=ESP, 2=swap, 3=root
-    echo ">> Partitioning GPT (ESP ${ESP_SIZE}, swap ${SWAP_SIZE}, root=rest)"
     sgdisk -Z "$IMG"
-    sgdisk -n 1:0:+"$ESP_SIZE" -t 1:EF00 -c 1:"EFI System" "$IMG"
-    sgdisk -n 2:0:+"$SWAP_SIZE" -t 2:8200 -c 2:"swap" "$IMG"
-    sgdisk -n 3:0:0        -t 3:8300 -c 3:"${FS_LABEL}" "$IMG"
+    if swap_enabled; then
+        echo ">> Partitioning GPT (ESP ${ESP_SIZE}, root=rest, swap ${SWAP_SIZE} at end)"
+        sgdisk -n 1:0:+"$ESP_SIZE" -t 1:EF00 -c 1:"EFI System" "$IMG"
+        sgdisk -n "3:-${SWAP_SIZE}:0" -t 3:8200 -c 3:"swap" "$IMG"
+        sgdisk -n 2:0:0 -t 2:8300 -c 2:"${FS_LABEL}" "$IMG"
+    else
+        echo ">> Partitioning GPT (ESP ${ESP_SIZE}, root=rest, no swap)"
+        sgdisk -n 1:0:+"$ESP_SIZE" -t 1:EF00 -c 1:"EFI System" "$IMG"
+        sgdisk -n 2:0:0 -t 2:8300 -c 2:"${FS_LABEL}" "$IMG"
+    fi
     sgdisk -p "$IMG"
 }
 
@@ -144,8 +304,8 @@ create_and_partition_image_gpt() {
 #  - LOOPDEV: the loop device reserved for mapping the IMG file
 #  - P1, P2 and P3: the device for each of the image partitions:
 #    - P1: ESP/EFI
-#    - P2: swap
-#    - P3: root
+#    - P2: root
+#    - P3: swap (optional)
 #  - MNT: a temporary directory where the root partition is mounted
 format_and_mount_partitions() {
 
@@ -159,17 +319,21 @@ format_and_mount_partitions() {
     P3="${LOOPDEV}p3"
 
     # Make the filesystems
-    echo ">> mkfs ESP FAT32"
-    mkfs.fat -F12 -n EFI "$P1"
-    echo ">> mkswap"
-    mkswap -L swap "$P2"
+    local esp_fat
+    esp_fat="$(esp_fat_bits)"
+    echo ">> mkfs ESP FAT${esp_fat}"
+    mkfs.fat -F"${esp_fat}" -n EFI "$P1"
+    if swap_enabled; then
+        echo ">> mkswap"
+        mkswap -L swap "$P3"
+    fi
     echo ">> mkfs Btrfs root"
-    mkfs.btrfs -f -L "${FS_LABEL}" "$P3"
+    mkfs.btrfs -f -L "${FS_LABEL}" "$P2"
 
-    # Mount with max zstd and sane opts
+    # Mount with max zstd and optimized write opts
     MNT="$(mktemp -d)"
     echo ">> Mounting root at $MNT"
-    mount -o defaults,compress-force=zstd:15,noatime,commit=600 "$P3" "$MNT"
+    mount -o defaults,compress-force=zstd:15,noatime,commit=600,nobarrier "$P2" "$MNT"
     mkdir -p "$MNT/boot/efi"
     mount "$P1" "$MNT/boot/efi"
 }
@@ -184,9 +348,14 @@ format_and_mount_partitions() {
 #  - MNT: the temporary directory where the root partition is mounted
 #  - CACHE_DIR: where the externally fetched packages were downloaded
 bootstrap_native() {
+    local pacstrap_opts=(-M -c -P)
+    if [[ -n "${PACMAN_CONF:-}" ]]; then
+        pacstrap_opts=(-M -c -C "$PACMAN_CONF")
+    fi
+
     echo ">> pacstrap base + tools for the native platform"
-    pacstrap -M -c -P "$MNT" "${BASE_PKGS[@]}"
-    pacstrap -M -c -P -U "$MNT" "$CACHE_DIR"/*.pkg.tar* "${ONLINE_PACKAGES[@]}"
+    pacstrap "${pacstrap_opts[@]}" "$MNT" "${BASE_PKGS[@]}"
+    pacstrap "${pacstrap_opts[@]}" -U "$MNT" "$CACHE_DIR"/*.pkg.tar* "${ONLINE_PACKAGES[@]}"
 }
 
 bootstrap_emulated() {
@@ -199,33 +368,58 @@ generate_fstab() {
 
     echo ">> Generating fstab with Btrfs opts (by UUID)"
     genfstab -t UUID -U "$MNT" >> "$MNT/etc/fstab"
+    if swap_enabled; then
+        local swap_uuid
+        swap_uuid="$(blkid -s UUID -o value "$P3")"
+        printf 'UUID=%s none swap defaults 0 0\n' "$swap_uuid" >> "$MNT/etc/fstab"
+    fi
     # Harden Btrfs mount options for root
-    sed -i 's|\(\s/\s*btrfs\s*\)\S*|\1defaults,noatime,compress=zstd:15,commit=600|' "$MNT/etc/fstab"
+    sed -i 's|\(\s/\s*btrfs\s*\)\S*|\1defaults,noatime,compress=zstd:15,commit=600,nobarrier|' "$MNT/etc/fstab"
 
     echo ">>     ... fixing any device resolution mistakes in the fstab file"
     # genfstab works badly inside AWS and GCE (at least) -- it uses the /dev/ entries instead of the UUID. The bellow fixes that
     # (harmless if no /dev/* entries are in use)
-    cat "$MNT/etc/fstab" | grep -v '#' | grep '/dev/' | while read md; do
-        echo $md | sed 's| .*||' | while read ld; do
-            UUID=`blkid | grep "$ld" | sed 's|.* \(UUID="[^"]*"\).*|\1|'`
-            sed -i "s|^$ld|$UUID|g" "$MNT/etc/fstab"
-        done
-    done
+    while read -r ld; do
+        local uuid
+        uuid="$(blkid -s UUID -o value "$ld")"
+        sed -i "s|^$ld|UUID=$uuid|g" "$MNT/etc/fstab"
+    done < <(awk '!/^#/ && /\/dev\// { print $1 }' "$MNT/etc/fstab")
+
+    if [[ ! -s "$MNT/etc/fstab" ]]; then
+        echo "Generated fstab is empty: $MNT/etc/fstab" >&2
+        exit 1
+    fi
 }
 
 # Receives as argument the name of the local script to execute on the new image,
 # inside its chroot env
 execute_inner_script() {
     echo ">> Executing the inner script (into the new image)"
-    cat "$1" | arch-chroot "$MNT" bash -eux
+    cat "$@" | arch-chroot "$MNT" bash -euxo pipefail
+}
+
+copy_target_pacman_config() {
+    local target_pacman_conf
+    target_pacman_conf="${TARGET_PACMAN_CONF:-${PACMAN_CONF:-}}"
+    if [[ -n "$target_pacman_conf" ]]; then
+        echo ">> Installing target pacman configuration"
+        install -Dm644 "$target_pacman_conf" "$MNT/etc/pacman.conf"
+    fi
+
+    if declare -p PACMAN_SUPPORT_FILES >/dev/null 2>&1; then
+        local file
+        for file in "${PACMAN_SUPPORT_FILES[@]}"; do
+            install -Dm644 "$file" "$MNT/$file"
+        done
+    fi
 }
 
 adjust_grub() {
     echo ">> Adjusting GRUB -- to boot from the partition's UUID and to log to the serial console"
     # activate ttys & uses UUID to boot (just in case...)
     sed -i 's| quiet$| console=ttyS0,115200|g' "$MNT/boot/grub/grub.cfg"
-    ROOT_UUID=`blkid | grep "$P3" | sed 's|.* \(UUID="[^"]*"\).*|\1|'` 
-    sed -i "s| root=$P3| root=$ROOT_UUID|g" "$MNT/boot/grub/grub.cfg"
+    ROOT_UUID=`blkid | grep "$P2" | sed 's|.* \(UUID="[^"]*"\).*|\1|'` 
+    sed -i "s| root=$P2| root=$ROOT_UUID|g" "$MNT/boot/grub/grub.cfg"
 }
 
 # Receive as argument the directory (with files) corresponding to the
@@ -295,12 +489,18 @@ CHROOT_EOF
 }
 
 ready_msg() {
+    local initrd_installer_hint
+    local publish_image_hint
+    local test_image_hint
+    initrd_installer_hint="${INITRD_INSTALLER_HINT:-cd initrd_installer; sudo ./generate_initrd_installer; cd ..}"
+    publish_image_hint="${PUBLISH_IMAGE_HINT:-xz -T1 -1kv $IMG && scp -pr ${IMG}.xz mutuatec@mutuatech.com:~/public_html/MutuatechLinux/images/${TARGET_ARCH}/}"
+    test_image_hint="${TEST_IMAGE_HINT:-./test_image}"
+
     echo ">> Image ready: $IMG"
     echo
     echo ">> For publishing:"
-    echo ">> Compress with: 'xz -T1 -1kv $IMG'"
-    echo ">> Publish with: 'scp -pr ${IMG}.xz mutuatec@mutuatech.com:~/public_html/MutuatechLinux/images/`uname -m`/'"
-    echo ">> Build & publish the initrd installation artifacts: 'cd initrd_installer; sudo ./generate_initrd_installer; cd ..'"
+    echo ">> Publish with: '${publish_image_hint}'"
+    echo ">> Build & publish the initrd installation artifacts: '${initrd_installer_hint}'"
     echo
-    echo ">> Test with ./test_image"
+    echo ">> Test with '${test_image_hint}'"
 }

@@ -1,0 +1,27 @@
+[
+  {
+    "name": "_Lock screen",
+    "exec": "hyprlock",
+    "icon": "lock.svg"
+  },
+  {
+  	"name": "Suspen_d",
+    "exec": "systemctl suspend",
+  	"icon": "suspend.svg"
+  },
+  {
+    "name": "Logou_t",
+    "exec": "hyprctl dispatch exit 0",
+    "icon": "logout.svg"
+  },
+  {
+    "name": "_Reboot",
+    "exec": "systemctl reboot",
+    "icon": "reboot.svg"
+  },
+  {
+    "name": "_Shutdown",
+    "exec": "systemctl -i poweroff",
+    "icon": "shutdown.svg"
+  }
+]

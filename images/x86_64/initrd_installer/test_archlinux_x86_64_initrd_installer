@@ -1,0 +1,17 @@
+#! /bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+TEST_IMG="${TEST_IMG:-${SCRIPT_DIR}/../artifacts/test-initrd-installer-archlinux-x86_64.img}"
+
+SRC_IMG="${SRC_IMG:-${SCRIPT_DIR}/../artifacts/mutuatechlinux-general-x86_64.img}" \
+TEST_IMG="$TEST_IMG" \
+ARTIFACTS_DIR="${ARTIFACTS_DIR:-${SCRIPT_DIR}/artifacts}" \
+KERNEL_BASENAME="${KERNEL_BASENAME:-vmlinuz-linux}" \
+INITRAMFS_BASENAME="${INITRAMFS_BASENAME:-initramfs-linux.img}" \
+WIPE_ROOT="${WIPE_ROOT:-1}" \
+../../common/prepare_initrd_installer_test_image
+
+IMG="$TEST_IMG" "${SCRIPT_DIR}/../test_archlinux_x86_64_image"

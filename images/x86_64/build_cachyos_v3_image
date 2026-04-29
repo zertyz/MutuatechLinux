@@ -1,0 +1,47 @@
+#! /bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+# --- Default Settings ---
+mkdir -p artifacts
+IMG="${IMG:-artifacts/mutuatechlinux-general-cachyos-x86_64_v3.img}"
+IMG_SIZE="${IMG_SIZE:-4G}"
+ESP_SIZE="${ESP_SIZE:-4MiB}"
+SWAP_SIZE="${SWAP_SIZE:-1GiB}"
+HOST_AUTH_KEYS="${HOST_AUTH_KEYS:-$HOME/.ssh/authorized_keys}"  # copied to root
+FS_LABEL="${FS_LABEL:-mtl_root}"
+TARGET_ARCH="${TARGET_ARCH:-x86_64_v3}"
+ROOT_PW="${ROOT_PW:-mutuatechlinux}"  # optional; if empty, root password stays locked
+DEF_USER="${DEF_USER:-}"              # e.g. 'arch'
+DEF_USER_PW="${DEF_USER_PW:-}"        # optional
+
+BASE_PKGS=(base base-devel cachyos-keyring cachyos-mirrorlist cachyos-v3-mirrorlist linux-cachyos linux-firmware intel-ucode amd-ucode btrfs-progs compsize jemalloc gptfdisk parted qemu-system-x86-firmware mkinitcpio-nfs-utils cloud-guest-utils wget grub efibootmgr net-tools dhclient dhcpcd openssh openbsd-netcat less vim sudo rust dosfstools arch-install-scripts)
+ONLINE_PACKAGES=()
+CUSTOM_CACHE_BASE_URL="http://mutuatech.com/MutuatechLinux/cache/x86_64"
+CUSTOM_CACHE_PACKAGE_FILES=(
+  'mutuatechlinux-general-multiarch-1.1.40-1-x86_64.pkg.tar.zst'
+  'mutuatechlinux-general-x86_64-1.1.40-1-x86_64.pkg.tar.zst'
+  'httpstat-go-1.1.0-1-x86_64.pkg.tar.zst'
+  'rar-7.12-1-x86_64.pkg.tar.zst'
+)
+CUSTOM_CACHE_REQUIRED_PATTERNS=(
+  'mutuatechlinux-general-multiarch-*-x86_64.pkg.tar.*'
+  'mutuatechlinux-general-x86_64-*-x86_64.pkg.tar.*'
+  'httpstat-go-*-x86_64.pkg.tar.*'
+  'rar-*-x86_64.pkg.tar.*'
+  'paru*-x86_64.pkg.tar.*'
+)
+PACMAN_CONF="./cachyos-v3-pacman.conf"
+PACMAN_SUPPORT_FILES=(/etc/pacman.d/mirrorlist /etc/pacman.d/cachyos-mirrorlist /etc/pacman.d/cachyos-v3-mirrorlist)
+PARTITION_FN=create_and_partition_image_dos_mbr
+BOOTSTRAP_FN=bootstrap_native
+PRE_FLIGHT_FN=preflight_native_cachyos_v3_build
+PUBLISH_IMAGE_HINT="./publish_cachyos_v3_image"
+TEST_IMAGE_HINT="./test_cachyos_v3_image"
+INITRD_INSTALLER_HINT="cd initrd_installer; sudo ./generate_cachyos_v3_initrd_installer; cd .."
+INNER_SCRIPT_FILES=(./image_setup_inner_script_cachyos ../common/image_setup_inner_script_x86_64)
+COMMON_FILES_DIR="../common/files"
+
+. ../common/build_image

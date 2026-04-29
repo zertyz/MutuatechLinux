@@ -1,0 +1,85 @@
+# Image Build Matrix
+
+Use these scripts to produce four final disk images:
+
+| Target | Final image |
+| --- | --- |
+| Arch Linux `x86_64` | `artifacts/mutuatechlinux-general-x86_64.img` |
+| Arch Linux `aarch64` | `artifacts/mutuatechlinux-general-aarch64.img` |
+| CachyOS `x86_64_v3` | `artifacts/mutuatechlinux-general-cachyos-x86_64_v3.img` |
+| CachyOS `x86_64_v4` | `artifacts/mutuatechlinux-general-cachyos-x86_64_v4.img` |
+
+## Build, Test, Publish
+
+### Arch Linux `x86_64`
+
+```bash
+cd x86_64
+sudo ./build_archlinux_x86_64_image
+./test_archlinux_x86_64_image
+./publish_archlinux_x86_64_image
+cd initrd_installer
+sudo ./generate_archlinux_x86_64_initrd_installer
+./publish_archlinux_x86_64_initrd_installer
+sudo ./test_archlinux_x86_64_initrd_installer
+```
+
+### Arch Linux `aarch64`
+
+```bash
+cd aarch64
+sudo ./build_archlinux_aarch64_image
+./test_archlinux_aarch64_image
+./publish_archlinux_aarch64_image
+cd initrd_installer
+sudo ./generate_archlinux_aarch64_initrd_installer
+./publish_archlinux_aarch64_initrd_installer
+sudo ./test_archlinux_aarch64_initrd_installer
+```
+
+### CachyOS `x86_64_v3`
+
+```bash
+cd x86_64
+sudo ./build_cachyos_v3_image
+./test_cachyos_v3_image
+./publish_cachyos_v3_image
+cd initrd_installer
+sudo ./generate_cachyos_v3_initrd_installer
+./publish_cachyos_v3_initrd_installer
+sudo ./test_cachyos_v3_initrd_installer
+```
+
+### CachyOS `x86_64_v4`
+
+```bash
+cd x86_64
+sudo ./build_cachyos_v4_image
+./test_cachyos_v4_image
+./publish_cachyos_v4_image
+cd initrd_installer
+sudo ./generate_cachyos_v4_initrd_installer
+./publish_cachyos_v4_initrd_installer
+sudo ./test_cachyos_v4_initrd_installer
+```
+
+## Notes
+
+- The generic Arch image entrypoints now use explicit names for both architectures.
+- The CachyOS `x86_64_v3` and `x86_64_v4` initrd generator wrappers are convenience entrypoints that make the installer fetch the matching CachyOS final image automatically.
+- The old generic script names are kept as compatibility wrappers.
+- Images default to `SWAP_SIZE=1GiB`. Set `SWAP_SIZE=0` or `SWAP_SIZE=0GiB` to omit swap; otherwise the layout is p1 ESP, p2 Btrfs root, and p3 swap at the end of the disk.
+- The initrd installer test wrappers create a disposable copy of the built image, replace the boot kernel and initramfs with the generated installer artifacts, optionally wipe everything except `/boot`, and then launch the usual QEMU test flow.
+- All publish helpers accept `REMOTE_HOST` and `REMOTE_BASE_DIR` overrides.
+- Image publish helpers use `XZ_LEVEL=1` by default; initrd publish helpers use `XZ_LEVEL=9`.
+- The `x86_64_v4` builder intentionally aborts on hosts that do not report `x86-64-v4` support.
+- The `aarch64` builder still requires `qemu-user-static` plus binfmt support.
+
+## Generic Helpers
+
+These are the shared low-level helpers used by the wrapper scripts:
+
+- `common/publish_image`
+- `common/publish_initrd_artifacts`
+
+They can be called directly if you want to override paths manually.
