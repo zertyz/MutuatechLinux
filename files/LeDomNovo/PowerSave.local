@@ -1,0 +1,20 @@
+# Turn off ethernet
+ifconfig $ETH down
+
+# Power down Wifi (in steps, so we can -- at least -- decrease a little bit of power
+for step in 10 8 6 5; do iwconfig $WLAN txpower $step; sleep 1; done
+
+# Stop the preload daemon
+systemctl stop preload
+
+# Set the Intel GPU performance
+#intel_gpu_frequency --min
+
+# Cut the maximum frequency for every CPU
+for p in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/scaling_max_freq; do echo 1600000 >"$p"; done
+
+# put the AMD/Radeon Barcelo GPU on low power settings
+for p in /sys/class/drm/card*/device/power_dpm_force_performance_level; do echo "manual" > "$p"; done
+for p in /sys/class/drm/card*/device/pp_power_profile_mode; do echo "5" >"$p"; done             # "Compute" profile
+for p in /sys/class/drm/card*/device/power_dpm_state; do echo "battery" >"$p"; done
+for p in /sys/class/drm/card*/device/power_dpm_force_performance_level; do echo "low" >"$p"; done

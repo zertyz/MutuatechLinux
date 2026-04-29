@@ -1,0 +1,55 @@
+# put on PostBoot.local any modules or other fine-tuning for your hardware
+
+TO_KILL="ModemManager cpupower-gui-helper"
+for p in $TO_KILL; do
+    pkill -f "$p"
+done
+
+# Set battery charging limits to maximize battery life
+echo auto >/sys/class/power_supply/BAT0/charge_behaviour
+echo 45 >/sys/class/power_supply/BAT0/charge_control_start_threshold
+echo 60 >/sys/class/power_supply/BAT0/charge_control_end_threshold
+
+# Optimized swapping -- oflloading ZRAM to the disk (via a loopback device that is, itself, compressed in the underlying BTRFS filesystem)
+# To enable, uncomment bellow
+
+swapoff -a
+
+# setup the backing device
+IMG_FILE="/root/bin/zram_experiment_loopdev.img"
+SIZE="32G"
+rm -f "$IMG_FILE"
+truncate -s "$SIZE" "$IMG_FILE"
+btrfs property set "$IMG_FILE" compression zstd:3
+LOOP_DEV=$(losetup --find --show --direct-io=off "$IMG_FILE")
+
+# setup zram using that backing device
+rmmod zram
+sleep 1
+modprobe zram
+echo 1 >/sys/block/zram0/reset
+sleep 1
+echo $LOOP_DEV >/sys/block/zram0/backing_dev
+echo zstd >/sys/block/zram0/comp_algorithm
+echo 'algo=zstd level=1' > /sys/block/zram0/algorithm_params
+echo 32g >/sys/block/zram0/disksize
+echo 12g >/sys/block/zram0/mem_limit
+mkswap /dev/zram0
+
+echo 5 >/proc/sys/vm/page-cluster
+echo 15000 >/proc/sys/vm/watermark_boost_factor
+echo 30 >/proc/sys/vm/watermark_scale_factor
+echo 133 >/proc/sys/vm/swappiness
+swapon /dev/zram0
+swapon -s
+
+/root/bin/zram_writeback_daemon -p 30 -w 5 &
+
+
+# Prepare for Ubuntu cooperation
+mount -t proc proc /ubuntu/proc
+for d in sys dev run; do
+  mount --rbind /$d /ubuntu/$d
+  mount --make-rslave /ubuntu/$d
+done
+rm /ubuntu/etc/resolv.conf; cp -a /etc/resolv.conf /ubuntu/etc/resolv.conf
